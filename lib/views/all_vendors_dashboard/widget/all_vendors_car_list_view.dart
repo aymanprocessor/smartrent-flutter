@@ -1,0 +1,851 @@
+part of '../screen/all_vendors_dashboard_screen.dart';
+
+class AllVendorsCarListView extends GetView<AllVendorsDashboardController> {
+  const AllVendorsCarListView({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(() {
+      if (controller.isSearchingCar && controller.vendorCars.isEmpty) {
+        return _buildSkeletonLoading();
+      }
+
+      if (controller.vendorCars.isEmpty) {
+        return _buildEmptyState();
+      }
+
+      return RefreshIndicator(
+        onRefresh: controller.refreshCars,
+        color: CustomColor.primary,
+        child: Obx(
+          () => CustomScrollView(
+            physics: AlwaysScrollableScrollPhysics(),
+            slivers: [
+              // Top spacing
+              SliverToBoxAdapter(
+                child: SizedBox(height: Dimensions.verticalSize),
+              ),
+
+              // Enhanced header with metadata styling
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: Dimensions.defaultHorizontalSize,
+                    vertical: Dimensions.verticalSize * 0.5,
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 10,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Color(0xFFF9FAFB),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: Color(0xFFE5E7EB),
+                              width: 1,
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.directions_car_rounded,
+                                size: 18,
+                                color: CustomColor.primary,
+                              ),
+                              SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  '${controller.pagination.value?.total ?? controller.vendorCars.length} ${DynamicLanguage.key(Strings.carsAvailable)}',
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w600,
+                                    color: Color(0xFF1F2937),
+                                    height: 1.4,
+                                    letterSpacing: 0,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 8),
+                      // Sort dropdown
+                      _buildSortDropdown(),
+                    ],
+                  ),
+                ),
+              ),
+
+              SliverToBoxAdapter(
+                child: SizedBox(height: Dimensions.verticalSize * 0.5),
+              ),
+
+              // Quick filter chips
+              SliverToBoxAdapter(child: _buildQuickFilterChips()),
+
+              SliverToBoxAdapter(
+                child: SizedBox(height: Dimensions.verticalSize * 0.75),
+              ),
+
+              // Car cards list
+              SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    if (index == controller.vendorCars.length) {
+                      // Load more indicator
+                      return Obx(
+                        () => controller.isLoadingMore
+                            ? Padding(
+                                padding: EdgeInsets.all(
+                                  Dimensions.defaultHorizontalSize,
+                                ),
+                                child: Center(
+                                  child: CircularProgressIndicator(
+                                    color: CustomColor.primary,
+                                  ),
+                                ),
+                              )
+                            : Padding(
+                                padding: EdgeInsets.all(
+                                  Dimensions.defaultHorizontalSize,
+                                ),
+                                child: Center(
+                                  child: OutlinedButton.icon(
+                                    onPressed: () => controller
+                                        .searchAllVendorsCars(loadMore: true),
+                                    icon: Icon(Icons.refresh_rounded, size: 18),
+                                    label: Text(
+                                      DynamicLanguage.key(Strings.loadMore),
+                                      style: TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w600,
+                                        letterSpacing: 0.2,
+                                      ),
+                                    ),
+                                    style: OutlinedButton.styleFrom(
+                                      foregroundColor: CustomColor.primary,
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 24,
+                                        vertical: 14,
+                                      ),
+                                      side: BorderSide(
+                                        color: CustomColor.primary,
+                                        width: 1.5,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                      );
+                    }
+
+                    final car = controller.vendorCars[index];
+                    return _buildCarCard(context, car);
+                  },
+                  childCount:
+                      controller.vendorCars.length +
+                      (controller.hasMore.value ? 1 : 0),
+                ),
+              ),
+
+              // Bottom spacing
+              SliverToBoxAdapter(
+                child: SizedBox(height: Dimensions.verticalSize * 3),
+              ),
+            ],
+          ),
+        ),
+      );
+    });
+  }
+
+  // Sort dropdown widget
+  Widget _buildSortDropdown() {
+    return PopupMenuButton<String>(
+      onSelected: controller.changeSortOption,
+      offset: Offset(0, 45),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(
+          color: CustomColor.primary.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: CustomColor.primary.withOpacity(0.3),
+            width: 1,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.sort_rounded, size: 18, color: CustomColor.primary),
+            SizedBox(width: 4),
+            Icon(Icons.arrow_drop_down, size: 20, color: CustomColor.primary),
+          ],
+        ),
+      ),
+      itemBuilder: (context) => [
+        _buildMenuItem('popularity', Strings.popularity, Icons.trending_up),
+        _buildMenuItem(
+          'priceLowToHigh',
+          Strings.priceLowToHigh,
+          Icons.arrow_upward,
+        ),
+        _buildMenuItem(
+          'priceHighToLow',
+          Strings.priceHighToLow,
+          Icons.arrow_downward,
+        ),
+        _buildMenuItem('rating', Strings.rating, Icons.star_rounded),
+      ],
+    );
+  }
+
+  PopupMenuItem<String> _buildMenuItem(
+    String value,
+    String labelKey,
+    IconData icon,
+  ) {
+    return PopupMenuItem<String>(
+      value: value,
+      child: Row(
+        children: [
+          Icon(icon, size: 18, color: Color(0xFF6B7280)),
+          SizedBox(width: 12),
+          Text(
+            DynamicLanguage.key(labelKey),
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: controller.sortOption.value == value
+                  ? FontWeight.w600
+                  : FontWeight.w500,
+              color: controller.sortOption.value == value
+                  ? CustomColor.primary
+                  : Color(0xFF1F2937),
+            ),
+          ),
+          if (controller.sortOption.value == value) ...[
+            Spacer(),
+            Icon(Icons.check, size: 18, color: CustomColor.primary),
+          ],
+        ],
+      ),
+    );
+  }
+
+  // Quick filter chips
+  Widget _buildQuickFilterChips() {
+    return Obx(
+      () => Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: Dimensions.defaultHorizontalSize,
+        ),
+        child: Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            _buildFilterChip('all', Strings.allCars, Icons.apps_rounded),
+            _buildFilterChip(
+              'available',
+              Strings.available,
+              Icons.check_circle,
+            ),
+            _buildFilterChip('limited', Strings.limited, Icons.access_time),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFilterChip(String value, String labelKey, IconData icon) {
+    final isSelected = controller.quickFilter.value == value;
+    return FilterChip(
+      selected: isSelected,
+      label: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            icon,
+            size: 14,
+            color: isSelected ? Colors.white : Color(0xFF6B7280),
+          ),
+          SizedBox(width: 6),
+          Text(
+            DynamicLanguage.key(labelKey),
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.1,
+            ),
+          ),
+        ],
+      ),
+      onSelected: (_) => controller.changeQuickFilter(value),
+      selectedColor: CustomColor.primary,
+      backgroundColor: Color(0xFFF3F4F6),
+      checkmarkColor: Colors.white,
+      labelStyle: TextStyle(
+        color: isSelected ? Colors.white : Color(0xFF1F2937),
+      ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+        side: BorderSide(
+          color: isSelected ? CustomColor.primary : Color(0xFFE5E7EB),
+          width: 1,
+        ),
+      ),
+      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+    );
+  }
+
+  // Skeleton loading
+  Widget _buildSkeletonLoading() {
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: NeverScrollableScrollPhysics(),
+      itemCount: 3,
+      itemBuilder: (context, index) {
+        return Container(
+          margin: EdgeInsets.symmetric(
+            horizontal: Dimensions.defaultHorizontalSize,
+            vertical: Dimensions.verticalSize * 0.5,
+          ),
+          decoration: BoxDecoration(
+            color: CustomColor.whiteColor,
+            borderRadius: BorderRadius.circular(Dimensions.radius * 1.2),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Image skeleton
+              Container(
+                height: MediaQuery.of(context).size.height * 0.18,
+                decoration: BoxDecoration(
+                  color: Color(0xFFE5E7EB),
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(Dimensions.radius * 1.2),
+                    topRight: Radius.circular(Dimensions.radius * 1.2),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.all(Dimensions.defaultHorizontalSize),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Title skeleton
+                    Container(
+                      height: 20,
+                      width: double.infinity * 0.6,
+                      decoration: BoxDecoration(
+                        color: Color(0xFFE5E7EB),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                    SizedBox(height: 12),
+                    // Subtitle skeleton
+                    Container(
+                      height: 14,
+                      width: double.infinity * 0.4,
+                      decoration: BoxDecoration(
+                        color: Color(0xFFF3F4F6),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                    SizedBox(height: 16),
+                    // Specs skeleton
+                    Row(
+                      children: List.generate(
+                        3,
+                        (i) => Expanded(
+                          child: Container(
+                            height: 40,
+                            margin: EdgeInsets.only(right: i < 2 ? 8 : 0),
+                            decoration: BoxDecoration(
+                              color: Color(0xFFF9FAFB),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildCarCard(BuildContext context, VendorCar car) {
+    return AnimatedScale(
+      scale: 1.0,
+      duration: Duration(milliseconds: 200),
+      child: Container(
+        margin: EdgeInsets.symmetric(
+          horizontal: Dimensions.defaultHorizontalSize,
+          vertical: Dimensions.verticalSize * 0.5,
+        ),
+        decoration: BoxDecoration(
+          color: CustomColor.whiteColor,
+          borderRadius: BorderRadius.circular(Dimensions.radius * 1.2),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 20,
+              offset: Offset(0, 8),
+              spreadRadius: 0,
+            ),
+            BoxShadow(
+              color: Colors.black.withOpacity(0.02),
+              blurRadius: 4,
+              offset: Offset(0, 2),
+              spreadRadius: 0,
+            ),
+          ],
+        ),
+        child: InkWell(
+          onTap: () => _onCarTap(car),
+          borderRadius: BorderRadius.circular(Dimensions.radius * 1.2),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Car Image with gradient overlay
+              ClipRRect(
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(Dimensions.radius * 1.2),
+                  topRight: Radius.circular(Dimensions.radius * 1.2),
+                ),
+                child: Stack(
+                  children: [
+                    CachedNetworkImage(
+                      imageUrl: car.primaryImageUrl,
+                      height: MediaQuery.of(context).size.height * 0.18,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                      placeholder: (context, url) => Container(
+                        height: MediaQuery.of(context).size.height * 0.18,
+                        color: CustomColor.background,
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            color: CustomColor.primary,
+                            strokeWidth: 2.5,
+                          ),
+                        ),
+                      ),
+                      errorWidget: (context, url, error) => Container(
+                        height: MediaQuery.of(context).size.height * 0.18,
+                        color: CustomColor.background.withOpacity(0.5),
+                        child: Center(
+                          child: Image.asset(
+                            'assets/background/smartrent.jpg',
+                            height: double.infinity,
+                            width: double.infinity,
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    // Subtle gradient overlay for better badge visibility
+                    Positioned.fill(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topRight,
+                            end: Alignment.bottomLeft,
+                            colors: [
+                              Colors.black.withOpacity(0.15),
+                              Colors.transparent,
+                            ],
+                            stops: [0.0, 0.5],
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    // Modern availability badge
+                    Positioned(
+                      top: Dimensions.verticalSize * 0.75,
+                      right: Dimensions.horizontalSize * 0.75,
+                      child: Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: Dimensions.horizontalSize * 0.7,
+                          vertical: Dimensions.verticalSize * 0.35,
+                        ),
+                        decoration: BoxDecoration(
+                          color: car.availabilityStatus == 'available'
+                              ? Color(0xFF10B981)
+                              : Color(0xFFF59E0B),
+                          borderRadius: BorderRadius.circular(
+                            Dimensions.radius * 0.6,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color:
+                                  (car.availabilityStatus == 'available'
+                                          ? Color(0xFF10B981)
+                                          : Color(0xFFF59E0B))
+                                      .withOpacity(0.3),
+                              blurRadius: 8,
+                              offset: Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Text(
+                          car.availabilityStatus == 'available'
+                              ? DynamicLanguage.key(Strings.available)
+                              : DynamicLanguage.key(Strings.limited),
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 0.3,
+                            height: 1.2,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    // Favorite toggle button
+                    Positioned(
+                      top: Dimensions.verticalSize * 0.75,
+                      left: Dimensions.horizontalSize * 0.75,
+                      child: Obx(
+                        () => InkWell(
+                          onTap: () =>
+                              controller.toggleFavorite(car.id.toString()),
+                          child: Container(
+                            padding: EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.95),
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.1),
+                                  blurRadius: 8,
+                                  offset: Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: Icon(
+                              controller.isFavorite(car.id.toString())
+                                  ? Icons.favorite_rounded
+                                  : Icons.favorite_border_rounded,
+                              size: 20,
+                              color: controller.isFavorite(car.id.toString())
+                                  ? Colors.red
+                                  : Color(0xFF6B7280),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Car details with improved spacing
+              Padding(
+                padding: EdgeInsets.all(Dimensions.defaultHorizontalSize),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Car name and year - Primary Typography
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                car.displayName,
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w700,
+                                  color: Color(0xFF1F2937),
+                                  height: 1.3,
+                                  letterSpacing: -0.3,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(width: Dimensions.horizontalSize * 0.6),
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: Dimensions.horizontalSize * 0.6,
+                            vertical: Dimensions.verticalSize * 0.3,
+                          ),
+                          decoration: BoxDecoration(
+                            color: CustomColor.primary.withOpacity(0.08),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: CustomColor.primary.withOpacity(0.12),
+                              width: 1,
+                            ),
+                          ),
+                          child: Text(
+                            '${car.year}',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: CustomColor.primary,
+                              letterSpacing: 0.2,
+                              height: 1.2,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    SizedBox(height: Dimensions.verticalSize * 0.4),
+
+                    // Vendor info - Secondary Typography
+                    Row(
+                      children: [
+                        Container(
+                          padding: EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: Color(0xFFF3F4F6),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Icon(
+                            Icons.store_rounded,
+                            size: 14,
+                            color: Color(0xFF6B7280),
+                          ),
+                        ),
+                        SizedBox(width: Dimensions.horizontalSize * 0.5),
+                        Expanded(
+                          child: Text(
+                            car.vendorName,
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                              color: Color(0xFF6B7280),
+                              height: 1.4,
+                              letterSpacing: 0.1,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    SizedBox(height: Dimensions.verticalSize * 0.6),
+
+                    // Features chips (if available)
+                    if (car.features.isNotEmpty) ...[
+                      SizedBox(height: Dimensions.verticalSize * 0.6),
+                      Wrap(
+                        spacing: 6,
+                        runSpacing: 6,
+                        children: car.features.take(3).map((feature) {
+                          return Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 5,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Color(0xFFEFF6FF),
+                              borderRadius: BorderRadius.circular(6),
+                              border: Border.all(
+                                color: Color(0xFFDBEAFE),
+                                width: 1,
+                              ),
+                            ),
+                            child: Text(
+                              feature,
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Color(0xFF1E40AF),
+                                fontWeight: FontWeight.w600,
+                                height: 1.3,
+                                letterSpacing: 0.2,
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ],
+
+                    SizedBox(height: Dimensions.verticalSize * 0.8),
+
+                    // Price and book button - Enhanced CTA
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                car.formattedPrice,
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w800,
+                                  color: CustomColor.primary,
+                                  height: 1.2,
+                                  letterSpacing: -0.5,
+                                ),
+                              ),
+                              if (car.insuranceIncluded) ...[
+                                SizedBox(height: 4),
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.verified_rounded,
+                                      size: 14,
+                                      color: Color(0xFF10B981),
+                                    ),
+                                    SizedBox(width: 4),
+                                    Flexible(
+                                      child: Text(
+                                        DynamicLanguage.key(
+                                          Strings.insuranceIncluded,
+                                        ),
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          color: Color(0xFF059669),
+                                          fontWeight: FontWeight.w600,
+                                          height: 1.3,
+                                          letterSpacing: 0.1,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                        SizedBox(width: 12),
+                        ElevatedButton(
+                          onPressed: () => _onCarTap(car),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: CustomColor.primary,
+                            foregroundColor: CustomColor.whiteColor,
+                            elevation: 0,
+                            shadowColor: Colors.transparent,
+                            padding: EdgeInsets.symmetric(
+                              horizontal: Dimensions.horizontalSize * 0.9,
+                              vertical: Dimensions.verticalSize * 0.5,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: Text(
+                            DynamicLanguage.key(Strings.bookNow),
+                            style: TextStyle(
+                              color: CustomColor.whiteColor,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 0.3,
+                              height: 1.2,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSpecDivider() {
+    return Container(height: 32, width: 1, color: Color(0xFFE5E7EB));
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          vertical: Dimensions.verticalSize * 4,
+          horizontal: Dimensions.defaultHorizontalSize,
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 120,
+              height: 120,
+              decoration: BoxDecoration(
+                color: Color(0xFFF9FAFB),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.search_off_rounded,
+                size: 56,
+                color: Color(0xFF9CA3AF),
+              ),
+            ),
+            SizedBox(height: Dimensions.verticalSize * 1.5),
+            Text(
+              DynamicLanguage.key(Strings.noCarsFound),
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF1F2937),
+                height: 1.3,
+                letterSpacing: -0.3,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: Dimensions.verticalSize * 0.5),
+            Text(
+              DynamicLanguage.key(Strings.tryDifferentFilters),
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: Color(0xFF6B7280),
+                height: 1.5,
+                letterSpacing: 0,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _onCarTap(VendorCar car) {
+    // Store selected car info for booking
+    try {
+      final dashController = Get.find<DashboardController>();
+      dashController.selectedCarId.value = car.id.toString();
+      // Note: The vendor cars API may return a different structure
+      // You may need to adapt this based on your booking flow
+    } catch (e) {
+      controller.selectedCarId.value = car.id.toString();
+    }
+    Get.toNamed(Routes.bookingScreen);
+  }
+}

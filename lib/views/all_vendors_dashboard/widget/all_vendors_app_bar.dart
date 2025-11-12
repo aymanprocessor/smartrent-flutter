@@ -1,7 +1,11 @@
 part of '../screen/all_vendors_dashboard_screen.dart';
 
-class AllVendorsAppBar extends GetView<AllVendorsDashboardController> implements PreferredSizeWidget {
+class AllVendorsAppBar extends GetView<AllVendorsDashboardController>
+    implements PreferredSizeWidget {
   const AllVendorsAppBar({Key? key}) : super(key: key);
+
+  @override
+  Size get preferredSize => Size.fromHeight(kToolbarHeight);
 
   @override
   Widget build(BuildContext context) {
@@ -13,26 +17,21 @@ class AllVendorsAppBar extends GetView<AllVendorsDashboardController> implements
         onPressed: () => Get.back(),
       ),
       title: Text(
-        'All Vendors Cars',
+        'Browse All Cars',
         style: TextStyle(
           color: CustomColor.whiteColor,
           fontSize: Dimensions.titleLarge,
           fontWeight: FontWeight.bold,
         ),
       ),
-      centerTitle: true,
       actions: [
         IconButton(
           icon: Icon(Icons.refresh, color: CustomColor.whiteColor),
           onPressed: () {
-            controller.clearFilters();
-            controller.getAllTypes();
+            controller.searchAllVendorsCars();
           },
         ),
       ],
     );
   }
-
-  @override
-  Size get preferredSize => Size.fromHeight(kToolbarHeight);
 }

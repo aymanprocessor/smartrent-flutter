@@ -42,9 +42,15 @@ class CarCarouselSlider extends GetView<DashboardController> {
                               Dimensions.radius * 1.2,
                             ),
                             child: CachedNetworkImage(
-                              imageUrl: (controller.carImgUrl.isNotEmpty)
+                              imageUrl:
+                                  (controller.carImgUrl.isNotEmpty &&
+                                      car.image != null &&
+                                      car.image!.trim().isNotEmpty &&
+                                      car.image!.toLowerCase() != 'null')
                                   ? '${controller.carImgUrl}${car.image}'
-                                  : 'https://via.placeholder.com/150',
+                                  : (car.imagesOrPlaceholder.isNotEmpty
+                                        ? car.imagesOrPlaceholder.first
+                                        : 'https://via.placeholder.com/150'),
                               placeholder: (context, url) =>
                                   const Center(child: Loader()),
                               errorWidget: (context, url, error) =>
@@ -57,7 +63,11 @@ class CarCarouselSlider extends GetView<DashboardController> {
                         TextWidget(
                           color: CustomColor.blackColor,
                           fontSize: Dimensions.titleSmall,
-                          car.carType + ' ' + car.carModel + ' ' + car.carYear.toString(),
+                          car.carType +
+                              ' ' +
+                              car.carModel +
+                              ' ' +
+                              car.carYear.toString(),
                           maxLines: 1,
                           textOverflow: TextOverflow.ellipsis,
                           fontWeight: FontWeight.bold,

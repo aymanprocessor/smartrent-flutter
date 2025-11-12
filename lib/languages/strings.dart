@@ -103,7 +103,6 @@ class Strings {
   static const String SelectModel = "appLSelectModel";
   static const String SelectYear = "appLSelectYear";
 
-
   static const String Phone = "appLPhone";
   static const String Address = "appLAddress";
   static const String City = "appLCity";
@@ -178,4 +177,28 @@ class Strings {
   static const String countryCode = "appLCountryCode";
   static const String enterSixDigitOtp = "appLEnterSixDigitOtp";
   static const String optional = "appLOptional";
+
+  // All Vendors Dashboard strings
+  static const String availableCars = "appLAvailableCars";
+  static const String carsAvailable = "appLCarsAvailable";
+  static const String loadMore = "appLLoadMore";
+  static const String available = "appLAvailable";
+  static const String limited = "appLLimited";
+  static const String seats = "appLSeats";
+  static const String insuranceIncluded = "appLInsuranceIncluded";
+  static const String automatic = "appLAutomatic";
+  static const String petrol = "appLPetrol";
+  static const String transmission = "appLTransmission";
+  static const String fuelType = "appLFuelType";
+  static const String noCarsFound = "appLNoCarsFound";
+  static const String tryDifferentFilters = "appLTryDifferentFilters";
+  static const String sortBy = "appLSortBy";
+  static const String priceLowToHigh = "appLPriceLowToHigh";
+  static const String priceHighToLow = "appLPriceHighToLow";
+  static const String popularity = "appLPopularity";
+  static const String rating = "appLRating";
+  static const String pullToRefresh = "appLPullToRefresh";
+  static const String refreshing = "appLRefreshing";
+  static const String allCars = "appLAllCars";
+  static const String filterBy = "appLFilterBy";
 }

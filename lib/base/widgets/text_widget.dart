@@ -43,8 +43,13 @@ class TextWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Obx(
-      () => InkWell(
+    return Obx(() {
+      final isLoading = DynamicLanguage.isLoading;
+      DynamicLanguage.selectedLanguage.value;
+
+      final displayText = isLoading ? '' : DynamicLanguage.key(text);
+
+      return InkWell(
         onTap: onTap,
         splashColor: Colors.transparent,
         focusColor: Colors.transparent,
@@ -55,7 +60,7 @@ class TextWidget extends StatelessWidget {
           child: Padding(
             padding: padding,
             child: Text(
-              DynamicLanguage.isLoading ? "" : DynamicLanguage.key(text),
+              displayText,
               style: style != null
                   ? style!.copyWith(
                       color: color ?? _color(colorShade),
@@ -75,8 +80,8 @@ class TextWidget extends StatelessWidget {
             ),
           ),
         ),
-      ),
-    );
+      );
+    });
   }
 }
 

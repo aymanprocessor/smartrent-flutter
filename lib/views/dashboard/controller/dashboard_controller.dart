@@ -155,6 +155,15 @@ class DashboardController extends GetxController {
         final decoded = jsonDecode(response.body);
         log.i('getAllTypes response type: ${decoded.runtimeType}');
 
+        // Debug: log top-level keys/summary to help diagnose mixed-type responses
+        try {
+          if (decoded is Map) {
+            log.d('getAllTypes decoded keys: ${decoded.keys.toList()}');
+          } else if (decoded is List) {
+            log.d('getAllTypes decoded is List of length: ${decoded.length}');
+          }
+        } catch (_) {}
+
         // Find a List within the response to use as our types list
         List<dynamic> list = [];
         if (decoded is List) {
@@ -165,7 +174,9 @@ class DashboardController extends GetxController {
           // { data: [...] }
           // { typesAll: [...] }
           try {
-            if (decoded['data'] is Map && decoded['data']['area'] is Map && decoded['data']['area']['typesAll'] is List) {
+            if (decoded['data'] is Map &&
+                decoded['data']['area'] is Map &&
+                decoded['data']['area']['typesAll'] is List) {
               list = decoded['data']['area']['typesAll'];
             } else if (decoded['data'] is List) {
               list = decoded['data'];
@@ -187,6 +198,23 @@ class DashboardController extends GetxController {
 
         if (list.isEmpty) {
           log.w('No types list found in getAllTypes response');
+        } else {
+          // Debug: log first few items' runtime types to detect unexpected shapes
+          try {
+            log.d('getAllTypes detected list length: ${list.length}');
+            if (list.isNotEmpty) {
+              final preview = list.take(3).map((e) => e.runtimeType).toList();
+              log.d('getAllTypes list item types (first 3): $preview');
+              // If first item is printable, log a truncated JSON of it
+              final first = list.first;
+              if (first is Map || first is List || first is String) {
+                final s = first is String ? first : jsonEncode(first);
+                log.d(
+                  'getAllTypes first item (truncated): ${s.length > 1000 ? s.substring(0, 1000) : s}',
+                );
+              }
+            }
+          } catch (_) {}
         }
 
         for (var item in list) {
@@ -196,9 +224,13 @@ class DashboardController extends GetxController {
             final name = item['name']?.toString() ?? '';
             DateTime createdAt;
             if (item['created_at'] != null) {
-              createdAt = DateTime.tryParse(item['created_at'].toString()) ?? DateTime.now();
+              createdAt =
+                  DateTime.tryParse(item['created_at'].toString()) ??
+                  DateTime.now();
             } else if (item['createdAt'] != null) {
-              createdAt = DateTime.tryParse(item['createdAt'].toString()) ?? DateTime.now();
+              createdAt =
+                  DateTime.tryParse(item['createdAt'].toString()) ??
+                  DateTime.now();
             } else {
               createdAt = DateTime.now();
             }
@@ -206,13 +238,16 @@ class DashboardController extends GetxController {
             dynamic updatedAtRaw = item['updated_at'] ?? item['updatedAt'];
             dynamic updatedAt;
             if (updatedAtRaw != null) {
-              updatedAt = DateTime.tryParse(updatedAtRaw.toString()) ?? updatedAtRaw;
+              updatedAt =
+                  DateTime.tryParse(updatedAtRaw.toString()) ?? updatedAtRaw;
             } else {
               updatedAt = null;
             }
 
-            final carTypeIdVal = int.tryParse(item['car_type_id']?.toString() ?? '') ?? id;
-            final carAreaIdVal = int.tryParse(item['car_area_id']?.toString() ?? '') ?? 0;
+            final carTypeIdVal =
+                int.tryParse(item['car_type_id']?.toString() ?? '') ?? id;
+            final carAreaIdVal =
+                int.tryParse(item['car_area_id']?.toString() ?? '') ?? 0;
 
             typeList.add(
               TypesAll(
@@ -351,7 +386,7 @@ class DashboardController extends GetxController {
     );
   }
 
-// Model Has Years
+  // Model Has Years
 
   // =  SEARCH CAR API
 

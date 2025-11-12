@@ -6,9 +6,9 @@ class AllVendorsCarCarousel extends GetView<AllVendorsDashboardController> {
   @override
   Widget build(BuildContext context) {
     final double sliderHeight = MediaQuery.of(context).size.height * 0.28;
-    
+
     return Obx(() {
-      return controller.cars.isNotEmpty
+      return controller.vendorCars.isNotEmpty
           ? Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -17,7 +17,7 @@ class AllVendorsCarCarousel extends GetView<AllVendorsDashboardController> {
                     horizontal: Dimensions.defaultHorizontalSize,
                   ),
                   child: Text(
-                    'Available Cars (${controller.cars.length})',
+                    'Available Cars (${controller.vendorCars.length})',
                     style: TextStyle(
                       fontSize: Dimensions.titleLarge,
                       fontWeight: FontWeight.bold,
@@ -27,36 +27,39 @@ class AllVendorsCarCarousel extends GetView<AllVendorsDashboardController> {
                 ),
                 SizedBox(height: Dimensions.verticalSize),
                 CarouselSlider.builder(
-                  itemCount: controller.cars.length,
+                  itemCount: controller.vendorCars.length,
                   itemBuilder: (context, index, realIndex) {
-                    final car = controller.cars[index];
+                    final car = controller.vendorCars[index];
                     return InkWell(
                       splashColor: Colors.transparent,
                       highlightColor: Colors.transparent,
                       onTap: () {
-                        // Store selected car info in main DashboardController
+                        // Store selected car ID for booking
+                        controller.selectedCarId.value = car.id.toString();
                         try {
-                          final dashController = Get.find<DashboardController>();
-                          dashController.selectedCarId.value = car.id.toString();
-                          dashController.carToken.value = controller.carToken.value;
-                          // Also add the car to the dashboard controller's cars list if not exists
-                          if (!dashController.cars.any((c) => c.id == car.id)) {
-                            dashController.cars.add(car);
-                          }
+                          final dashController =
+                              Get.find<DashboardController>();
+                          dashController.selectedCarId.value = car.id
+                              .toString();
+                          dashController.carToken.value =
+                              controller.carToken.value;
                         } catch (e) {
-                          // DashboardController might not be loaded, just use local controller
-                          controller.selectedCarId.value = car.id.toString();
+                          // DashboardController may not be loaded yet
                         }
                         Get.toNamed(Routes.bookingScreen);
                       },
                       child: Container(
-                        padding: EdgeInsets.all(Dimensions.defaultHorizontalSize),
+                        padding: EdgeInsets.all(
+                          Dimensions.defaultHorizontalSize,
+                        ),
                         margin: EdgeInsets.symmetric(
                           horizontal: Dimensions.horizontalSize * 0.5,
                         ),
                         decoration: BoxDecoration(
                           color: CustomColor.whiteColor,
-                          borderRadius: BorderRadius.circular(Dimensions.radius),
+                          borderRadius: BorderRadius.circular(
+                            Dimensions.radius,
+                          ),
                           boxShadow: [
                             BoxShadow(
                               color: Colors.black.withOpacity(0.1),
@@ -71,30 +74,51 @@ class AllVendorsCarCarousel extends GetView<AllVendorsDashboardController> {
                             // Car Image
                             Expanded(
                               child: ClipRRect(
-                                borderRadius: BorderRadius.circular(Dimensions.radius * 0.5),
-                                child: CachedNetworkImage(
-                                  imageUrl: car.imagesOrPlaceholder.first.startsWith('http')
-                                      ? car.imagesOrPlaceholder.first
-                                      : '${controller.carImgUrl.value}${car.imagesOrPlaceholder.first}',
-                                  fit: BoxFit.cover,
-                                  width: double.infinity,
-                                  placeholder: (context, url) => Center(
-                                    child: CircularProgressIndicator(
-                                      color: CustomColor.primary,
-                                    ),
-                                  ),
-                                  errorWidget: (context, url, error) => Image.asset(
-                                    'assets/logo/logo_carbo.png',
-                                    fit: BoxFit.contain,
-                                  ),
+                                borderRadius: BorderRadius.circular(
+                                  Dimensions.radius * 0.5,
+                                ),
+                                child: Builder(
+                                  builder: (context) {
+                                    // Use the model's primaryImageUrl which already
+                                    // applies basic sanitization. If it's relative or empty,
+                                    // use local asset placeholder.
+                                    final primary = car.primaryImageUrl;
+                                    if (primary.isEmpty) {
+                                      return Image.asset(
+                                        'assets/background/smartrent.jpg',
+                                        fit: BoxFit.cover,
+                                        width: double.infinity,
+                                      );
+                                    }
+                                    final imageUrlToUse =
+                                        primary.startsWith('http')
+                                        ? primary
+                                        : '${controller.carImgUrl.value}$primary';
+
+                                    return CachedNetworkImage(
+                                      imageUrl: imageUrlToUse,
+                                      fit: BoxFit.cover,
+                                      width: double.infinity,
+                                      placeholder: (context, url) => Center(
+                                        child: CircularProgressIndicator(
+                                          color: CustomColor.primary,
+                                        ),
+                                      ),
+                                      errorWidget: (context, url, error) =>
+                                          Image.asset(
+                                            'assets/background/smartrent.jpg',
+                                            fit: BoxFit.cover,
+                                          ),
+                                    );
+                                  },
                                 ),
                               ),
                             ),
                             SizedBox(height: Dimensions.verticalSize * 0.5),
-                            
+
                             // Car Title
                             Text(
-                              car.carTitle?.en?.carTitle ?? car.carModel,
+                              car.displayName,
                               style: TextStyle(
                                 fontSize: Dimensions.titleMedium,
                                 fontWeight: FontWeight.bold,
@@ -104,48 +128,57 @@ class AllVendorsCarCarousel extends GetView<AllVendorsDashboardController> {
                               overflow: TextOverflow.ellipsis,
                             ),
                             SizedBox(height: Dimensions.verticalSize * 0.3),
-                            
+
                             // Car Details
                             Row(
                               children: [
-                                Icon(Icons.directions_car, 
+                                Icon(
+                                  Icons.directions_car,
                                   size: Dimensions.iconSizeDefault * 0.7,
                                   color: CustomColor.primary,
                                 ),
-                                SizedBox(width: Dimensions.horizontalSize * 0.3),
+                                SizedBox(
+                                  width: Dimensions.horizontalSize * 0.3,
+                                ),
                                 Text(
-                                  '${car.carType} • ${car.carYear}',
+                                  '${car.type} • ${car.year}',
                                   style: TextStyle(
                                     fontSize: Dimensions.bodySmall,
-                                    color: CustomColor.typography.withOpacity(0.7),
+                                    color: CustomColor.typography.withOpacity(
+                                      0.7,
+                                    ),
                                   ),
                                 ),
                               ],
                             ),
                             SizedBox(height: Dimensions.verticalSize * 0.3),
-                            
+
                             // Seats and Fee
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Row(
                                   children: [
-                                    Icon(Icons.event_seat,
+                                    Icon(
+                                      Icons.event_seat,
                                       size: Dimensions.iconSizeDefault * 0.7,
                                       color: CustomColor.primary,
                                     ),
-                                    SizedBox(width: Dimensions.horizontalSize * 0.3),
+                                    SizedBox(
+                                      width: Dimensions.horizontalSize * 0.3,
+                                    ),
                                     Text(
-                                      '${car.seat} Seats',
+                                      '${car.seats} ${DynamicLanguage.key(Strings.seats)}',
                                       style: TextStyle(
                                         fontSize: Dimensions.bodySmall,
-                                        color: CustomColor.typography.withOpacity(0.7),
+                                        color: CustomColor.typography
+                                            .withOpacity(0.7),
                                       ),
                                     ),
                                   ],
                                 ),
                                 Text(
-                                  '\$${car.fees}',
+                                  car.formattedPrice,
                                   style: TextStyle(
                                     fontSize: Dimensions.titleMedium,
                                     fontWeight: FontWeight.bold,
@@ -171,29 +204,28 @@ class AllVendorsCarCarousel extends GetView<AllVendorsDashboardController> {
                   ),
                 ),
                 SizedBox(height: Dimensions.verticalSize),
-                
+
                 // Book Now Button
                 Padding(
                   padding: EdgeInsets.symmetric(
                     horizontal: Dimensions.defaultHorizontalSize * 2,
                   ),
                   child: PrimaryButton(
-                    title: Strings.bookNow,
+                    title: DynamicLanguage.key(Strings.bookNow),
                     onPressed: () {
-                      if (controller.cars.isNotEmpty) {
-                        final car = controller.cars[controller.selectedCarIndex.value];
-                        // Store selected car info in main DashboardController
+                      if (controller.vendorCars.isNotEmpty) {
+                        final car = controller
+                            .vendorCars[controller.selectedCarIndex.value];
+                        controller.selectedCarId.value = car.id.toString();
                         try {
-                          final dashController = Get.find<DashboardController>();
-                          dashController.selectedCarId.value = car.id.toString();
-                          dashController.carToken.value = controller.carToken.value;
-                          // Also add the car to the dashboard controller's cars list if not exists
-                          if (!dashController.cars.any((c) => c.id == car.id)) {
-                            dashController.cars.add(car);
-                          }
+                          final dashController =
+                              Get.find<DashboardController>();
+                          dashController.selectedCarId.value = car.id
+                              .toString();
+                          dashController.carToken.value =
+                              controller.carToken.value;
                         } catch (e) {
-                          // DashboardController might not be loaded
-                          controller.selectedCarId.value = car.id.toString();
+                          // DashboardController may not be loaded yet
                         }
                         Get.toNamed(Routes.bookingScreen);
                       }

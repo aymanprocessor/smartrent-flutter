@@ -38,7 +38,9 @@ class SelectTypeBox extends GetView<DashboardController> {
                 color: CustomColor.background,
               ),
               itemsList: controller.typeList,
-              selectMethod: controller.isLoad ? RxString(Strings.pleaseWait) : controller.alis,
+              selectMethod: controller.isLoad
+                  ? RxString(Strings.pleaseWait)
+                  : controller.alis,
               onChanged: (v) {
                 controller.selectType.value = v!;
                 // clear previous models and selection
@@ -67,7 +69,9 @@ class SelectTypeBox extends GetView<DashboardController> {
                 color: CustomColor.background,
               ),
               itemsList: controller.modelList,
-              selectMethod: controller.isLoad ? RxString(Strings.pleaseWait) : controller.selectedModelName,
+              selectMethod: controller.isLoad
+                  ? RxString(Strings.pleaseWait)
+                  : controller.selectedModelName,
               onChanged: (v) {
                 controller.selectModel.value = v!;
                 controller.carModelId.value = v.id;
@@ -94,7 +98,9 @@ class SelectTypeBox extends GetView<DashboardController> {
                 color: CustomColor.background,
               ),
               itemsList: controller.modelYearsList,
-              selectMethod: controller.isLoad ? RxString(Strings.pleaseWait) : controller.selectedYearName,
+              selectMethod: controller.isLoad
+                  ? RxString(Strings.pleaseWait)
+                  : controller.selectedYearName,
               onChanged: (v) {
                 if (v == null) return;
                 controller.selectedYearName.value = v;
@@ -105,7 +111,6 @@ class SelectTypeBox extends GetView<DashboardController> {
               },
             ),
           ),
-
         ],
       ),
     );

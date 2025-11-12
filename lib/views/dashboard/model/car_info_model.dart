@@ -76,12 +76,12 @@ class Car {
   Car({
     required this.id,
     required this.vendorId,
-  required this.carAreaId,
-  required this.carTypeId,
-  required this.slug,
-  this.carTitle,
-  this.branchId,
-  this.carModelId,
+    required this.carAreaId,
+    required this.carTypeId,
+    required this.slug,
+    this.carTitle,
+    this.branchId,
+    this.carModelId,
     required this.carType,
     required this.carModel,
     required this.carYear,
@@ -96,48 +96,65 @@ class Car {
     required this.approval,
     required this.createdAt,
     required this.updatedAt,
-  }) : images = images, model = model;
+  }) : images = images,
+       model = model;
 
   factory Car.fromJson(Map<String, dynamic> json) => Car(
     id: json["id"],
     vendorId: json["vendor_id"],
-    branchId: json.containsKey("branch_id") ? (json["branch_id"] is int ? json["branch_id"] : int.tryParse(json["branch_id"]?.toString() ?? '')) : null,
+    branchId: json.containsKey("branch_id")
+        ? (json["branch_id"] is int
+              ? json["branch_id"]
+              : int.tryParse(json["branch_id"]?.toString() ?? ''))
+        : null,
     carAreaId: json["car_area_id"],
     carTypeId: json["car_type_id"],
     slug: json["slug"],
-  carTitle: json["car_title"] == null ? null : CarTitle.fromJson(json["car_title"]),
-    carModelId: json.containsKey("car_model_id") ? (json["car_model_id"] is int ? json["car_model_id"] : int.tryParse(json["car_model_id"]?.toString() ?? '')) : null,
+    carTitle: json["car_title"] == null
+        ? null
+        : CarTitle.fromJson(json["car_title"]),
+    carModelId: json.containsKey("car_model_id")
+        ? (json["car_model_id"] is int
+              ? json["car_model_id"]
+              : int.tryParse(json["car_model_id"]?.toString() ?? ''))
+        : null,
     carType: json["car_type"],
     carModel: json["car_model"],
     carYear: json["year"],
     seat: json["seat"],
-  // // Handle nullable and mixed-type values safely
-  // experience: json.containsKey("experience") && json["experience"] != null
-  //   ? (json["experience"] is int
-  //     ? json["experience"] as int
-  //     : int.tryParse(json["experience"].toString()))
-  //   : null,
-  // carNumber: json.containsKey("car_number") && json["car_number"] != null
-  //   ? json["car_number"].toString()
-  //   : null,
-  fees: json["fees"],
-  image: json["image"] == null ? null : json["image"].toString(),
+    // // Handle nullable and mixed-type values safely
+    // experience: json.containsKey("experience") && json["experience"] != null
+    //   ? (json["experience"] is int
+    //     ? json["experience"] as int
+    //     : int.tryParse(json["experience"].toString()))
+    //   : null,
+    // carNumber: json.containsKey("car_number") && json["car_number"] != null
+    //   ? json["car_number"].toString()
+    //   : null,
+    fees: json["fees"],
+    image: json["image"] == null ? null : json["image"].toString(),
     status: json["status"],
     approval: json["approval"],
     createdAt: DateTime.parse(json["created_at"]),
     updatedAt: DateTime.parse(json["updated_at"]),
-  // parse images which may be sent as a JSON array or as a stringified JSON
+    // parse images which may be sent as a JSON array or as a stringified JSON
     images: (() {
       try {
         final raw = json.containsKey('images') ? json['images'] : null;
         if (raw == null) return null;
         List<String> parsed = [];
         if (raw is List) {
-          parsed = raw.map((e) => e?.toString() ?? '').where((s) => s.isNotEmpty).toList();
+          parsed = raw
+              .map((e) => e?.toString() ?? '')
+              .where((s) => s.isNotEmpty)
+              .toList();
         } else if (raw is String) {
           final decoded = jsonDecode(raw);
           if (decoded is List) {
-            parsed = decoded.map((e) => e?.toString() ?? '').where((s) => s.isNotEmpty).toList();
+            parsed = decoded
+                .map((e) => e?.toString() ?? '')
+                .where((s) => s.isNotEmpty)
+                .toList();
           }
         }
         return parsed.isEmpty ? null : parsed;
@@ -162,10 +179,10 @@ class Car {
     "vendor_id": vendorId,
     "car_area_id": carAreaId,
     "car_type_id": carTypeId,
-  "slug": slug,
-  if (branchId != null) "branch_id": branchId,
-  if (carModelId != null) "car_model_id": carModelId,
-  if (carTitle != null) "car_title": carTitle!.toJson(),
+    "slug": slug,
+    if (branchId != null) "branch_id": branchId,
+    if (carModelId != null) "car_model_id": carModelId,
+    if (carTitle != null) "car_title": carTitle!.toJson(),
     "car_model": carModel,
     "car_year": carYear,
     "car_type": carType,
@@ -175,10 +192,10 @@ class Car {
     // if (experience != null) "experience": experience,
     // if (carNumber != null) "car_number": carNumber,
     // images column (JSON array) - include only when present
-  if (images != null) "images": List<dynamic>.from(images!.map((x) => x)),
-  "fees": fees,
-  if (image != null) "image": image,
-  if (model != null) "model": model,
+    if (images != null) "images": List<dynamic>.from(images!.map((x) => x)),
+    "fees": fees,
+    if (image != null) "image": image,
+    if (model != null) "model": model,
     "status": status,
     "approval": approval,
     "created_at": createdAt.toIso8601String(),
@@ -188,9 +205,18 @@ class Car {
   /// Returns images list if present, otherwise a placeholder fallback.
   /// Use `imagesOrPlaceholder` in UI to always have at least one image.
   List<String> get imagesOrPlaceholder {
-    const String defaultPlaceholder = 'https://via.placeholder.com/300x200?text=No+Image';
-    if (images != null && images!.isNotEmpty) return images!;
-    if (image != null && image!.isNotEmpty) return [image!];
+    const String defaultPlaceholder =
+        'https://via.placeholder.com/300x200?text=No+Image';
+    if (images != null && images!.isNotEmpty) {
+      final filtered = images!
+          .where((s) => s.trim().isNotEmpty && s.toLowerCase() != 'null')
+          .toList();
+      if (filtered.isNotEmpty) return filtered;
+    }
+    if (image != null &&
+        image!.trim().isNotEmpty &&
+        image!.toLowerCase() != 'null')
+      return [image!];
     return [defaultPlaceholder];
   }
 }
@@ -201,12 +227,7 @@ class CarTitle {
   Ar? es;
   Ar? ar;
 
-  CarTitle({
-    this.en,
-    this.fr,
-    this.es,
-    this.ar,
-  });
+  CarTitle({this.en, this.fr, this.es, this.ar});
 
   factory CarTitle.fromJson(Map<String, dynamic> json) => CarTitle(
     en: json["en"] == null ? null : Ar.fromJson(json["en"]),

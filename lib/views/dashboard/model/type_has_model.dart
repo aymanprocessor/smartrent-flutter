@@ -19,10 +19,10 @@ class TypeHasModelModel {
       );
 
   Map<String, dynamic> toJson() => {
-        "message": message.toJson(),
-        "data": data.toJson(),
-        "type": type,
-      };
+    "message": message.toJson(),
+    "data": data.toJson(),
+    "type": type,
+  };
 }
 
 class Data {
@@ -58,26 +58,26 @@ class ModelsAll implements DropdownModel {
   });
 
   factory ModelsAll.fromJson(Map<String, dynamic> json) => ModelsAll(
-        id: json["id"],
-        carTypeId: json["car_type_id"],
-        slug: json["slug"] ?? '',
-        name: json["name"] ?? '',
-        status: json["status"] ?? 0,
-        lastEditBy: json["last_edit_by"] ?? 0,
-        createdAt: DateTime.parse(json["created_at"]),
-        updatedAt: DateTime.parse(json["updated_at"]),
-      );
+    id: json["id"],
+    carTypeId: json["car_type_id"],
+    slug: json["slug"] ?? '',
+    name: json["name"] ?? '',
+    status: json["status"] ?? 0,
+    lastEditBy: json["last_edit_by"] ?? 0,
+    createdAt: DateTime.parse(json["created_at"]),
+    updatedAt: DateTime.parse(json["updated_at"]),
+  );
 
   Map<String, dynamic> toJson() => {
-        "id": id,
-        "car_type_id": carTypeId,
-        "slug": slug,
-        "name": name,
-        "status": status,
-        "last_edit_by": lastEditBy,
-        "created_at": createdAt.toIso8601String(),
-        "updated_at": updatedAt.toIso8601String(),
-      };
+    "id": id,
+    "car_type_id": carTypeId,
+    "slug": slug,
+    "name": name,
+    "status": status,
+    "last_edit_by": lastEditBy,
+    "created_at": createdAt.toIso8601String(),
+    "updated_at": updatedAt.toIso8601String(),
+  };
 
   @override
   String get title => name;
@@ -105,31 +105,32 @@ class TypeData {
   });
 
   factory TypeData.fromJson(Map<String, dynamic> json) => TypeData(
-        id: json["id"],
-        slug: json["slug"],
-        name: json["name"],
-        status: json["status"],
-        lastEditBy: json["last_edit_by"],
-        createdAt: DateTime.parse(json["created_at"]),
-        updatedAt: DateTime.parse(json["updated_at"]),
-        models: json["models"] == null
-            ? []
-            : List<ModelsAll>.from(
-                json["models"]!.map((x) => ModelsAll.fromJson(x))),
-      );
+    id: json["id"],
+    slug: json["slug"],
+    name: json["name"],
+    status: json["status"],
+    lastEditBy: json["last_edit_by"],
+    createdAt: DateTime.parse(json["created_at"]),
+    updatedAt: DateTime.parse(json["updated_at"]),
+    models: json["models"] == null
+        ? []
+        : List<ModelsAll>.from(
+            json["models"]!.map((x) => ModelsAll.fromJson(x)),
+          ),
+  );
 
   Map<String, dynamic> toJson() => {
-        "id": id,
-        "slug": slug,
-        "name": name,
-        "status": status,
-        "last_edit_by": lastEditBy,
-        "created_at": createdAt.toIso8601String(),
-        "updated_at": updatedAt.toIso8601String(),
-        "models": models == null
-            ? []
-            : List<dynamic>.from(models!.map((x) => x.toJson())),
-      };
+    "id": id,
+    "slug": slug,
+    "name": name,
+    "status": status,
+    "last_edit_by": lastEditBy,
+    "created_at": createdAt.toIso8601String(),
+    "updated_at": updatedAt.toIso8601String(),
+    "models": models == null
+        ? []
+        : List<dynamic>.from(models!.map((x) => x.toJson())),
+  };
 }
 
 class Message {
@@ -140,6 +141,7 @@ class Message {
   factory Message.fromJson(Map<String, dynamic> json) =>
       Message(success: List<String>.from(json["success"].map((x) => x)));
 
-  Map<String, dynamic> toJson() =>
-      {"success": List<dynamic>.from(success.map((x) => x))};
+  Map<String, dynamic> toJson() => {
+    "success": List<dynamic>.from(success.map((x) => x)),
+  };
 }

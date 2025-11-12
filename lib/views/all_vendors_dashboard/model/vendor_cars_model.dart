@@ -1,0 +1,437 @@
+// To parse this JSON data, do
+//
+//     final vendorCarsModel = vendorCarsModelFromJson(jsonString);
+
+import 'dart:convert';
+
+VendorCarsModel vendorCarsModelFromJson(String str) =>
+    VendorCarsModel.fromJson(json.decode(str));
+
+String vendorCarsModelToJson(VendorCarsModel data) =>
+    json.encode(data.toJson());
+
+class VendorCarsModel {
+  bool success;
+  List<String> message;
+  VendorCarsData data;
+  String? type;
+
+  VendorCarsModel({
+    required this.success,
+    required this.message,
+    required this.data,
+    this.type,
+  });
+
+  factory VendorCarsModel.fromJson(Map<String, dynamic> json) =>
+      VendorCarsModel(
+        success: json["success"] ?? (json["type"] == "success"),
+        message: (() {
+          final m = json["message"];
+          if (m == null) return <String>[];
+          // Handle nested structure: { "success": [...] }
+          if (m is Map) {
+            final successList = m["success"];
+            if (successList is List) {
+              return List<String>.from(successList.map((x) => x.toString()));
+            }
+            return <String>[];
+          }
+          if (m is String) return <String>[m];
+          if (m is List) return List<String>.from(m.map((x) => x.toString()));
+          return <String>[];
+        })(),
+        data: VendorCarsData.fromJson(json["data"] ?? {}),
+        type: json["type"]?.toString(),
+      );
+
+  Map<String, dynamic> toJson() => {
+    "success": success,
+    "message": List<dynamic>.from(message.map((x) => x)),
+    "data": data.toJson(),
+    if (type != null) "type": type,
+  };
+}
+
+class VendorCarsData {
+  List<VendorCar> cars;
+  Pagination pagination;
+  Map<String, dynamic> filtersApplied;
+  MetaInfo meta;
+
+  VendorCarsData({
+    required this.cars,
+    required this.pagination,
+    required this.filtersApplied,
+    required this.meta,
+  });
+
+  factory VendorCarsData.fromJson(Map<String, dynamic> json) => VendorCarsData(
+    cars: (() {
+      final c = json["cars"];
+      if (c == null) return <VendorCar>[];
+      if (c is List)
+        return List<VendorCar>.from(c.map((x) => VendorCar.fromJson(x)));
+      // Unexpected shape -> return empty
+      return <VendorCar>[];
+    })(),
+    pagination: json["pagination"] != null
+        ? Pagination.fromJson(json["pagination"])
+        : Pagination.empty(),
+    filtersApplied: (() {
+      final fa = json["filters_applied"];
+      if (fa == null) return <String, dynamic>{};
+      if (fa is Map) return Map<String, dynamic>.from(fa);
+      // If API returns an array (e.g., []), treat as empty map
+      return <String, dynamic>{};
+    })(),
+    meta: json["meta"] != null
+        ? MetaInfo.fromJson(json["meta"])
+        : MetaInfo.empty(),
+  );
+
+  Map<String, dynamic> toJson() => {
+    "cars": List<dynamic>.from(cars.map((x) => x.toJson())),
+    "pagination": pagination.toJson(),
+    "filters_applied": filtersApplied,
+    "meta": meta.toJson(),
+  };
+}
+
+class VendorCar {
+  int id;
+  int vendorId;
+  String vendorName;
+  double vendorRating;
+  String make;
+  String model;
+  String type;
+  int year;
+  String color;
+  String licensePlate;
+  String transmission;
+  String fuelType;
+  int seats;
+  int doors;
+  double pricePerDay;
+  String currency;
+  double rating;
+  int totalReviews;
+  String availabilityStatus;
+  String? nextAvailableDate;
+  List<CarImage> images;
+  List<String> features;
+  bool insuranceIncluded;
+  int? mileageLimitPerDay;
+  String? mileageUnit;
+  double? depositRequired;
+  String? cancellationPolicy;
+  VendorLocation? vendorLocation;
+
+  VendorCar({
+    required this.id,
+    required this.vendorId,
+    required this.vendorName,
+    required this.vendorRating,
+    required this.make,
+    required this.model,
+    required this.type,
+    required this.year,
+    required this.color,
+    required this.licensePlate,
+    required this.transmission,
+    required this.fuelType,
+    required this.seats,
+    required this.doors,
+    required this.pricePerDay,
+    required this.currency,
+    required this.rating,
+    required this.totalReviews,
+    required this.availabilityStatus,
+    this.nextAvailableDate,
+    required this.images,
+    required this.features,
+    required this.insuranceIncluded,
+    this.mileageLimitPerDay,
+    this.mileageUnit,
+    this.depositRequired,
+    this.cancellationPolicy,
+    this.vendorLocation,
+  });
+
+  factory VendorCar.fromJson(Map<String, dynamic> json) => VendorCar(
+    id: json["id"] ?? 0,
+    vendorId: json["vendor_id"] ?? 0,
+    vendorName: json["vendor_name"] ?? '',
+    vendorRating: (json["vendor_rating"] ?? 0).toDouble(),
+    make: json["make"] ?? '',
+    model: json["model"] ?? '',
+    type: json["type"] ?? '',
+    year: json["year"] ?? 0,
+    color: json["color"] ?? 'Not specified',
+    licensePlate: json["license_plate"] ?? '',
+    transmission: json["transmission"] ?? 'automatic',
+    fuelType: json["fuel_type"] ?? 'petrol',
+    seats: json["seats"] ?? 0,
+    doors: json["doors"] ?? 0,
+    pricePerDay: (json["price_per_day"] ?? 0).toDouble(),
+    currency: json["currency"] ?? 'USD',
+    rating: (json["rating"] ?? 0).toDouble(),
+    totalReviews: json["total_reviews"] ?? 0,
+    availabilityStatus: json["availability_status"] ?? 'available',
+    nextAvailableDate: json["next_available_date"],
+    images: json["images"] != null
+        ? List<CarImage>.from(json["images"].map((x) => CarImage.fromJson(x)))
+        : [],
+    features: json["features"] != null
+        ? List<String>.from(json["features"].map((x) => x))
+        : [],
+    insuranceIncluded: json["insurance_included"] ?? false,
+    mileageLimitPerDay: json["mileage_limit_per_day"],
+    mileageUnit: json["mileage_unit"],
+    depositRequired: json["deposit_required"] != null
+        ? (json["deposit_required"]).toDouble()
+        : null,
+    cancellationPolicy: json["cancellation_policy"],
+    vendorLocation: json["vendor_location"] != null
+        ? VendorLocation.fromJson(json["vendor_location"])
+        : null,
+  );
+
+  Map<String, dynamic> toJson() => {
+    "id": id,
+    "vendor_id": vendorId,
+    "vendor_name": vendorName,
+    "vendor_rating": vendorRating,
+    "make": make,
+    "model": model,
+    "type": type,
+    "year": year,
+    "color": color,
+    "license_plate": licensePlate,
+    "transmission": transmission,
+    "fuel_type": fuelType,
+    "seats": seats,
+    "doors": doors,
+    "price_per_day": pricePerDay,
+    "currency": currency,
+    "rating": rating,
+    "total_reviews": totalReviews,
+    "availability_status": availabilityStatus,
+    "next_available_date": nextAvailableDate,
+    "images": List<dynamic>.from(images.map((x) => x.toJson())),
+    "features": List<dynamic>.from(features.map((x) => x)),
+    "insurance_included": insuranceIncluded,
+    "mileage_limit_per_day": mileageLimitPerDay,
+    "mileage_unit": mileageUnit,
+    "deposit_required": depositRequired,
+    "cancellation_policy": cancellationPolicy,
+    "vendor_location": vendorLocation?.toJson(),
+  };
+
+  String get primaryImageUrl {
+    if (images.isEmpty) {
+      // Return empty string to signal use of local asset placeholder
+      return '';
+    }
+    final primaryImage = images.firstWhere(
+      (img) => img.isPrimary,
+      orElse: () => images.first,
+    );
+    final url = primaryImage.url.trim();
+    // Guard against common bad values that lead to URLs like '/null' or 'null'
+    if (url.isEmpty) return '';
+    if (url.toLowerCase() == 'null') return '';
+    if (url.contains('/null') || url.endsWith('/null')) {
+      return '';
+    }
+    return url;
+  }
+
+  String get displayName => '$make $model';
+
+  String get formattedPrice {
+    // Map currency codes to their symbols (SAR for Saudi Riyal)
+    final currencySymbols = {
+      'SAR': 'ريال',
+      'USD': '\$',
+      'AED': 'د.إ',
+      'EGP': '£',
+      'KWD': 'د.ك',
+    };
+    final symbol = currencySymbols[currency] ?? currency;
+    return '$symbol ${pricePerDay.toStringAsFixed(0)}/day';
+  }
+}
+
+class CarImage {
+  int id;
+  String url;
+  bool isPrimary;
+
+  CarImage({required this.id, required this.url, required this.isPrimary});
+
+  factory CarImage.fromJson(Map<String, dynamic> json) => CarImage(
+    id: json["id"] ?? 0,
+    url: json["url"] ?? '',
+    isPrimary: json["is_primary"] ?? false,
+  );
+
+  Map<String, dynamic> toJson() => {
+    "id": id,
+    "url": url,
+    "is_primary": isPrimary,
+  };
+}
+
+class VendorLocation {
+  String? city;
+  String? address;
+  double? latitude;
+  double? longitude;
+
+  VendorLocation({this.city, this.address, this.latitude, this.longitude});
+
+  factory VendorLocation.fromJson(Map<String, dynamic> json) => VendorLocation(
+    city: json["city"],
+    address: json["address"],
+    latitude: json["latitude"] != null ? (json["latitude"]).toDouble() : null,
+    longitude: json["longitude"] != null
+        ? (json["longitude"]).toDouble()
+        : null,
+  );
+
+  Map<String, dynamic> toJson() => {
+    "city": city,
+    "address": address,
+    "latitude": latitude,
+    "longitude": longitude,
+  };
+
+  String get displayLocation {
+    if (city != null && address != null) {
+      return '$address, $city';
+    } else if (city != null) {
+      return city!;
+    } else if (address != null) {
+      return address!;
+    }
+    return 'Location not specified';
+  }
+}
+
+class Pagination {
+  int currentPage;
+  int perPage;
+  int total;
+  int totalPages;
+  int from;
+  int to;
+  bool hasMore;
+
+  Pagination({
+    required this.currentPage,
+    required this.perPage,
+    required this.total,
+    required this.totalPages,
+    required this.from,
+    required this.to,
+    required this.hasMore,
+  });
+
+  factory Pagination.fromJson(Map<String, dynamic> json) => Pagination(
+    currentPage: json["current_page"] ?? 1,
+    perPage: json["per_page"] ?? 15,
+    total: json["total"] ?? 0,
+    totalPages: json["total_pages"] ?? 0,
+    from: json["from"] ?? 0,
+    to: json["to"] ?? 0,
+    hasMore: json["has_more"] ?? false,
+  );
+
+  factory Pagination.empty() => Pagination(
+    currentPage: 1,
+    perPage: 15,
+    total: 0,
+    totalPages: 0,
+    from: 0,
+    to: 0,
+    hasMore: false,
+  );
+
+  Map<String, dynamic> toJson() => {
+    "current_page": currentPage,
+    "per_page": perPage,
+    "total": total,
+    "total_pages": totalPages,
+    "from": from,
+    "to": to,
+    "has_more": hasMore,
+  };
+}
+
+class MetaInfo {
+  List<String> availableTypes;
+  PriceRange priceRange;
+  YearRange yearRange;
+
+  MetaInfo({
+    required this.availableTypes,
+    required this.priceRange,
+    required this.yearRange,
+  });
+
+  factory MetaInfo.fromJson(Map<String, dynamic> json) => MetaInfo(
+    availableTypes: json["available_types"] != null
+        ? List<String>.from(json["available_types"].map((x) => x))
+        : [],
+    priceRange: json["price_range"] != null
+        ? PriceRange.fromJson(json["price_range"])
+        : PriceRange.empty(),
+    yearRange: json["year_range"] != null
+        ? YearRange.fromJson(json["year_range"])
+        : YearRange.empty(),
+  );
+
+  factory MetaInfo.empty() => MetaInfo(
+    availableTypes: [],
+    priceRange: PriceRange.empty(),
+    yearRange: YearRange.empty(),
+  );
+
+  Map<String, dynamic> toJson() => {
+    "available_types": List<dynamic>.from(availableTypes.map((x) => x)),
+    "price_range": priceRange.toJson(),
+    "year_range": yearRange.toJson(),
+  };
+}
+
+class PriceRange {
+  double min;
+  double max;
+
+  PriceRange({required this.min, required this.max});
+
+  factory PriceRange.fromJson(Map<String, dynamic> json) => PriceRange(
+    min: (json["min"] ?? 0).toDouble(),
+    max: (json["max"] ?? 0).toDouble(),
+  );
+
+  factory PriceRange.empty() => PriceRange(min: 0, max: 0);
+
+  Map<String, dynamic> toJson() => {"min": min, "max": max};
+}
+
+class YearRange {
+  int min;
+  int max;
+
+  YearRange({required this.min, required this.max});
+
+  factory YearRange.fromJson(Map<String, dynamic> json) =>
+      YearRange(min: json["min"] ?? 0, max: json["max"] ?? 0);
+
+  factory YearRange.empty() => YearRange(min: 0, max: 0);
+
+  Map<String, dynamic> toJson() => {"min": min, "max": max};
+}

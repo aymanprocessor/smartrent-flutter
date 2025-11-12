@@ -5,19 +5,8 @@ class AllVendorsSearchButton extends GetView<AllVendorsDashboardController> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: Dimensions.defaultHorizontalSize,
-      ),
-      child: Obx(
-        () => PrimaryButton(
-          title: 'Search Cars',
-          isLoading: controller.isSearchingCar,
-          onPressed: () {
-            controller.searchAllVendorsCars();
-          },
-        ),
-      ),
-    );
+    // Filters removed; search happens automatically on init/refresh.
+    // Keep widget as no-op placeholder.
+    return SizedBox.shrink();
   }
 }

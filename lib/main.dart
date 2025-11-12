@@ -43,7 +43,13 @@ class MyApp extends StatelessWidget {
         themeMode: ThemeMode.light,
         initialBinding: BindingsBuilder(() async {
           Get.put(SystemMaintenanceController());
-          await DynamicLanguage.init(url: ApiConfig.languageUrl);
+          try {
+            DynamicLanguage.init(url: ApiConfig.languageUrl);
+          } catch (e) {
+            // Fallback if language loading fails
+            print('Language initialization error: $e');
+            // Continue with default language
+          }
           Get.lazyPut(() => DashboardController());
         }),
         builder: (context, widget) {

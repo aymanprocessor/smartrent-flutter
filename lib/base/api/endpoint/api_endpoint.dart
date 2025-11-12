@@ -1,6 +1,6 @@
 class ApiConfig {
   // static const String mainDomain = "https://smartrent.nextoneplus.com";
-   static const String mainDomain = "http://192.168.1.211:8000";
+  static const String mainDomain = "http://192.168.1.211:8000";
   static const String baseUrl = "$mainDomain/api/v1";
   static const String languageUrl = "$baseUrl/settings/languages";
 }
@@ -41,6 +41,9 @@ enum ApiEndpoint {
   postTypeHasModel('/user/car-booking/type/models'),
   postModelHasYears('/user/car-booking/model/years'),
   searchCar('/user/car-booking/search/car'),
+  vendorCars(
+    '/vendor/cars',
+  ), // New API for all vendor cars with advanced filtering
   notification('/user/notifications'),
 
   // Profile

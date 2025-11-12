@@ -11,7 +11,7 @@ class NavigatorPlug {
   bool _timerStarted = false;
 
   void startListening({required int seconds, required VoidCallback onChanged}) {
-    _subscription = DynamicLanguage().isLoadingValue.stream.listen((isLoading) {
+    _subscription = DynamicLanguage.isLoadingValue.stream.listen((isLoading) {
       _checkStatus(seconds, onChanged);
     });
 
@@ -24,13 +24,13 @@ class NavigatorPlug {
 
   void _checkStatus(int seconds, VoidCallback onChanged) {
     if (!_timerStarted &&
-        !DynamicLanguage().isLoadingValue.value &&
+        !DynamicLanguage.isLoadingValue.value &&
         Get.find<SystemMaintenanceController>().maintenanceStatus.value ==
             false) {
       _timerStarted = true;
 
       Timer(Duration(seconds: seconds), () {
-        if (!DynamicLanguage().isLoadingValue.value &&
+        if (!DynamicLanguage.isLoadingValue.value &&
             Get.find<SystemMaintenanceController>().maintenanceStatus.value ==
                 false) {
           _subscription?.cancel();
