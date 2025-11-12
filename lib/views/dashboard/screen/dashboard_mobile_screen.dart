@@ -20,61 +20,26 @@ class DashboardMobileScreen extends GetView<DashboardController> {
   }
 
   _bodyWidget(BuildContext context) {
-    return RefreshIndicator(
-      color: CustomColor.primary,
-      onRefresh: () async {
-        controller.clearData();
-        controller.getDashboardInfo();
-      },
-      child: Stack(
-        children: [
-          Positioned.fill(
-            child: Image.asset(
-              'assets/background/background.jpg',
-              fit: BoxFit.cover,
-            ),
+    // Initialize the AllVendors controller once
+    if (!Get.isRegistered<AllVendorsDashboardController>()) {
+      Get.put(AllVendorsDashboardController(), permanent: true);
+    }
+
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: Image.asset(
+            'assets/background/background.jpg',
+            fit: BoxFit.cover,
           ),
-          ListView(
-            children: [
-              // Button to navigate to All Vendors Dashboard
-              Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: Dimensions.defaultHorizontalSize,
-                  vertical: Dimensions.verticalSize * 0.5,
-                ),
-                child: ElevatedButton.icon(
-                  onPressed: () {
-                    Get.toNamed(Routes.allVendorsDashboardScreen);
-                  },
-                  icon: Icon(Icons.explore, color: CustomColor.whiteColor),
-                  label: Text(
-                    'Browse All Vendors Cars',
-                    style: TextStyle(
-                      color: CustomColor.whiteColor,
-                      fontSize: Dimensions.titleMedium,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: CustomColor.secondary,
-                    padding: EdgeInsets.symmetric(
-                      vertical: Dimensions.verticalSize * 0.6,
-                      horizontal: Dimensions.horizontalSize,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(Dimensions.radius),
-                    ),
-                  ),
-                ),
-              ),
-              SelectTypeBox(),
-              TimeDateBox(),
-              FindCarButton(),
-              CarCarouselSlider(),
-            ],
-          ),
-        ],
-      ),
+        ),
+        GetBuilder<AllVendorsDashboardController>(
+          builder: (vendorController) {
+            // Use CustomScrollView to avoid nested scrollable conflict
+            return AllVendorsCarListView();
+          },
+        ),
+      ],
     );
   }
 }

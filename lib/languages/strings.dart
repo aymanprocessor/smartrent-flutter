@@ -201,4 +201,5 @@ class Strings {
   static const String refreshing = "appLRefreshing";
   static const String allCars = "appLAllCars";
   static const String filterBy = "appLFilterBy";
+  static const String day = "appLDay";
 }

@@ -260,7 +260,6 @@ class AllVendorsCarListView extends GetView<AllVendorsDashboardController> {
               Strings.available,
               Icons.check_circle,
             ),
-            _buildFilterChip('limited', Strings.limited, Icons.access_time),
           ],
         ),
       ),
@@ -699,7 +698,7 @@ class AllVendorsCarListView extends GetView<AllVendorsDashboardController> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                car.formattedPrice,
+                                _formatPrice(car),
                                 style: TextStyle(
                                   fontSize: 20,
                                   fontWeight: FontWeight.w800,
@@ -708,35 +707,6 @@ class AllVendorsCarListView extends GetView<AllVendorsDashboardController> {
                                   letterSpacing: -0.5,
                                 ),
                               ),
-                              if (car.insuranceIncluded) ...[
-                                SizedBox(height: 4),
-                                Row(
-                                  children: [
-                                    Icon(
-                                      Icons.verified_rounded,
-                                      size: 14,
-                                      color: Color(0xFF10B981),
-                                    ),
-                                    SizedBox(width: 4),
-                                    Flexible(
-                                      child: Text(
-                                        DynamicLanguage.key(
-                                          Strings.insuranceIncluded,
-                                        ),
-                                        style: TextStyle(
-                                          fontSize: 11,
-                                          color: Color(0xFF059669),
-                                          fontWeight: FontWeight.w600,
-                                          height: 1.3,
-                                          letterSpacing: 0.1,
-                                        ),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
                             ],
                           ),
                         ),
@@ -834,6 +804,19 @@ class AllVendorsCarListView extends GetView<AllVendorsDashboardController> {
         ),
       ),
     );
+  }
+
+  String _formatPrice(VendorCar car) {
+    final currencySymbols = {
+      'SAR': 'ريال',
+      'USD': '\$',
+      'AED': 'د.إ',
+      'EGP': '£',
+      'KWD': 'د.ك',
+    };
+    final symbol = currencySymbols[car.currency] ?? car.currency;
+    final dayText = DynamicLanguage.key(Strings.day);
+    return '$symbol ${car.pricePerDay.toStringAsFixed(0)}/$dayText';
   }
 
   void _onCarTap(VendorCar car) {

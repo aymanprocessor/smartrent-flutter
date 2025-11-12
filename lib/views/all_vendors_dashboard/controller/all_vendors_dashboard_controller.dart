@@ -49,7 +49,7 @@ class AllVendorsDashboardController extends GetxController {
       'popularity'.obs; // popularity, priceLowToHigh, priceHighToLow, rating
 
   // Quick filters
-  RxString quickFilter = 'all'.obs; // all, available, limited
+  RxString quickFilter = 'all'.obs; // all, available
 
   @override
   void onInit() {
@@ -195,10 +195,6 @@ class AllVendorsDashboardController extends GetxController {
     if (quickFilter.value == 'available') {
       filteredCars = filteredCars
           .where((car) => car.availabilityStatus == 'available')
-          .toList();
-    } else if (quickFilter.value == 'limited') {
-      filteredCars = filteredCars
-          .where((car) => car.availabilityStatus != 'available')
           .toList();
     }
 
