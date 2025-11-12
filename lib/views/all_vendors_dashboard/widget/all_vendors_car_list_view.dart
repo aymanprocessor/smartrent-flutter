@@ -780,8 +780,10 @@ class AllVendorsCarListView extends GetView<AllVendorsDashboardController> {
       'KWD': 'د.ك',
     };
     final symbol = currencySymbols[car.currency] ?? car.currency;
-    final dayText = DynamicLanguage.key(Strings.day);
-    return '$symbol ${car.pricePerDay.toStringAsFixed(0)}/$dayText';
+    final unitText = car.pricing.unit == 'day'
+        ? DynamicLanguage.key(Strings.day)
+        : car.pricing.unit;
+    return '$symbol ${car.pricing.price.toStringAsFixed(0)}/$unitText';
   }
 
   void _onCarTap(VendorCar car) {

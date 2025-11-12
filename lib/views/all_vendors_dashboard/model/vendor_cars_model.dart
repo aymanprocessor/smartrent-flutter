@@ -108,12 +108,12 @@ class VendorCar {
   String type;
   int year;
   String color;
-  String licensePlate;
+  String? licensePlate;
   String transmission;
   String fuelType;
   int seats;
   int doors;
-  double pricePerDay;
+  Pricing pricing;
   String currency;
   double rating;
   int totalReviews;
@@ -138,12 +138,12 @@ class VendorCar {
     required this.type,
     required this.year,
     required this.color,
-    required this.licensePlate,
+    this.licensePlate,
     required this.transmission,
     required this.fuelType,
     required this.seats,
     required this.doors,
-    required this.pricePerDay,
+    required this.pricing,
     required this.currency,
     required this.rating,
     required this.totalReviews,
@@ -169,12 +169,14 @@ class VendorCar {
     type: json["type"] ?? '',
     year: json["year"] ?? 0,
     color: json["color"] ?? 'Not specified',
-    licensePlate: json["license_plate"] ?? '',
+    licensePlate: json["license_plate"],
     transmission: json["transmission"] ?? 'automatic',
     fuelType: json["fuel_type"] ?? 'petrol',
     seats: json["seats"] ?? 0,
     doors: json["doors"] ?? 0,
-    pricePerDay: (json["price_per_day"] ?? 0).toDouble(),
+    pricing: json["pricing"] != null
+        ? Pricing.fromJson(json["pricing"])
+        : Pricing.empty(),
     currency: json["currency"] ?? 'USD',
     rating: (json["rating"] ?? 0).toDouble(),
     totalReviews: json["total_reviews"] ?? 0,
@@ -213,7 +215,7 @@ class VendorCar {
     "fuel_type": fuelType,
     "seats": seats,
     "doors": doors,
-    "price_per_day": pricePerDay,
+    "pricing": pricing.toJson(),
     "currency": currency,
     "rating": rating,
     "total_reviews": totalReviews,
@@ -260,8 +262,48 @@ class VendorCar {
       'KWD': 'د.ك',
     };
     final symbol = currencySymbols[currency] ?? currency;
-    return '$symbol ${pricePerDay.toStringAsFixed(0)}/day';
+    return '${symbol} ${pricing.price.toStringAsFixed(0)}/${pricing.unit}';
   }
+}
+
+class Pricing {
+  String type;
+  String currency;
+  double price;
+  String unit;
+  String displayName;
+
+  Pricing({
+    required this.type,
+    required this.currency,
+    required this.price,
+    required this.unit,
+    required this.displayName,
+  });
+
+  factory Pricing.fromJson(Map<String, dynamic> json) => Pricing(
+    type: json["type"] ?? 'per_day',
+    currency: json["currency"] ?? 'USD',
+    price: (json["price"] ?? 0).toDouble(),
+    unit: json["unit"] ?? 'day',
+    displayName: json["display_name"] ?? 'Price per day',
+  );
+
+  factory Pricing.empty() => Pricing(
+    type: 'per_day',
+    currency: 'USD',
+    price: 0,
+    unit: 'day',
+    displayName: 'Price per day',
+  );
+
+  Map<String, dynamic> toJson() => {
+    "type": type,
+    "currency": currency,
+    "price": price,
+    "unit": unit,
+    "display_name": displayName,
+  };
 }
 
 class CarImage {
@@ -372,12 +414,14 @@ class Pagination {
 
 class MetaInfo {
   List<String> availableTypes;
-  PriceRange priceRange;
+  List<String> pricingTypes;
+  Map<String, PricingRange> priceRanges;
   YearRange yearRange;
 
   MetaInfo({
     required this.availableTypes,
-    required this.priceRange,
+    required this.pricingTypes,
+    required this.priceRanges,
     required this.yearRange,
   });
 
@@ -385,9 +429,18 @@ class MetaInfo {
     availableTypes: json["available_types"] != null
         ? List<String>.from(json["available_types"].map((x) => x))
         : [],
-    priceRange: json["price_range"] != null
-        ? PriceRange.fromJson(json["price_range"])
-        : PriceRange.empty(),
+    pricingTypes: json["pricing_types"] != null
+        ? List<String>.from(json["pricing_types"].map((x) => x))
+        : [],
+    priceRanges: (() {
+      final pr = json["price_ranges"];
+      if (pr == null || pr is! Map) return <String, PricingRange>{};
+      final result = <String, PricingRange>{};
+      pr.forEach((key, value) {
+        result[key.toString()] = PricingRange.fromJson(value);
+      });
+      return result;
+    })(),
     yearRange: json["year_range"] != null
         ? YearRange.fromJson(json["year_range"])
         : YearRange.empty(),
@@ -395,29 +448,38 @@ class MetaInfo {
 
   factory MetaInfo.empty() => MetaInfo(
     availableTypes: [],
-    priceRange: PriceRange.empty(),
+    pricingTypes: [],
+    priceRanges: {},
     yearRange: YearRange.empty(),
   );
 
-  Map<String, dynamic> toJson() => {
-    "available_types": List<dynamic>.from(availableTypes.map((x) => x)),
-    "price_range": priceRange.toJson(),
-    "year_range": yearRange.toJson(),
-  };
+  Map<String, dynamic> toJson() {
+    final result = <String, dynamic>{
+      "available_types": List<dynamic>.from(availableTypes.map((x) => x)),
+      "pricing_types": List<dynamic>.from(pricingTypes.map((x) => x)),
+      "year_range": yearRange.toJson(),
+    };
+    final priceRangesMap = <String, dynamic>{};
+    priceRanges.forEach((key, value) {
+      priceRangesMap[key] = value.toJson();
+    });
+    result["price_ranges"] = priceRangesMap;
+    return result;
+  }
 }
 
-class PriceRange {
+class PricingRange {
   double min;
   double max;
 
-  PriceRange({required this.min, required this.max});
+  PricingRange({required this.min, required this.max});
 
-  factory PriceRange.fromJson(Map<String, dynamic> json) => PriceRange(
+  factory PricingRange.fromJson(Map<String, dynamic> json) => PricingRange(
     min: (json["min"] ?? 0).toDouble(),
     max: (json["max"] ?? 0).toDouble(),
   );
 
-  factory PriceRange.empty() => PriceRange(min: 0, max: 0);
+  factory PricingRange.empty() => PricingRange(min: 0, max: 0);
 
   Map<String, dynamic> toJson() => {"min": min, "max": max};
 }

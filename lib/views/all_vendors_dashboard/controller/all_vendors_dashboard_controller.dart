@@ -201,10 +201,10 @@ class AllVendorsDashboardController extends GetxController {
     // Apply sort
     switch (sortOption.value) {
       case 'priceLowToHigh':
-        filteredCars.sort((a, b) => a.pricePerDay.compareTo(b.pricePerDay));
+        filteredCars.sort((a, b) => a.pricing.price.compareTo(b.pricing.price));
         break;
       case 'priceHighToLow':
-        filteredCars.sort((a, b) => b.pricePerDay.compareTo(a.pricePerDay));
+        filteredCars.sort((a, b) => b.pricing.price.compareTo(a.pricing.price));
         break;
       case 'rating':
         filteredCars.sort((a, b) => b.vendorRating.compareTo(a.vendorRating));
