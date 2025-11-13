@@ -16,11 +16,13 @@ class BookingController extends GetxController {
   RxBool isDeliver = false.obs;
   
   // Pricing and car data
+  Rxn<VendorCar> selectedCar = Rxn<VendorCar>();
   Rxn<Pricing> selectedPricing = Rxn<Pricing>();
   RxString pricingType = ''.obs; // 'per_day' or 'per_km'
   RxString pricingUnit = ''.obs; // 'day', 'km', etc.
   RxDouble deliveryCharge = 0.0.obs;
   RxDouble subtotal = 0.0.obs;
+  RxDouble taxAmount = 0.0.obs;
   RxDouble total = 0.0.obs;
 
   @override
@@ -63,6 +65,7 @@ class BookingController extends GetxController {
 
   /// Initialize booking with selected car and pricing info
   void initializeWithCar(VendorCar car) {
+    selectedCar.value = car;
     selectedPricing.value = car.pricing;
     pricingType.value = car.pricing.type;
     pricingUnit.value = car.pricing.unit;
@@ -79,7 +82,7 @@ class BookingController extends GetxController {
   }
 
   void _calculateCharges() {
-    if (selectedPricing.value == null) return;
+    if (selectedPricing.value == null || selectedCar.value == null) return;
 
     double quantity = double.tryParse(quantityController.text) ?? 0;
     double price = selectedPricing.value!.price;
@@ -87,16 +90,23 @@ class BookingController extends GetxController {
     // Calculate subtotal based on quantity and price
     subtotal.value = quantity * price;
     
-    // Add delivery charge if enabled
-    if (isDeliver.value) {
-      // You can set a fixed delivery charge or make it dynamic
-      // For now, let's assume 10% of subtotal as delivery charge
-      deliveryCharge.value = subtotal.value * 0.1;
+    // Add delivery charge if enabled (use car's delivery price)
+    if (isDeliver.value && selectedCar.value!.deliveryPrice != null) {
+      deliveryCharge.value = selectedCar.value!.deliveryPrice!;
     } else {
       deliveryCharge.value = 0;
     }
     
-    total.value = subtotal.value + deliveryCharge.value;
+    // Calculate tax if enabled
+    if (selectedCar.value!.taxEnabled) {
+      taxAmount.value = (subtotal.value + deliveryCharge.value) * 
+                        (selectedCar.value!.taxPercentage / 100);
+    } else {
+      taxAmount.value = 0;
+    }
+    
+    // Total = subtotal + delivery + tax
+    total.value = subtotal.value + deliveryCharge.value + taxAmount.value;
   }
 
   /// Get label for quantity input based on pricing type
@@ -162,7 +172,13 @@ class BookingController extends GetxController {
       'notes': noteController.text,
       'subtotal': subtotal.value,
       'delivery_charge': deliveryCharge.value,
+      'tax_amount': taxAmount.value,
+      'tax_enabled': selectedCar.value?.taxEnabled ?? false,
+      'tax_percentage': selectedCar.value?.taxPercentage ?? 0,
       'total': total.value,
+      'car_id': selectedCar.value?.id,
+      'car_name': '${selectedCar.value?.make} ${selectedCar.value?.model}',
+      'currency': selectedCar.value?.currency ?? 'SAR',
     };
   }
 }

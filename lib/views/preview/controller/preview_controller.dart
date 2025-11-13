@@ -72,10 +72,12 @@ class PreviewController extends GetxController {
     if (Get.arguments != null && Get.arguments is Map) {
       bookingData.value = Get.arguments;
     }
+    // Set online payment as default (method = 1)
+    selectedMethod.value = 1;
     getPreviewData();
   }
 
-  var selectedMethod = RxInt(0);
+  var selectedMethod = RxInt(1); // Default to online payment
 
   var paymentType = Rx<PaymentType>(
     PaymentType(onlinePayment: "online-payment", cash: 'cash'),
@@ -83,9 +85,8 @@ class PreviewController extends GetxController {
 
   String get selectedMethodText {
     totalPayable.value = 0.00;
-    return selectedMethod.value == 0
-        ? paymentType.value.cash
-        : paymentType.value.onlinePayment;
+    // Always return online payment since cash is removed
+    return paymentType.value.onlinePayment;
   }
 
   void changePaymentMethod(int method) {
@@ -93,9 +94,7 @@ class PreviewController extends GetxController {
   }
 
   void handlePaymentProcess() {
-    if (selectedMethodText == 'cash') {
-      cashBookedProcess();
-    } else if (alias.value.contains('manual')) {
+    if (alias.value.contains('manual')) {
       paymentManualInsert();
     } else if (alias.value.contains('paytabs') || 
                paymentTypes.value.contains('paytabs')) {
@@ -297,6 +296,12 @@ class PreviewController extends GetxController {
       'quantity': bookingData.value?['quantity'],
       'pricing_type': bookingData.value?['pricing_type'],
       'delivery_required': bookingData.value?['delivery_required'] ?? false,
+      'delivery_charge': bookingData.value?['delivery_charge'] ?? 0,
+      'subtotal': bookingData.value?['subtotal'] ?? 0,
+      // Tax fields
+      'tax_amount': bookingData.value?['tax_amount'] ?? 0,
+      'tax_enabled': bookingData.value?['tax_enabled'] ?? false,
+      'tax_percentage': bookingData.value?['tax_percentage'] ?? 0,
       // 'transaction_id': fees.value,
     };
     if (_selectedCarAreaId != null) inputBody['car_area'] = _selectedCarAreaId;
@@ -318,7 +323,8 @@ class PreviewController extends GetxController {
     );
   }
 
-  Future<CommonSuccessModel?> cashBookedProcess() async {
+  // Cash payment removed - online payment only
+  /* Future<CommonSuccessModel?> cashBookedProcess() async {
     // Validate car identifiers before sending booking request
     if (slug.value.isEmpty || Id.value.isEmpty) {
       Get.snackbar(
@@ -358,7 +364,7 @@ class PreviewController extends GetxController {
         _confirmation(_commonSuccessModel);
       },
     );
-  }
+  } */
 
   ///=> Get manual payment input field
 
@@ -421,6 +427,16 @@ class PreviewController extends GetxController {
       'payment': selectedMethodText,
       'token': dashboardController.carToken.value,
       'fees': (bookingData.value?['total'] ?? 0).toString(),
+      // New pricing fields
+      'quantity': (bookingData.value?['quantity'] ?? 0).toString(),
+      'pricing_type': (bookingData.value?['pricing_type'] ?? '').toString(),
+      'delivery_required': (bookingData.value?['delivery_required'] ?? false).toString(),
+      'delivery_charge': (bookingData.value?['delivery_charge'] ?? 0).toString(),
+      'subtotal': (bookingData.value?['subtotal'] ?? 0).toString(),
+      // Tax fields
+      'tax_amount': (bookingData.value?['tax_amount'] ?? 0).toString(),
+      'tax_enabled': (bookingData.value?['tax_enabled'] ?? false).toString(),
+      'tax_percentage': (bookingData.value?['tax_percentage'] ?? 0).toString(),
     };
   if (_selectedCarAreaId != null) inputBody['car_area'] = _selectedCarAreaId.toString();
     final data = _manualInputModel.data.inputFields;
@@ -568,6 +584,9 @@ class PreviewController extends GetxController {
           'car_slug': slug.value,
           'location': bookingData.value?['delivery_location'] ?? bookingController.locationController.text,
           'fees': amount.toString(),
+          'tax_amount': bookingData.value?['tax_amount'] ?? 0,
+          'delivery_charge': bookingData.value?['delivery_charge'] ?? 0,
+          'subtotal': bookingData.value?['subtotal'] ?? 0,
           if (_selectedCarAreaId != null) 'car_area': _selectedCarAreaId,
         },
       );
@@ -634,6 +653,12 @@ class PreviewController extends GetxController {
       'quantity': bookingData.value?['quantity'],
       'pricing_type': bookingData.value?['pricing_type'],
       'delivery_required': bookingData.value?['delivery_required'] ?? false,
+      'delivery_charge': bookingData.value?['delivery_charge'] ?? 0,
+      'subtotal': bookingData.value?['subtotal'] ?? 0,
+      // Tax fields
+      'tax_amount': bookingData.value?['tax_amount'] ?? 0,
+      'tax_enabled': bookingData.value?['tax_enabled'] ?? false,
+      'tax_percentage': bookingData.value?['tax_percentage'] ?? 0,
     };
     if (_selectedCarAreaId != null) inputBody['car_area'] = _selectedCarAreaId;
 

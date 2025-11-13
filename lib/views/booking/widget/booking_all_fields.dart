@@ -112,14 +112,16 @@ class BookingAllFields extends GetView<BookingController> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Price per unit
+            // Price per unit (Price per day / Price per km)
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
                   DynamicLanguage.isLoading
                       ? ''
-                      : DynamicLanguage.key('السعر'),
+                      : DynamicLanguage.key(controller.pricingType.value == 'per_day' 
+                          ? 'السعر في اليوم' 
+                          : 'السعر في الكيلومتر'),
                   style: TextStyle(fontSize: 14),
                 ),
                 Text(
@@ -130,7 +132,7 @@ class BookingAllFields extends GetView<BookingController> {
             ),
             Sizes.height.v10,
             
-            // Subtotal
+            // Subtotal (shows quantity × price)
             if (controller.quantityController.text.isNotEmpty)
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -138,7 +140,7 @@ class BookingAllFields extends GetView<BookingController> {
                   Text(
                     DynamicLanguage.isLoading
                         ? ''
-                        : DynamicLanguage.key('المجموع الفرعي'),
+                        : DynamicLanguage.key('إجمالي الإيجار'),
                     style: TextStyle(fontSize: 14),
                   ),
                   Text(
@@ -158,11 +160,34 @@ class BookingAllFields extends GetView<BookingController> {
                     Text(
                       DynamicLanguage.isLoading
                           ? ''
-                          : DynamicLanguage.key('رسم التوصيل'),
+                          : DynamicLanguage.key('رسوم التوصيل'),
                       style: TextStyle(fontSize: 14),
                     ),
                     Text(
                       '${controller.deliveryCharge.value.toStringAsFixed(2)} ${controller.selectedPricing.value?.currency ?? 'SAR'}',
+                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+              ),
+            
+            // Tax Amount (if enabled)
+            if (controller.selectedCar.value != null &&
+                controller.selectedCar.value!.taxEnabled &&
+                controller.taxAmount.value > 0)
+              Padding(
+                padding: EdgeInsets.only(top: 8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      DynamicLanguage.isLoading
+                          ? ''
+                          : DynamicLanguage.key('الضريبة'),
+                      style: TextStyle(fontSize: 14),
+                    ),
+                    Text(
+                      '${controller.taxAmount.value.toStringAsFixed(2)} ${controller.selectedPricing.value?.currency ?? 'SAR'}',
                       style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                     ),
                   ],

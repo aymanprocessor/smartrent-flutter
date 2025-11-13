@@ -115,6 +115,8 @@ class VendorCar {
   int doors;
   Pricing pricing;
   String currency;
+  bool taxEnabled;
+  double taxPercentage;
   double rating;
   int totalReviews;
   String availabilityStatus;
@@ -125,6 +127,7 @@ class VendorCar {
   int? mileageLimitPerDay;
   String? mileageUnit;
   double? depositRequired;
+  double? deliveryPrice;
   String? cancellationPolicy;
   VendorLocation? vendorLocation;
 
@@ -145,6 +148,8 @@ class VendorCar {
     required this.doors,
     required this.pricing,
     required this.currency,
+    required this.taxEnabled,
+    required this.taxPercentage,
     required this.rating,
     required this.totalReviews,
     required this.availabilityStatus,
@@ -155,6 +160,7 @@ class VendorCar {
     this.mileageLimitPerDay,
     this.mileageUnit,
     this.depositRequired,
+    this.deliveryPrice,
     this.cancellationPolicy,
     this.vendorLocation,
   });
@@ -178,6 +184,8 @@ class VendorCar {
         ? Pricing.fromJson(json["pricing"])
         : Pricing.empty(),
     currency: json["currency"] ?? 'USD',
+    taxEnabled: json["tax_enabled"] ?? false,
+    taxPercentage: (json["tax_percentage"] ?? 0).toDouble(),
     rating: (json["rating"] ?? 0).toDouble(),
     totalReviews: json["total_reviews"] ?? 0,
     availabilityStatus: json["availability_status"] ?? 'available',
@@ -193,6 +201,9 @@ class VendorCar {
     mileageUnit: json["mileage_unit"],
     depositRequired: json["deposit_required"] != null
         ? (json["deposit_required"]).toDouble()
+        : null,
+    deliveryPrice: json["delivery_price"] != null
+        ? (json["delivery_price"]).toDouble()
         : null,
     cancellationPolicy: json["cancellation_policy"],
     vendorLocation: json["vendor_location"] != null
@@ -217,6 +228,8 @@ class VendorCar {
     "doors": doors,
     "pricing": pricing.toJson(),
     "currency": currency,
+    "tax_enabled": taxEnabled,
+    "tax_percentage": taxPercentage,
     "rating": rating,
     "total_reviews": totalReviews,
     "availability_status": availabilityStatus,
@@ -227,6 +240,7 @@ class VendorCar {
     "mileage_limit_per_day": mileageLimitPerDay,
     "mileage_unit": mileageUnit,
     "deposit_required": depositRequired,
+    "delivery_price": deliveryPrice,
     "cancellation_policy": cancellationPolicy,
     "vendor_location": vendorLocation?.toJson(),
   };
