@@ -46,7 +46,16 @@ class AllVendorsCarCarousel extends GetView<AllVendorsDashboardController> {
                         } catch (e) {
                           // DashboardController may not be loaded yet
                         }
-                        Get.toNamed(Routes.bookingScreen);
+                        
+                        // Initialize booking controller with selected car
+                        try {
+                          final bookingController = Get.find<BookingController>();
+                          bookingController.initializeWithCar(car);
+                        } catch (e) {
+                          // BookingController not yet initialized
+                        }
+                        
+                        Get.toNamed(Routes.bookingScreen, arguments: {'car': car});
                       },
                       child: Container(
                         padding: EdgeInsets.all(
@@ -227,7 +236,16 @@ class AllVendorsCarCarousel extends GetView<AllVendorsDashboardController> {
                         } catch (e) {
                           // DashboardController may not be loaded yet
                         }
-                        Get.toNamed(Routes.bookingScreen);
+                        
+                        // Initialize booking controller with selected car
+                        try {
+                          final bookingController = Get.find<BookingController>();
+                          bookingController.initializeWithCar(car);
+                        } catch (e) {
+                          // BookingController not yet initialized
+                        }
+                        
+                        Get.toNamed(Routes.bookingScreen, arguments: {'car': car});
                       }
                     },
                   ),

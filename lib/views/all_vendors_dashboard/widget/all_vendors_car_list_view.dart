@@ -788,14 +788,16 @@ class AllVendorsCarListView extends GetView<AllVendorsDashboardController> {
 
   void _onCarTap(VendorCar car) {
     // Store selected car info for booking
+    controller.selectedCarId.value = car.id.toString();
+    
+    // Initialize booking controller with selected car data
     try {
-      final dashController = Get.find<DashboardController>();
-      dashController.selectedCarId.value = car.id.toString();
-      // Note: The vendor cars API may return a different structure
-      // You may need to adapt this based on your booking flow
+      final bookingController = Get.find<BookingController>();
+      bookingController.initializeWithCar(car);
     } catch (e) {
-      controller.selectedCarId.value = car.id.toString();
+      // BookingController not yet initialized, will initialize in booking screen
     }
-    Get.toNamed(Routes.bookingScreen);
+    
+    Get.toNamed(Routes.bookingScreen, arguments: {'car': car});
   }
 }

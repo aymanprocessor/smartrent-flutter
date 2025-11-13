@@ -61,10 +61,17 @@ class PreviewController extends GetxController {
   final List<PaymentGateway> paymentGatewayList = [];
   Rxn<Currency> selectedCurrency = Rxn<Currency>();
   final List<Currency> currencyList = [];
+  
+  // Store booking data from new pricing-based booking flow
+  Rxn<Map<String, dynamic>> bookingData = Rxn<Map<String, dynamic>>();
 
   @override
   void onInit() {
     super.onInit();
+    // Check if booking data was passed from booking screen
+    if (Get.arguments != null && Get.arguments is Map) {
+      bookingData.value = Get.arguments;
+    }
     getPreviewData();
   }
 
@@ -275,23 +282,21 @@ class PreviewController extends GetxController {
   final int? _selectedCarAreaId = _getSelectedCarAreaId();
 
     Map<String, dynamic> inputBody = {
-      'location': Get.find<BookingController>().locationController.text,
-      'destination': Get.find<BookingController>().destinationController.text,
-      'distance': Get.find<BookingController>().distanceController.text,
-      'message': Get.find<BookingController>().noteController.text,
-      'round_pickup_time':
-          Get.find<BookingController>().selectedRoundTime.value,
-      'round_pickup_date':
-          Get.find<BookingController>().selectedRoundDate.value,
-      'mobile': Get.find<BookingController>().mobileController.text,
-      'credentials': LocalStorage.email,
+      'location': bookingData.value?['delivery_location'] ?? Get.find<BookingController>().locationController.text,
+      'message': bookingData.value?['notes'] ?? Get.find<BookingController>().noteController.text,
+      'mobile': bookingData.value?['phone'] ?? Get.find<BookingController>().mobileController.text,
+      'credentials': bookingData.value?['email'] ?? LocalStorage.email,
       'car_slug': slug.value,
       'car_id': Id.value,
       'gateway_type': paymentTypes.value,
       'gateway_currency': alias.value,
       'payment': selectedMethodText,
       'token': dashboardController.carToken.value,
-      'fees': Get.find<BookingController>().totalFees.value.toString(),
+      'fees': (bookingData.value?['total'] ?? 0).toString(),
+      // New pricing fields
+      'quantity': bookingData.value?['quantity'],
+      'pricing_type': bookingData.value?['pricing_type'],
+      'delivery_required': bookingData.value?['delivery_required'] ?? false,
       // 'transaction_id': fees.value,
     };
     if (_selectedCarAreaId != null) inputBody['car_area'] = _selectedCarAreaId;
@@ -327,21 +332,19 @@ class PreviewController extends GetxController {
   final int? _selectedCarAreaId = _getSelectedCarAreaId();
 
   Map<String, dynamic> inputBody = {
-      'location': Get.find<BookingController>().locationController.text,
-      'destination': Get.find<BookingController>().destinationController.text,
-      'distance': Get.find<BookingController>().distanceController.text,
-      'message': Get.find<BookingController>().noteController.text,
-      'round_pickup_time':
-          Get.find<BookingController>().selectedRoundTime.value,
-      'round_pickup_date':
-          Get.find<BookingController>().selectedRoundDate.value,
-      'mobile': Get.find<BookingController>().mobileController.text,
-      'credentials': LocalStorage.email,
+      'location': bookingData.value?['delivery_location'] ?? Get.find<BookingController>().locationController.text,
+      'message': bookingData.value?['notes'] ?? Get.find<BookingController>().noteController.text,
+      'mobile': bookingData.value?['phone'] ?? Get.find<BookingController>().mobileController.text,
+      'credentials': bookingData.value?['email'] ?? LocalStorage.email,
       'car_slug': slug.value,
       'car_id': Id.value,
       'payment': selectedMethodText,
       'token': dashboardController.carToken.value,
-      'fees': Get.find<BookingController>().totalFees.value.toString(),
+      'fees': (bookingData.value?['total'] ?? 0).toString(),
+      // New pricing fields
+      'quantity': bookingData.value?['quantity'],
+      'pricing_type': bookingData.value?['pricing_type'],
+      'delivery_required': bookingData.value?['delivery_required'] ?? false,
     };
   if (_selectedCarAreaId != null) inputBody['car_area'] = _selectedCarAreaId;
     return RequestProcess().request<CommonSuccessModel>(
@@ -407,23 +410,17 @@ class PreviewController extends GetxController {
   final int? _selectedCarAreaId = _getSelectedCarAreaId();
 
   Map<String, String> inputBody = {
-      'location': Get.find<BookingController>().locationController.text,
-      'destination': Get.find<BookingController>().destinationController.text,
-      'distance': Get.find<BookingController>().distanceController.text,
-      'message': Get.find<BookingController>().noteController.text,
-      'round_pickup_time':
-          Get.find<BookingController>().selectedRoundTime.value,
-      'round_pickup_date':
-          Get.find<BookingController>().selectedRoundDate.value,
-      'mobile': Get.find<BookingController>().mobileController.text,
-      'credentials': LocalStorage.email,
+      'location': bookingData.value?['delivery_location'] ?? Get.find<BookingController>().locationController.text,
+      'message': bookingData.value?['notes'] ?? Get.find<BookingController>().noteController.text,
+      'mobile': bookingData.value?['phone'] ?? Get.find<BookingController>().mobileController.text,
+      'credentials': bookingData.value?['email'] ?? LocalStorage.email,
       'car_slug': slug.value,
       'car_id': Id.value,
       'gateway_type': paymentTypes.value,
       'gateway_currency': alias.value,
       'payment': selectedMethodText,
       'token': dashboardController.carToken.value,
-      'fees': Get.find<BookingController>().totalFees.value.toString(),
+      'fees': (bookingData.value?['total'] ?? 0).toString(),
     };
   if (_selectedCarAreaId != null) inputBody['car_area'] = _selectedCarAreaId.toString();
     final data = _manualInputModel.data.inputFields;
@@ -482,7 +479,7 @@ class PreviewController extends GetxController {
 
   void calculateAllCharges() {
     conversionAmount.value =
-        exRent.value * Get.find<BookingController>().totalFees.value;
+        exRent.value * (bookingData.value?['total'] ?? Get.find<BookingController>().total.value);
 
     // Calculate the percent charge based on the conversion amount
     percentCharge.value = percentCharge.value / 100 * conversionAmount.value;
@@ -552,7 +549,7 @@ class PreviewController extends GetxController {
     final cartId = 'BOOKING_${DateTime.now().millisecondsSinceEpoch}';
     final amount = totalPayable.value > 0 
           ? totalPayable.value 
-          : bookingController.totalFees.value;
+          : (bookingData.value?['total'] ?? bookingController.total.value);
     final int? _selectedCarAreaId = _getSelectedCarAreaId();
 
       // Create payment with PayTabs
@@ -569,8 +566,7 @@ class PreviewController extends GetxController {
         userDefined: {
           'car_id': Id.value,
           'car_slug': slug.value,
-          'location': bookingController.locationController.text,
-          'destination': bookingController.destinationController.text,
+          'location': bookingData.value?['delivery_location'] ?? bookingController.locationController.text,
           'fees': amount.toString(),
           if (_selectedCarAreaId != null) 'car_area': _selectedCarAreaId,
         },
@@ -622,24 +618,22 @@ class PreviewController extends GetxController {
     final int? _selectedCarAreaId = _getSelectedCarAreaId();
 
     Map<String, dynamic> inputBody = {
-      'location': Get.find<BookingController>().locationController.text,
-      'destination': Get.find<BookingController>().destinationController.text,
-      'distance': Get.find<BookingController>().distanceController.text,
-      'message': Get.find<BookingController>().noteController.text,
-      'round_pickup_time':
-          Get.find<BookingController>().selectedRoundTime.value,
-      'round_pickup_date':
-          Get.find<BookingController>().selectedRoundDate.value,
-      'mobile': Get.find<BookingController>().mobileController.text,
-      'credentials': LocalStorage.email,
+      'location': bookingData.value?['delivery_location'] ?? Get.find<BookingController>().locationController.text,
+      'message': bookingData.value?['notes'] ?? Get.find<BookingController>().noteController.text,
+      'mobile': bookingData.value?['phone'] ?? Get.find<BookingController>().mobileController.text,
+      'credentials': bookingData.value?['email'] ?? LocalStorage.email,
       'car_slug': slug.value,
       'car_id': Id.value,
       'gateway_type': 'paytabs',
       'gateway_currency': alias.value,
       'payment': selectedMethodText,
       'token': dashboardController.carToken.value,
-      'fees': Get.find<BookingController>().totalFees.value.toString(),
+      'fees': (bookingData.value?['total'] ?? 0).toString(),
       'transaction_ref': transactionRef,
+      // New pricing fields
+      'quantity': bookingData.value?['quantity'],
+      'pricing_type': bookingData.value?['pricing_type'],
+      'delivery_required': bookingData.value?['delivery_required'] ?? false,
     };
     if (_selectedCarAreaId != null) inputBody['car_area'] = _selectedCarAreaId;
 

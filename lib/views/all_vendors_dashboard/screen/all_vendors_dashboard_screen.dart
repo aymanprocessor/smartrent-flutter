@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carbo/routes/routes.dart';
+import 'package:carbo/views/booking/controller/booking_controller.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:dynamic_languages/dynamic_languages.dart';
 import 'package:flutter/material.dart';

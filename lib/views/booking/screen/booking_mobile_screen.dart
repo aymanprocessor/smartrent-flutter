@@ -17,8 +17,7 @@ class BookingMobileScreen extends GetView<BookingController> {
             disable: !controller.isFormValid.value,
             onPressed: () {
               if (controller.isFormValid.value) {
-                controller.calculateAllCharges();
-                Get.toNamed(Routes.previewScreen);
+                Get.toNamed(Routes.previewScreen, arguments: controller.getBookingData());
               }
             },
           ),

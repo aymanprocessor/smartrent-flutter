@@ -34,10 +34,6 @@ class PreviewSectionCard extends GetView<PreviewController> {
                 bookController.locationController.text,
               ),
               _cardSection(
-                Strings.destination,
-                bookController.destinationController.text,
-              ),
-              _cardSection(
                 Strings.PickUpdate,
                 Get.find<DashboardController>().selectedDate.value,
               ),
@@ -46,35 +42,26 @@ class PreviewSectionCard extends GetView<PreviewController> {
                 Get.find<DashboardController>().selectedTime.value,
               ),
               _cardSection(
-                Strings.roundTripDate,
-                bookController.selectedRoundDate.value.isEmpty
-                    ? 'N/A'
-                    : bookController.selectedRoundDate.value,
+                'Quantity',
+                bookController.quantityController.text,
               ),
               _cardSection(
-                Strings.roundTripTime,
-                bookController.selectedRoundTime.value.isEmpty
-                    ? 'N/A'
-                    : bookController.selectedRoundTime.value,
-              ),
-              // _cardSection(Strings.carModel, controller.carModel.value),
-              // _cardSection(Strings.carNumber, controller.carNumber.value),
-              _cardSection(
-                Strings.distance,
-                '${bookController.distanceController.text} KM',
-              ),
-              _cardSection(
-                Strings.rate,
-                '${double.parse(Get.find<BookingController>().Fees.value).toStringAsFixed(0)}/KM USD',
+                'Price per ${bookController.pricingUnit.value}',
+                '${bookController.selectedPricing.value?.price ?? 0} ${bookController.selectedPricing.value?.currency ?? 'USD'}',
               ),
               _cardSection(
                 Strings.totalRent,
-                '${Get.find<BookingController>().totalFees.value.toStringAsFixed(BasicServices.precision.value)} USD',
+                '${bookController.subtotal.value.toStringAsFixed(BasicServices.precision.value)} ${bookController.selectedPricing.value?.currency ?? 'USD'}',
               ),
+              if (bookController.isDeliver.value)
+                _cardSection(
+                  'Delivery Charge',
+                  '${bookController.deliveryCharge.value.toStringAsFixed(BasicServices.precision.value)} ${bookController.selectedPricing.value?.currency ?? 'USD'}',
+                ),
               Obx(
                 () => _cardSection(
                   Strings.totalPayable,
-                  '${controller.totalPayable.value.toStringAsFixed(BasicServices.precision.value)} USD',
+                  '${bookController.total.value.toStringAsFixed(BasicServices.precision.value)} ${bookController.selectedPricing.value?.currency ?? 'USD'}',
                 ),
               ),
             ],

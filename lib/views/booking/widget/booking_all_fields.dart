@@ -5,56 +5,34 @@ class BookingAllFields extends GetView<BookingController> {
 
   @override
   Widget build(BuildContext context) {
-    return Obx(
-      () => Column(
-        crossAxisAlignment: crossStart,
-        children: [
-          _othersInputField(),
-          if (controller.isChecked.value == true) ...[
-            Sizes.height.v5,
-            _roundTripField(context),
-          ],
-          Sizes.height.betweenInputBox,
-          PrimaryInputWidget(
-            skipEnterText: true,
-            optionalText: Strings.Optional,
-            label: Strings.note,
-            maxLines: 4,
-            controller: controller.noteController,
-            hintText: Strings.writeHere,
-            textInputType: TextInputType.name,
-            showBorderSide: true,
-          ),
-        ],
-      ),
-    );
-  }
-
-  _roundTripField(BuildContext context) {
-    return Row(
+    return Column(
+      crossAxisAlignment: crossStart,
       children: [
-        Expanded(
-          child: CustomDatePicker(
-            showBorder: true,
-            label: Strings.PickUpdate,
-            selectedDate: controller.selectedRoundDate,
-          ),
-        ),
-        Sizes.width.v10,
-        Expanded(
-          child: CustomTimePicker(
-            showBorder: true,
-            label: Strings.PickUpTime,
-            selectedTime: controller.selectedRoundTime,
-          ),
+        _othersInputField(),
+        Sizes.height.betweenInputBox,
+        _deliverySection(),
+        Sizes.height.betweenInputBox,
+        _pricingInfoSection(),
+        Sizes.height.betweenInputBox,
+        PrimaryInputWidget(
+          skipEnterText: true,
+          optionalText: Strings.Optional,
+          label: Strings.note,
+          maxLines: 4,
+          controller: controller.noteController,
+          hintText: Strings.writeHere,
+          textInputType: TextInputType.name,
+          showBorderSide: true,
         ),
       ],
     );
   }
 
+  /// Main input fields: Email, Phone, Quantity (Days or Distance)
   _othersInputField() {
     return Column(
       children: [
+        // Email field (read-only, from profile)
         PrimaryInputWidget(
           controller: controller.emailController,
           label: Strings.email,
@@ -64,6 +42,8 @@ class BookingAllFields extends GetView<BookingController> {
           showBorderSide: true,
         ),
         Sizes.height.betweenInputBox,
+        
+        // Phone field (from profile)
         PrimaryInputWidget(
           controller: controller.mobileController,
           label: Strings.Phone,
@@ -72,31 +52,25 @@ class BookingAllFields extends GetView<BookingController> {
           showBorderSide: true,
         ),
         Sizes.height.betweenInputBox,
-        Row(
-          children: [
-            Expanded(
-              child: PrimaryInputWidget(
-                textInputType: TextInputType.number,
-                controller: controller.distanceController,
-                label: Strings.distance,
-                hintText: Strings.distance,
-                showBorderSide: true,
-              ),
-            ),
-            Sizes.width.v10,
-            Expanded(
-              child: PrimaryInputWidget(
-                controller: controller.destinationController,
-                label: Strings.destination,
-                hintText: Strings.destination,
-                showBorderSide: true,
-              ),
-            ),
-          ],
+        
+        // Dynamic Quantity field (Days or Distance based on pricing type)
+        Obx(
+          () => PrimaryInputWidget(
+            textInputType: TextInputType.number,
+            controller: controller.quantityController,
+            label: controller.getQuantityLabel(),
+            hintText: controller.getQuantityHint(),
+            showBorderSide: true,
+          ),
         ),
+      ],
+    );
+  }
 
-        Sizes.height.betweenInputBox,
-        // Deliver toggle: when true, pickup location is shown and required
+  /// Delivery Section: Checkbox and Location Input
+  _deliverySection() {
+    return Column(
+      children: [
         Obx(
           () => Row(
             children: [
@@ -105,13 +79,12 @@ class BookingAllFields extends GetView<BookingController> {
                 onChanged: (v) => controller.isDeliver.value = v ?? false,
               ),
               const SizedBox(width: 8),
-              Text('توصيل السيارة'),
+              Text(DynamicLanguage.isLoading ? '' : DynamicLanguage.key('توصيل السيارة')),
             ],
           ),
         ),
-
-  Sizes.height.v5,
-
+        Sizes.height.v5,
+        
         // Show pickup location only when deliver is enabled
         Obx(
           () => controller.isDeliver.value
@@ -123,8 +96,110 @@ class BookingAllFields extends GetView<BookingController> {
                 )
               : const SizedBox.shrink(),
         ),
-        RoundTripCheck(),
       ],
     );
   }
+
+  /// Pricing Summary Section
+  _pricingInfoSection() {
+    return Obx(
+      () => Container(
+        padding: EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey.shade300),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Price per unit
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  DynamicLanguage.isLoading
+                      ? ''
+                      : DynamicLanguage.key('السعر'),
+                  style: TextStyle(fontSize: 14),
+                ),
+                Text(
+                  controller.getPriceDisplayText(),
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+            Sizes.height.v10,
+            
+            // Subtotal
+            if (controller.quantityController.text.isNotEmpty)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    DynamicLanguage.isLoading
+                        ? ''
+                        : DynamicLanguage.key('المجموع الفرعي'),
+                    style: TextStyle(fontSize: 14),
+                  ),
+                  Text(
+                    '${controller.subtotal.value.toStringAsFixed(2)} ${controller.selectedPricing.value?.currency ?? 'SAR'}',
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+            
+            // Delivery Charge (if enabled)
+            if (controller.isDeliver.value && controller.deliveryCharge.value > 0)
+              Padding(
+                padding: EdgeInsets.only(top: 8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      DynamicLanguage.isLoading
+                          ? ''
+                          : DynamicLanguage.key('رسم التوصيل'),
+                      style: TextStyle(fontSize: 14),
+                    ),
+                    Text(
+                      '${controller.deliveryCharge.value.toStringAsFixed(2)} ${controller.selectedPricing.value?.currency ?? 'SAR'}',
+                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+              ),
+            
+            // Total
+            if (controller.total.value > 0)
+              Padding(
+                padding: EdgeInsets.only(top: 8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      DynamicLanguage.isLoading
+                          ? ''
+                          : DynamicLanguage.key('الإجمالي'),
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      '${controller.total.value.toStringAsFixed(2)} ${controller.selectedPricing.value?.currency ?? 'SAR'}',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.green,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
 }
+
