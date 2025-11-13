@@ -217,7 +217,7 @@ class _PrimaryInputWidgetState extends State<PrimaryInputWidget> {
                   ),
                   color: Color(0xfff1D1D1D),
                 ),
-                if (widget.optionalText != '')
+                if (widget.optionalText != '' && widget.optionalText != null)
                   Row(
                     children: [
                       Sizes.width.v5,

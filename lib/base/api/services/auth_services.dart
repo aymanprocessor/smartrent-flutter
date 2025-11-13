@@ -56,6 +56,7 @@ class AuthServices {
           temporaryToken: data.authorization.token,
           isEmailVerified: data.userInfo.emailVerified == 1,
           email: data.userInfo.email,
+          number: data.userInfo.fullMobile, // Save the full phone number from API
           kycStatus: data.userInfo.kycVerified,
         );
         // OTP verification removed; always go to dashboard
@@ -312,6 +313,7 @@ class AuthServices {
           temporaryToken: data.authorization.token,
           isEmailVerified: data.userInfo.emailVerified == 1,
           email: data.userInfo.email,
+          number: mobileCode + mobile, // Save the full phone number with country code
           kycStatus: data.userInfo.kycVerified,
         );
         // Navigate to dashboard after successful OTP login

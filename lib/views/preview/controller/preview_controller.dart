@@ -71,6 +71,37 @@ class PreviewController extends GetxController {
     // Check if booking data was passed from booking screen
     if (Get.arguments != null && Get.arguments is Map) {
       bookingData.value = Get.arguments;
+      // Initialize totalPayable from booking data
+      if (bookingData.value != null && bookingData.value!.containsKey('total')) {
+        totalPayable.value = (bookingData.value!['total'] ?? 0).toDouble();
+        log.i('Initialized totalPayable from bookingData: ${totalPayable.value}');
+      }
+      // Initialize car ID from booking data if available
+      if (bookingData.value != null) {
+        final carId = bookingData.value!['car_id'] ?? bookingData.value!['id'];
+        if (carId != null) {
+          Id.value = carId.toString();
+          log.i('Initialized car ID from bookingData: ${Id.value}');
+        }
+      }
+    } else {
+      // Fallback: retrieve booking data from BookingController if not passed via Get.arguments
+      try {
+        final bookingController = Get.find<BookingController>();
+        bookingData.value = bookingController.getBookingData();
+        totalPayable.value = (bookingData.value?['total'] ?? 0).toDouble();
+        
+        // Extract car ID from booking data
+        final carId = bookingData.value?['car_id'] ?? bookingData.value?['id'];
+        if (carId != null) {
+          Id.value = carId.toString();
+          log.i('Retrieved car ID from BookingController: ${Id.value}');
+        }
+        
+        log.i('Retrieved bookingData from BookingController: ${totalPayable.value}');
+      } catch (e) {
+        log.w('Could not retrieve booking data from BookingController: $e');
+      }
     }
     // Set online payment as default (method = 1)
     selectedMethod.value = 1;
@@ -80,7 +111,7 @@ class PreviewController extends GetxController {
   var selectedMethod = RxInt(1); // Default to online payment
 
   var paymentType = Rx<PaymentType>(
-    PaymentType(onlinePayment: "online-payment", cash: 'cash'),
+    PaymentType(onlinePayment: "paytabs", cash: 'cash'),
   );
 
   String get selectedMethodText {
@@ -94,13 +125,42 @@ class PreviewController extends GetxController {
   }
 
   void handlePaymentProcess() {
+    // DEBUG: Log the current state
+    log.i('=== CONFIRM BOOKING CLICKED ===');
+    log.i('alias.value: "${alias.value}"');
+    log.i('paymentTypes.value: "${paymentTypes.value}"');
+    log.i('Id.value: "${Id.value}"');
+    log.i('bookingData.value: ${bookingData.value}');
+    log.i('Car ID: ${Id.value}');
+    log.i('selectPaymentGateway.value: ${selectPaymentGateway.value}');
+    log.i('selectedCurrency.value: ${selectedCurrency.value}');
+    log.i('================================');
+    
+    // Check if car ID is initialized or selected
+    if (Id.value.isEmpty || Id.value == '0' || Id.value == 'null') {
+      // Defer snackbar to be safe
+      Future.delayed(Duration.zero, () {
+        Get.snackbar(
+          'Error',
+          'No car selected. Please select a car before booking.',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      });
+      log.e('ERROR: No car selected - Id: "${Id.value}"');
+      return;
+    }
+    
     if (alias.value.contains('manual')) {
+      log.i('Processing manual payment');
       paymentManualInsert();
     } else if (alias.value.contains('paytabs') || 
                paymentTypes.value.contains('paytabs')) {
       // Handle PayTabs payment
+      log.i('Processing PayTabs payment');
       processPayTabsPayment();
     } else {
+      // Fallback to auto booking
+      log.i('Processing auto booking (fallback)');
       bookingProcessAuto();
     }
   }
@@ -118,11 +178,14 @@ class PreviewController extends GetxController {
   Future<BookingPreviewModel?> getPreviewData() async {
     // Validate that car ID is available before requesting
     if (dashboardController.selectedCarId.value.isEmpty) {
-      Get.snackbar(
-        'Error',
-        'No car selected. Please select a car first.',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      // Defer snackbar to after build is complete
+      Future.delayed(Duration.zero, () {
+        Get.snackbar(
+          'Error',
+          'No car selected. Please select a car first.',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      });
       return null;
     }
 
@@ -147,7 +210,7 @@ class PreviewController extends GetxController {
   log.i('Full car data: ${_bookingPreviewModel.data.car.toJson()}');
   log.i('========================');
         
-        _getPreviewALlData();
+        // IMPORTANT: Populate payment gateways BEFORE calling _getPreviewALlData()
         // Clear existing list before adding new gateways to prevent duplicates
         paymentGatewayList.clear();
         _bookingPreviewModel.data.paymentGateways.forEach((v) {
@@ -163,6 +226,13 @@ class PreviewController extends GetxController {
             ),
           );
         });
+        log.i('Payment gateways populated: ${paymentGatewayList.length} gateways');
+        for (final g in paymentGatewayList) {
+          log.i('  - Gateway: ${g.name} (${g.type})');
+        }
+        
+        // Now call _getPreviewALlData() AFTER gateways are populated
+        _getPreviewALlData();
       },
     );
 
@@ -171,6 +241,7 @@ class PreviewController extends GetxController {
     // immediate booking failure when preview API is temporarily returning
     // malformed JSON (see logs). It's a best-effort fallback.
     if (result == null) {
+      log.e('🚨 getPreviewData API FAILED! Using local fallback...');
       try {
         final selectedId = dashboardController.selectedCarId.value;
         final localCar = dashboardController.cars.firstWhere(
@@ -183,12 +254,59 @@ class PreviewController extends GetxController {
         carModel.value = localCar.carModel;
         // Local model doesn't contain carNumber in all responses — leave empty
         carNumber.value = '';
+        
+        log.i('✓ Loaded fallback car data:');
+        log.i('  slug: ${slug.value}');
+        log.i('  id: ${Id.value}');
+        log.i('  carModel: ${carModel.value}');
 
-        Get.snackbar(
-          'Notice',
-          'Preview data unavailable from server — using cached car data.' + (kDebugMode ? '\n(Dev: raw response logged)' : ''),
-          snackPosition: SnackPosition.BOTTOM,
+        // Set default payment gateway (PayTabs) since API failed
+        log.i('Setting default payment gateway (PayTabs)...');
+        PaymentGateway paytabsDefault = PaymentGateway(
+          id: 1,
+          type: 'paytabs',
+          name: 'PayTabs',
+          crypto: 0,
+          desc: 'PayTabs Payment Gateway',
+          status: 1,
+          currencies: [
+            Currency(
+              id: 1,
+              paymentGatewayId: 1,
+              name: 'Saudi Riyal',
+              alias: 'paytabs_sa',
+              currencyCode: 'SAR',
+              currencySymbol: 'ر.س',
+              image: '',
+              rate: 1.0,
+              minLimit: 0,
+              maxLimit: 999999,
+              fixedCharge: 0,
+              percentCharge: 0,
+              createdAt: DateTime.now(),
+              updatedAt: DateTime.now(),
+            ),
+          ],
         );
+        
+        selectPaymentGateway.value = paytabsDefault;
+        paymentTypes.value = 'paytabs';
+        selectedCurrency.value = paytabsDefault.currencies.first;
+        alias.value = paytabsDefault.currencies.first.alias;
+        currencyName.value = paytabsDefault.currencies.first.name;
+        
+        log.i('✓ Default PayTabs gateway set:');
+        log.i('  alias: ${alias.value}');
+        log.i('  currency: ${currencyName.value}');
+
+        // Defer snackbar to after build is complete
+        Future.delayed(Duration.zero, () {
+          Get.snackbar(
+            'Notice',
+            'Preview data unavailable from server — using cached car data.' + (kDebugMode ? '\n(Dev: raw response logged)' : ''),
+            snackPosition: SnackPosition.BOTTOM,
+          );
+        });
       } catch (e) {
   // No local fallback available — bubble up nothing and allow UI to show
   // validation when user tries to proceed with booking.
@@ -219,6 +337,85 @@ class PreviewController extends GetxController {
       log.e('WARNING: Car ID is empty/null, using fallback from dashboardController');
       Id.value = dashboardController.selectedCarId.value;
       log.i('Fallback Id.value: "${Id.value}"');
+    }
+    
+    // Auto-select PayTabs payment gateway
+    log.i('Looking for PayTabs gateway in ${paymentGatewayList.length} gateways...');
+    PaymentGateway? paytabsGateway;
+    for (final g in paymentGatewayList) {
+      log.i('Checking gateway: ${g.name} (type: ${g.type})');
+      if (g.type.toLowerCase().contains('paytabs')) {
+        paytabsGateway = g;
+        log.i('✓ Found PayTabs gateway!');
+        break;
+      }
+    }
+    
+    if (paytabsGateway != null) {
+      selectPaymentGateway.value = paytabsGateway;
+      paymentTypes.value = paytabsGateway.type;
+      log.i('PayTabs gateway selected - Type: ${paymentTypes.value}');
+      
+      // Populate currencies from selected gateway
+      log.i('Populating currencies from PayTabs gateway...');
+      currencyList.clear();
+      paytabsGateway.currencies.forEach((v) {
+        currencyList.add(
+          Currency(
+            id: v.id,
+            name: v.name,
+            updatedAt: v.updatedAt,
+            createdAt: v.createdAt,
+            image: v.image,
+            alias: v.alias,
+            currencyCode: v.currencyCode,
+            currencySymbol: v.currencySymbol,
+            fixedCharge: v.fixedCharge,
+            maxLimit: v.maxLimit,
+            minLimit: v.minLimit,
+            paymentGatewayId: v.paymentGatewayId,
+            percentCharge: v.percentCharge,
+            rate: v.rate,
+          ),
+        );
+      });
+      log.i('Currencies populated: ${currencyList.length} currencies');
+      
+      // Auto-select first currency (preferably SAR)
+      Currency? selectedCurr;
+      for (final c in currencyList) {
+        if (c.currencyCode == 'SAR') {
+          selectedCurr = c;
+          log.i('✓ Found SAR currency');
+          break;
+        }
+      }
+      
+      if (selectedCurr == null && currencyList.isNotEmpty) {
+        selectedCurr = currencyList.first;
+        log.i('SAR not found, using first currency: ${selectedCurr.name}');
+      }
+      
+      if (selectedCurr != null) {
+        selectedCurrency.value = selectedCurr;
+        alias.value = selectedCurr.alias;
+        currencyName.value = selectedCurr.name;
+        log.i('✓ Currency selected: ${currencyName.value} (alias: ${alias.value})');
+      } else {
+        log.e('ERROR: No currency found for PayTabs');
+      }
+      
+      log.i('PayTabs gateway auto-selected with currency: ${currencyName.value}');
+    } else {
+      log.e('ERROR: PayTabs gateway not found in payment gateways list!');
+      log.e('Available gateways: ${paymentGatewayList.map((g) => g.name).toList()}');
+      
+      // Fallback: Try to use first gateway if PayTabs not found
+      if (paymentGatewayList.isNotEmpty) {
+        log.w('Using fallback: ${paymentGatewayList.first.name}');
+        selectPaymentGateway.value = paymentGatewayList.first;
+        paymentTypes.value = paymentGatewayList.first.type;
+      }
     }
     
     log.i('===========================');
@@ -267,11 +464,11 @@ class PreviewController extends GetxController {
   BookingConfirmModel get bookingConfirmModel => _bookingConfirmModel;
 
   Future<BookingConfirmModel?> bookingProcessAuto() async {
-    // Validate car identifiers before sending booking request
-    if (slug.value.isEmpty || Id.value.isEmpty) {
+    // Validate car ID is selected
+    if (Id.value.isEmpty || Id.value == '0' || Id.value == 'null') {
       Get.snackbar(
         'Error',
-        'Car information is missing. Please try again.',
+        'No car selected. Please select a car before booking.',
         snackPosition: SnackPosition.BOTTOM,
       );
       return null;
@@ -279,18 +476,31 @@ class PreviewController extends GetxController {
 
   // include car_area when possible to satisfy backend validation
   final int? _selectedCarAreaId = _getSelectedCarAreaId();
+  
+  // Get token from bookingData (from preview API) or LocalStorage as fallback
+  final String bookingToken = bookingData.value?['token'] ?? 
+                               (bookingData.value?['booking_token'] ?? 
+                               LocalStorage.token);
+  
+  if (bookingToken.isEmpty) {
+    Get.snackbar(
+      'Error',
+      'Booking session expired. Please go back and try again.',
+      snackPosition: SnackPosition.BOTTOM,
+    );
+    return null;
+  }
 
     Map<String, dynamic> inputBody = {
       'location': bookingData.value?['delivery_location'] ?? Get.find<BookingController>().locationController.text,
       'message': bookingData.value?['notes'] ?? Get.find<BookingController>().noteController.text,
       'mobile': bookingData.value?['phone'] ?? Get.find<BookingController>().mobileController.text,
       'credentials': bookingData.value?['email'] ?? LocalStorage.email,
-      'car_slug': slug.value,
+      'car_slug': slug.value.isNotEmpty ? slug.value : 'car-${Id.value}', // Required by API
       'car_id': Id.value,
-      'gateway_type': paymentTypes.value,
-      'gateway_currency': alias.value,
+      'gateway_currency': 'SAR',
       'payment': selectedMethodText,
-      'token': dashboardController.carToken.value,
+      'token': bookingToken,
       'fees': (bookingData.value?['total'] ?? 0).toString(),
       // New pricing fields
       'quantity': bookingData.value?['quantity'],
@@ -403,29 +613,42 @@ class PreviewController extends GetxController {
   CommonSuccessModel get commonSuccessModel => _commonSuccessModel;
 
   Future<CommonSuccessModel?> bookingManualProcess() async {
-    // Validate car identifiers before sending booking request
-    if (slug.value.isEmpty || Id.value.isEmpty) {
+    // Validate car ID is selected
+    if (Id.value.isEmpty || Id.value == '0' || Id.value == 'null') {
       Get.snackbar(
         'Error',
-        'Car information is missing. Please try again.',
+        'No car selected. Please select a car before booking.',
         snackPosition: SnackPosition.BOTTOM,
       );
       return null;
     }
 
   final int? _selectedCarAreaId = _getSelectedCarAreaId();
+  
+  // Get token from bookingData (from preview API) or LocalStorage as fallback
+  final String bookingToken = bookingData.value?['token'] ?? 
+                               (bookingData.value?['booking_token'] ?? 
+                               LocalStorage.token);
+  
+  if (bookingToken.isEmpty) {
+    Get.snackbar(
+      'Error',
+      'Booking session expired. Please go back and try again.',
+      snackPosition: SnackPosition.BOTTOM,
+    );
+    return null;
+  }
 
   Map<String, String> inputBody = {
       'location': bookingData.value?['delivery_location'] ?? Get.find<BookingController>().locationController.text,
       'message': bookingData.value?['notes'] ?? Get.find<BookingController>().noteController.text,
       'mobile': bookingData.value?['phone'] ?? Get.find<BookingController>().mobileController.text,
       'credentials': bookingData.value?['email'] ?? LocalStorage.email,
-      'car_slug': slug.value,
+      'car_slug': slug.value.isNotEmpty ? slug.value : 'car-${Id.value}', // Required by API
       'car_id': Id.value,
-      'gateway_type': paymentTypes.value,
-      'gateway_currency': alias.value,
+      'gateway_currency': 'SAR',
       'payment': selectedMethodText,
-      'token': dashboardController.carToken.value,
+      'token': bookingToken,
       'fees': (bookingData.value?['total'] ?? 0).toString(),
       // New pricing fields
       'quantity': (bookingData.value?['quantity'] ?? 0).toString(),
@@ -547,8 +770,18 @@ class PreviewController extends GetxController {
 
   /// Process payment through PayTabs
   Future<void> processPayTabsPayment() async {
+    // Validate booking data exists
+    if (bookingData.value == null || bookingData.value!.isEmpty) {
+      Get.snackbar(
+        'Error',
+        'Booking data is missing. Please complete your booking again.',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
+
     // Validate car identifiers before sending booking request
-    if (slug.value.isEmpty || Id.value.isEmpty) {
+    if (Id.value.isEmpty) {
       Get.snackbar(
         'Error',
         'Car information is missing. Please try again.',
@@ -557,7 +790,18 @@ class PreviewController extends GetxController {
       return;
     }
 
+    // Validate payment amount
+    if (totalPayable.value <= 0) {
+      Get.snackbar(
+        'Error',
+        'Invalid payment amount. Please review your booking.',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
+
     _isPayTabsLoading.value = true;
+    log.i('Processing PayTabs payment - Amount: ${totalPayable.value}, Booking: ${bookingData.value}');
 
     try {
       // Prepare booking details for PayTabs
@@ -581,7 +825,6 @@ class PreviewController extends GetxController {
         language: 'en',
         userDefined: {
           'car_id': Id.value,
-          'car_slug': slug.value,
           'location': bookingData.value?['delivery_location'] ?? bookingController.locationController.text,
           'fees': amount.toString(),
           'tax_amount': bookingData.value?['tax_amount'] ?? 0,
@@ -597,6 +840,8 @@ class PreviewController extends GetxController {
         final data = paymentResult['data'];
         final paymentUrl = data['payment_url'];
         paytabsTransactionRef.value = data['transaction_ref'];
+
+        log.i('PayTabs payment created successfully - Transaction Ref: ${paytabsTransactionRef.value}');
 
         // Navigate to PayTabs payment screen
         Get.to(() => PayTabsPaymentScreen(
@@ -623,8 +868,19 @@ class PreviewController extends GetxController {
 
   /// Handle successful PayTabs payment
   void handlePaymentSuccess(String transactionRef) async {
+    // Validate booking data exists
+    if (bookingData.value == null || bookingData.value!.isEmpty) {
+      Get.snackbar(
+        'Error',
+        'Booking data is missing. Cannot complete booking.',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      log.e('handlePaymentSuccess: bookingData is null or empty');
+      return;
+    }
+
     // Validate car identifiers
-    if (slug.value.isEmpty || Id.value.isEmpty) {
+    if (Id.value.isEmpty) {
       Get.snackbar(
         'Error',
         'Car information is missing. Please try again.',
@@ -633,20 +889,37 @@ class PreviewController extends GetxController {
       return;
     }
 
+    log.i('Processing payment success for transaction: $transactionRef');
+    log.i('Booking data: ${bookingData.value}');
+    log.i('Car ID: ${Id.value}');
+
     // Submit booking with payment confirmation
     final int? _selectedCarAreaId = _getSelectedCarAreaId();
+    
+    // Get token from bookingData (from preview API) or LocalStorage as fallback
+    final String bookingToken = bookingData.value?['token'] ?? 
+                                 (bookingData.value?['booking_token'] ?? 
+                                 LocalStorage.token);
+    
+    if (bookingToken.isEmpty) {
+      Get.snackbar(
+        'Error',
+        'Booking session expired. Please go back and try again.',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
 
     Map<String, dynamic> inputBody = {
       'location': bookingData.value?['delivery_location'] ?? Get.find<BookingController>().locationController.text,
       'message': bookingData.value?['notes'] ?? Get.find<BookingController>().noteController.text,
       'mobile': bookingData.value?['phone'] ?? Get.find<BookingController>().mobileController.text,
       'credentials': bookingData.value?['email'] ?? LocalStorage.email,
-      'car_slug': slug.value,
+      'car_slug': slug.value.isNotEmpty ? slug.value : 'car-${Id.value}', // Required by API
       'car_id': Id.value,
-      'gateway_type': 'paytabs',
-      'gateway_currency': alias.value,
+      'gateway_currency': 'SAR',
       'payment': selectedMethodText,
-      'token': dashboardController.carToken.value,
+      'token': bookingToken,
       'fees': (bookingData.value?['total'] ?? 0).toString(),
       'transaction_ref': transactionRef,
       // New pricing fields
@@ -662,6 +935,8 @@ class PreviewController extends GetxController {
     };
     if (_selectedCarAreaId != null) inputBody['car_area'] = _selectedCarAreaId;
 
+    log.i('Submitting booking confirmation with body: $inputBody');
+
     RequestProcess().request<CommonSuccessModel>(
       fromJson: CommonSuccessModel.fromJson,
       apiEndpoint: ApiEndpoint.bookingConfirm,
@@ -669,6 +944,7 @@ class PreviewController extends GetxController {
       method: HttpMethod.POST,
       body: inputBody,
       onSuccess: (value) {
+        log.i('Booking confirmation successful');
         _commonSuccessModel = value!;
         _confirmation(_commonSuccessModel);
       },

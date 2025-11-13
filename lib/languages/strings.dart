@@ -201,5 +201,19 @@ class Strings {
   static const String refreshing = "appLRefreshing";
   static const String allCars = "appLAllCars";
   static const String filterBy = "appLFilterBy";
-  static const String day = "appLDay";
+  static const String rentalDays = "appLRentalDays";
+  
+  // Booking pricing related strings
+  static const String pricePerDay = "appLPricePerDay";
+  static const String pricePerKm = "appLPricePerKm";
+  static const String deliveryCharge = "appLDeliveryCharge";
+  static const String deliveryCar = "appLDeliveryCar";
+  static const String tax = "appLTax";
+  static const String total = "appLTotal";
+  static const String quantity = "appLQuantity";
+  
+  // Quantity input related strings
+  static const String enterDays = "appLEnterDays";
+  static const String enterDistance = "appLEnterDistance";
+  static const String enterQuantity = "appLEnterQuantity";
 }

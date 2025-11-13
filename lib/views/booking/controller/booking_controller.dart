@@ -1,5 +1,6 @@
 import 'package:carbo/base/utils/local_storage.dart';
 import 'package:carbo/views/all_vendors_dashboard/model/vendor_cars_model.dart';
+import 'package:carbo/languages/strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -113,11 +114,11 @@ class BookingController extends GetxController {
   String getQuantityLabel() {
     switch (pricingType.value) {
       case 'per_day':
-        return 'عدد الأيام'; // Number of Days
+        return Strings.rentalDays; // Number of rental days
       case 'per_km':
-        return 'المسافة'; // Distance
+        return Strings.distance; // Distance
       default:
-        return 'الكمية'; // Quantity
+        return Strings.quantity; // Quantity
     }
   }
 
@@ -125,11 +126,11 @@ class BookingController extends GetxController {
   String getQuantityHint() {
     switch (pricingType.value) {
       case 'per_day':
-        return 'أدخل عدد الأيام'; // Enter number of days
+        return Strings.enterDays;
       case 'per_km':
-        return 'أدخل المسافة بـ ${pricingUnit.value}'; // Enter distance in km/miles
+        return Strings.enterDistance;
       default:
-        return 'أدخل الكمية'; // Enter quantity
+        return Strings.enterQuantity;
     }
   }
 
@@ -177,6 +178,7 @@ class BookingController extends GetxController {
       'tax_percentage': selectedCar.value?.taxPercentage ?? 0,
       'total': total.value,
       'car_id': selectedCar.value?.id,
+      'id': selectedCar.value?.id,  // Added: explicit id field for preview screen
       'car_name': '${selectedCar.value?.make} ${selectedCar.value?.model}',
       'currency': selectedCar.value?.currency ?? 'SAR',
     };

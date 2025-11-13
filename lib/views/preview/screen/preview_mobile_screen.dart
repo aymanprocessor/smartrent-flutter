@@ -39,7 +39,7 @@ class PreviewMobileScreen extends GetView<PreviewController> {
         padding: EdgeInsets.symmetric(
           horizontal: Dimensions.defaultHorizontalSize,
         ),
-        children: [PaymentSelectionWidget(), PreviewSectionCard()],
+        children: [PreviewSectionCard()],
       ),
     );
   }

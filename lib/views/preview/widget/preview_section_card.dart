@@ -29,26 +29,34 @@ class PreviewSectionCard extends GetView<PreviewController> {
           ),
           child: Column(
             children: [
+              if (bookController.isDeliver.value)
+                _cardSection(
+                  Strings.PickUpLocation,
+                  bookController.locationController.text,
+                ),
+              if (bookController.isDeliver.value)
+                _cardSection(
+                  Strings.PickUpdate,
+                  Get.find<DashboardController>().selectedDate.value,
+                ),
+              if (bookController.isDeliver.value)
+                _cardSection(
+                  Strings.PickUpTime,
+                  Get.find<DashboardController>().selectedTime.value,
+                ),
               _cardSection(
-                Strings.PickUpLocation,
-                bookController.locationController.text,
-              ),
-              _cardSection(
-                Strings.PickUpdate,
-                Get.find<DashboardController>().selectedDate.value,
-              ),
-              _cardSection(
-                Strings.PickUpTime,
-                Get.find<DashboardController>().selectedTime.value,
-              ),
-              _cardSection(
-                'الكمية',
+                Strings.quantity,
                 bookController.quantityController.text,
               ),
+              if (bookController.isDeliver.value)
+                _cardSection(
+                  Strings.deliveryCar,
+                  'Yes',
+                ),
               _cardSection(
                 bookController.pricingType.value == 'per_day' 
-                  ? 'السعر في اليوم' 
-                  : 'السعر في الكيلومتر',
+                  ? Strings.pricePerDay
+                  : Strings.pricePerKm,
                 '${bookController.selectedPricing.value?.price ?? 0} ${bookController.selectedPricing.value?.currency ?? 'USD'}',
               ),
               _cardSection(
@@ -57,14 +65,14 @@ class PreviewSectionCard extends GetView<PreviewController> {
               ),
               if (bookController.isDeliver.value)
                 _cardSection(
-                  'رسوم التوصيل',
+                  Strings.deliveryCharge,
                   '${bookController.deliveryCharge.value.toStringAsFixed(BasicServices.precision.value)} ${bookController.selectedPricing.value?.currency ?? 'USD'}',
                 ),
               if (bookController.selectedCar.value != null &&
                   bookController.selectedCar.value!.taxEnabled &&
                   bookController.taxAmount.value > 0)
                 _cardSection(
-                  'الضريبة',
+                  Strings.tax,
                   '${bookController.taxAmount.value.toStringAsFixed(BasicServices.precision.value)} ${bookController.selectedPricing.value?.currency ?? 'USD'}',
                 ),
               Obx(

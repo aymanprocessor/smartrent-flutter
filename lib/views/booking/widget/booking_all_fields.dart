@@ -28,42 +28,16 @@ class BookingAllFields extends GetView<BookingController> {
     );
   }
 
-  /// Main input fields: Email, Phone, Quantity (Days or Distance)
+  /// Main input fields: Quantity (Days or Distance)
   _othersInputField() {
-    return Column(
-      children: [
-        // Email field (read-only, from profile)
-        PrimaryInputWidget(
-          controller: controller.emailController,
-          label: Strings.email,
-          hintText: Strings.email,
-          readOnly: true,
-          textInputType: TextInputType.emailAddress,
-          showBorderSide: true,
-        ),
-        Sizes.height.betweenInputBox,
-        
-        // Phone field (from profile)
-        PrimaryInputWidget(
-          controller: controller.mobileController,
-          label: Strings.Phone,
-          hintText: Strings.Phone,
-          textInputType: TextInputType.phone,
-          showBorderSide: true,
-        ),
-        Sizes.height.betweenInputBox,
-        
-        // Dynamic Quantity field (Days or Distance based on pricing type)
-        Obx(
-          () => PrimaryInputWidget(
-            textInputType: TextInputType.number,
-            controller: controller.quantityController,
-            label: controller.getQuantityLabel(),
-            hintText: controller.getQuantityHint(),
-            showBorderSide: true,
-          ),
-        ),
-      ],
+    return Obx(
+      () => PrimaryInputWidget(
+        textInputType: TextInputType.number,
+        controller: controller.quantityController,
+        label: controller.getQuantityLabel(),
+        hintText: controller.getQuantityHint(),
+        showBorderSide: true,
+      ),
     );
   }
 
@@ -77,9 +51,14 @@ class BookingAllFields extends GetView<BookingController> {
               Checkbox(
                 value: controller.isDeliver.value,
                 onChanged: (v) => controller.isDeliver.value = v ?? false,
+                // use app primary color when checked
+                fillColor: MaterialStateProperty.resolveWith<Color?>((states) {
+                  if (states.contains(MaterialState.selected)) return CustomColor.primary;
+                  return null;
+                }),
               ),
               const SizedBox(width: 8),
-              Text(DynamicLanguage.isLoading ? '' : DynamicLanguage.key('توصيل السيارة')),
+              Text(DynamicLanguage.isLoading ? '' : DynamicLanguage.key(Strings.deliveryCar)),
             ],
           ),
         ),
@@ -120,8 +99,8 @@ class BookingAllFields extends GetView<BookingController> {
                   DynamicLanguage.isLoading
                       ? ''
                       : DynamicLanguage.key(controller.pricingType.value == 'per_day' 
-                          ? 'السعر في اليوم' 
-                          : 'السعر في الكيلومتر'),
+                          ? Strings.pricePerDay
+                          : Strings.pricePerKm),
                   style: TextStyle(fontSize: 14),
                 ),
                 Text(
@@ -140,7 +119,7 @@ class BookingAllFields extends GetView<BookingController> {
                   Text(
                     DynamicLanguage.isLoading
                         ? ''
-                        : DynamicLanguage.key('إجمالي الإيجار'),
+                        : DynamicLanguage.key(Strings.totalRent),
                     style: TextStyle(fontSize: 14),
                   ),
                   Text(
@@ -160,7 +139,7 @@ class BookingAllFields extends GetView<BookingController> {
                     Text(
                       DynamicLanguage.isLoading
                           ? ''
-                          : DynamicLanguage.key('رسوم التوصيل'),
+                          : DynamicLanguage.key(Strings.deliveryCharge),
                       style: TextStyle(fontSize: 14),
                     ),
                     Text(
@@ -183,7 +162,7 @@ class BookingAllFields extends GetView<BookingController> {
                     Text(
                       DynamicLanguage.isLoading
                           ? ''
-                          : DynamicLanguage.key('الضريبة'),
+                          : DynamicLanguage.key(Strings.tax),
                       style: TextStyle(fontSize: 14),
                     ),
                     Text(
@@ -204,7 +183,7 @@ class BookingAllFields extends GetView<BookingController> {
                     Text(
                       DynamicLanguage.isLoading
                           ? ''
-                          : DynamicLanguage.key('الإجمالي'),
+                          : DynamicLanguage.key(Strings.total),
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
