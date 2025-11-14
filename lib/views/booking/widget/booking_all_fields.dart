@@ -10,6 +10,8 @@ class BookingAllFields extends GetView<BookingController> {
       children: [
         _othersInputField(),
         Sizes.height.betweenInputBox,
+        _pickupDateTimeSection(),
+        Sizes.height.betweenInputBox,
         _deliverySection(),
         Sizes.height.betweenInputBox,
         _pricingInfoSection(),
@@ -38,6 +40,30 @@ class BookingAllFields extends GetView<BookingController> {
         hintText: controller.getQuantityHint(),
         showBorderSide: true,
       ),
+    );
+  }
+
+  /// Pickup Date and Time Section
+  _pickupDateTimeSection() {
+    return Column(
+      children: [
+        // Pickup Date
+        CustomDatePicker(
+          selectedDate: controller.pickupDate,
+          label: Strings.PickUpDate,
+          subtitle: Strings.SelectADate,
+          showBorder: true,
+        ),
+        Sizes.height.betweenInputBox,
+        
+        // Pickup Time
+        CustomTimePicker(
+          selectedTime: controller.pickupTime,
+          label: Strings.PickUpTime,
+          subtitle: Strings.SelectATime,
+          showBorder: true,
+        ),
+      ],
     );
   }
 

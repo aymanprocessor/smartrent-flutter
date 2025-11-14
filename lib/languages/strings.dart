@@ -70,6 +70,7 @@ class Strings {
   static const String rate = "appLRate";
   static const String totalPayable = "appLTotalPayable";
   static const String PickUpTime = "appLPickUpTime";
+  static const String PickUpDate = "appLPickUpDate";
   static const String emailAddress = "appLEmailAddress";
   static const String password = "appLPassword";
   static const String iHaveAgreedWith = "appLIHaveAgreedWith";
@@ -202,6 +203,7 @@ class Strings {
   static const String allCars = "appLAllCars";
   static const String filterBy = "appLFilterBy";
   static const String rentalDays = "appLRentalDays";
+  static const String Day = "appLDay";
   
   // Booking pricing related strings
   static const String pricePerDay = "appLPricePerDay";

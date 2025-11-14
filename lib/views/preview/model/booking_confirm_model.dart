@@ -1,58 +1,65 @@
 class BookingConfirmModel {
-  Message message;
-  Data data;
+  Message? message;
+  Data? data;
   String type;
 
   BookingConfirmModel({
-    required this.message,
-    required this.data,
+    this.message,
+    this.data,
     required this.type,
   });
 
   factory BookingConfirmModel.fromJson(Map<String, dynamic> json) =>
       BookingConfirmModel(
-        message: Message.fromJson(json["message"]),
-        data: Data.fromJson(json["data"]),
-        type: json["type"],
+        message: json["message"] != null ? Message.fromJson(json["message"]) : null,
+        data: json["data"] != null && json["data"] is Map ? Data.fromJson(json["data"]) : null,
+        type: json["type"] ?? 'error',
       );
 
   Map<String, dynamic> toJson() => {
-    "message": message.toJson(),
-    "data": data.toJson(),
+    "message": message?.toJson(),
+    "data": data?.toJson(),
     "type": type,
   };
 }
 
 class Data {
-  String redirectUrl;
-  List<RedirectLink> redirectLinks;
-  String actionType;
-  List<dynamic> addressInfo;
-  String identifier;
+  String? redirectUrl;
+  List<RedirectLink>? redirectLinks;
+  String? actionType;
+  List<dynamic>? addressInfo;
+  String? identifier;
 
   Data({
-    required this.redirectUrl,
-    required this.redirectLinks,
-    required this.actionType,
-    required this.addressInfo,
-    required this.identifier,
+    this.redirectUrl,
+    this.redirectLinks,
+    this.actionType,
+    this.addressInfo,
+    this.identifier,
   });
 
   factory Data.fromJson(Map<String, dynamic> json) => Data(
     redirectUrl: json["redirect_url"],
-    redirectLinks: List<RedirectLink>.from(
-      json["redirect_links"].map((x) => RedirectLink.fromJson(x)),
-    ),
+    redirectLinks: json["redirect_links"] != null
+        ? List<RedirectLink>.from(
+            json["redirect_links"].map((x) => RedirectLink.fromJson(x)))
+        : null,
     actionType: json["action_type"],
-    addressInfo: List<dynamic>.from(json["address_info"].map((x) => x)),
+    addressInfo: json["address_info"] != null
+        ? List<dynamic>.from(json["address_info"].map((x) => x))
+        : null,
     identifier: json["identifier"],
   );
 
   Map<String, dynamic> toJson() => {
     "redirect_url": redirectUrl,
-    "redirect_links": List<dynamic>.from(redirectLinks.map((x) => x.toJson())),
+    "redirect_links": redirectLinks != null
+        ? List<dynamic>.from(redirectLinks!.map((x) => x.toJson()))
+        : null,
     "action_type": actionType,
-    "address_info": List<dynamic>.from(addressInfo.map((x) => x)),
+    "address_info": addressInfo != null
+        ? List<dynamic>.from(addressInfo!.map((x) => x))
+        : null,
   };
 }
 
@@ -73,14 +80,23 @@ class RedirectLink {
 }
 
 class Message {
-  List<String> success;
+  List<String>? success;
+  List<String>? error;
 
-  Message({required this.success});
+  Message({this.success, this.error});
 
   factory Message.fromJson(Map<String, dynamic> json) =>
-      Message(success: List<String>.from(json["success"].map((x) => x)));
+      Message(
+        success: json["success"] != null 
+            ? List<String>.from(json["success"].map((x) => x)) 
+            : null,
+        error: json["error"] != null 
+            ? List<String>.from(json["error"].map((x) => x)) 
+            : null,
+      );
 
   Map<String, dynamic> toJson() => {
-    "success": List<dynamic>.from(success.map((x) => x)),
+    "success": success != null ? List<dynamic>.from(success!.map((x) => x)) : null,
+    "error": error != null ? List<dynamic>.from(error!.map((x) => x)) : null,
   };
 }

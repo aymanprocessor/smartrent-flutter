@@ -781,7 +781,7 @@ class AllVendorsCarListView extends GetView<AllVendorsDashboardController> {
     };
     final symbol = currencySymbols[car.currency] ?? car.currency;
     final unitText = car.pricing.unit == 'day'
-        ? DynamicLanguage.key(Strings.rentalDays)
+        ? DynamicLanguage.key(Strings.Day)
         : car.pricing.unit;
     return '$symbol ${car.pricing.price.toStringAsFixed(0)}/$unitText';
   }

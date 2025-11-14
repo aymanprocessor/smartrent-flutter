@@ -26,7 +26,31 @@ class WebPaymentScreen extends StatelessWidget {
   }
 
   _bodyWidget(BuildContext context) {
-    final paymentUrl = controller.bookingConfirmModel.data.redirectUrl;
+    // Handle nullable data - must check before accessing fields
+    final data = controller.bookingConfirmModel.data;
+    
+    if (data == null || data.redirectUrl == null || data.redirectUrl!.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline, size: 60, color: Colors.red),
+            const SizedBox(height: 16),
+            Text(
+              'Payment URL not available',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () => Get.back(),
+              child: const Text('Go Back'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final paymentUrl = data.redirectUrl!;
 
     return InAppWebView(
       initialUrlRequest: URLRequest(url: WebUri(paymentUrl)),

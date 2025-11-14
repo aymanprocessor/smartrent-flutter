@@ -17,14 +17,28 @@ class PreviewMobileScreen extends GetView<PreviewController> {
                   horizontal: Dimensions.defaultHorizontalSize,
                   vertical: Dimensions.verticalSize,
                 ),
-                child: Obx(
-                  () => PrimaryButton(
-                    isLoading: controller.isBookingLoading,
-                    title: Strings.ConfirmBooking,
-                    onPressed: () {
-                      controller.handlePaymentProcess();
-                    },
-                  ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Test Booking Button (for testing/QA)
+                    PrimaryButton(
+                      title: '🧪 Test Booking (No Payment)',
+                      onPressed: () {
+                        controller.testConfirmBooking();
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    // Confirm Booking Button (normal flow)
+                    Obx(
+                      () => PrimaryButton(
+                        isLoading: controller.isBookingLoading,
+                        title: Strings.ConfirmBooking,
+                        onPressed: () {
+                          controller.handlePaymentProcess();
+                        },
+                      ),
+                    ),
+                  ],
                 ),
               ),
       ),

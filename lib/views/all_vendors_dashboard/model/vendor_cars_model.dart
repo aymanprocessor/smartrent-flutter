@@ -54,12 +54,14 @@ class VendorCarsModel {
 }
 
 class VendorCarsData {
+  String? token;
   List<VendorCar> cars;
   Pagination pagination;
   Map<String, dynamic> filtersApplied;
   MetaInfo meta;
 
   VendorCarsData({
+    this.token,
     required this.cars,
     required this.pagination,
     required this.filtersApplied,
@@ -67,6 +69,7 @@ class VendorCarsData {
   });
 
   factory VendorCarsData.fromJson(Map<String, dynamic> json) => VendorCarsData(
+    token: json["token"]?.toString(),
     cars: (() {
       final c = json["cars"];
       if (c == null) return <VendorCar>[];
@@ -91,6 +94,7 @@ class VendorCarsData {
   );
 
   Map<String, dynamic> toJson() => {
+    if (token != null) "token": token,
     "cars": List<dynamic>.from(cars.map((x) => x.toJson())),
     "pagination": pagination.toJson(),
     "filters_applied": filtersApplied,

@@ -1,4 +1,5 @@
 import 'package:carbo/base/utils/local_storage.dart';
+import 'package:carbo/base/utils/type_conversion_helpers.dart';
 import 'package:carbo/views/booking/controller/booking_controller.dart';
 import 'package:carbo/views/dashboard/controller/dashboard_controller.dart';
 import 'package:carbo/views/preview/model/booking_preview_model.dart';
@@ -7,10 +8,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:flutter/foundation.dart';
 import '../../../base/widgets/logger.dart';
+import '../../../base/widgets/custom_snackbar.dart';
 import '../../../base/api/endpoint/api_endpoint.dart';
 import '../../../base/api/method/request_process.dart';
 import '../../../base/api/model/common_success_model.dart';
 import '../../../base/api/services/paytabs_service.dart';
+import '../../../base/api/services/car_booking_test_service.dart';
 import '../../../languages/strings.dart';
 import '../../../routes/routes.dart';
 import '../../congratulations/model/congratulations_model.dart';
@@ -189,10 +192,24 @@ class PreviewController extends GetxController {
       return null;
     }
 
+    // Get booking token from dashboard controller (vendor cars token)
+    final String bookingToken = dashboardController.carToken.value;
+    if (bookingToken.isEmpty) {
+      // Defer snackbar to after build is complete
+      Future.delayed(Duration.zero, () {
+        Get.snackbar(
+          'Error',
+          'Booking token is missing. Please select a car again.',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      });
+      return null;
+    }
+
     // Await the request so we can detect failures and provide a local fallback
     BookingPreviewModel? result = await RequestProcess().request<BookingPreviewModel>(
       queryParams: {
-        'token': dashboardController.carToken.value,
+        'token': bookingToken,
         'car_id': dashboardController.selectedCarId.value,
       },
       fromJson: BookingPreviewModel.fromJson,
@@ -474,45 +491,40 @@ class PreviewController extends GetxController {
       return null;
     }
 
-  // include car_area when possible to satisfy backend validation
-  final int? _selectedCarAreaId = _getSelectedCarAreaId();
-  
-  // Get token from bookingData (from preview API) or LocalStorage as fallback
-  final String bookingToken = bookingData.value?['token'] ?? 
-                               (bookingData.value?['booking_token'] ?? 
-                               LocalStorage.token);
-  
-  if (bookingToken.isEmpty) {
-    Get.snackbar(
-      'Error',
-      'Booking session expired. Please go back and try again.',
-      snackPosition: SnackPosition.BOTTOM,
-    );
-    return null;
-  }
+    // include car_area when possible to satisfy backend validation
+    final int? _selectedCarAreaId = _getSelectedCarAreaId();
+    
+    // Get token from bookingData (from preview API response)
+    final String bookingToken = bookingData.value?['token'] ?? '';
+    
+    if (bookingToken.isEmpty) {
+      Get.snackbar(
+        'Error',
+        'Booking session expired. Please go back and refresh your booking.',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return null;
+    }
+
+    // Extract pickup date and time safely
+    final String pickupDateValue = (bookingData.value?['pickup_date'] is String) ? (bookingData.value?['pickup_date'] as String) : '';
+    final String pickupTimeValue = (bookingData.value?['pickup_time'] is String) ? (bookingData.value?['pickup_time'] as String) : '';
 
     Map<String, dynamic> inputBody = {
-      'location': bookingData.value?['delivery_location'] ?? Get.find<BookingController>().locationController.text,
-      'message': bookingData.value?['notes'] ?? Get.find<BookingController>().noteController.text,
-      'mobile': bookingData.value?['phone'] ?? Get.find<BookingController>().mobileController.text,
-      'credentials': bookingData.value?['email'] ?? LocalStorage.email,
-      'car_slug': slug.value.isNotEmpty ? slug.value : 'car-${Id.value}', // Required by API
-      'car_id': Id.value,
-      'gateway_currency': 'SAR',
-      'payment': selectedMethodText,
-      'token': bookingToken,
-      'fees': (bookingData.value?['total'] ?? 0).toString(),
-      // New pricing fields
-      'quantity': bookingData.value?['quantity'],
-      'pricing_type': bookingData.value?['pricing_type'],
-      'delivery_required': bookingData.value?['delivery_required'] ?? false,
-      'delivery_charge': bookingData.value?['delivery_charge'] ?? 0,
-      'subtotal': bookingData.value?['subtotal'] ?? 0,
-      // Tax fields
-      'tax_amount': bookingData.value?['tax_amount'] ?? 0,
-      'tax_enabled': bookingData.value?['tax_enabled'] ?? false,
-      'tax_percentage': bookingData.value?['tax_percentage'] ?? 0,
-      // 'transaction_id': fees.value,
+      'car_id': int.parse(Id.value), // Required: integer
+      'car_slug': slug.value.isNotEmpty ? slug.value : 'car-${Id.value}', // Required: string
+      'token': bookingToken, // Required: string
+      'mobile': bookingData.value?['phone'] ?? Get.find<BookingController>().mobileController.text, // Required: string
+      'pickup_date': pickupDateValue, // Required: date format (YYYY-MM-DD)
+      'pickup_time': pickupTimeValue, // Required: string (HH:mm)
+      'fees': double.parse((bookingData.value?['total'] ?? 0).toString()), // Required: numeric
+      'credentials': bookingData.value?['email'] ?? LocalStorage.email, // Nullable: email
+      'location': bookingData.value?['delivery_location'] ?? Get.find<BookingController>().locationController.text, // Nullable: string
+      'is_deliver': bookingData.value?['delivery_required'] ?? false, // Nullable: boolean
+      'destination': bookingData.value?['destination'] ?? '', // Nullable: string
+      'distance': bookingData.value?['delivery_distance'] ?? 0, // Nullable: numeric
+      'rental_days': bookingData.value?['quantity'], // Nullable: integer
+      'message': bookingData.value?['notes'] ?? Get.find<BookingController>().noteController.text, // Nullable: string
     };
     if (_selectedCarAreaId != null) inputBody['car_area'] = _selectedCarAreaId;
     return RequestProcess().request<BookingConfirmModel>(
@@ -522,8 +534,48 @@ class PreviewController extends GetxController {
       method: HttpMethod.POST,
       body: inputBody,
       onSuccess: (value) {
-        _bookingConfirmModel = value!;
-        identifier.value = _bookingConfirmModel.data.identifier;
+        if (value == null) {
+          Get.snackbar(
+            'Error',
+            'Failed to process booking. Please try again.',
+            snackPosition: SnackPosition.BOTTOM,
+          );
+          return;
+        }
+        
+        _bookingConfirmModel = value;
+        
+        // Check if this is an error response
+        if (_bookingConfirmModel.type == 'error' || _bookingConfirmModel.data == null) {
+          String errorMessage = 'Booking confirmation failed.';
+          
+          // Extract error message from response
+          if (_bookingConfirmModel.message?.error != null && 
+              _bookingConfirmModel.message!.error!.isNotEmpty) {
+            errorMessage = _bookingConfirmModel.message!.error!.first;
+          }
+          
+          Get.snackbar(
+            'Booking Error',
+            errorMessage,
+            snackPosition: SnackPosition.BOTTOM,
+            duration: const Duration(seconds: 4),
+          );
+          return;
+        }
+        
+        // Safely check if identifier exists
+        if (_bookingConfirmModel.data?.identifier == null || 
+            _bookingConfirmModel.data!.identifier!.isEmpty) {
+          Get.snackbar(
+            'Error',
+            'Invalid booking response. Please try again.',
+            snackPosition: SnackPosition.BOTTOM,
+          );
+          return;
+        }
+        
+        identifier.value = _bookingConfirmModel.data!.identifier!;
         if (alias.value.contains('authorize')) {
           Get.to(AuthorizeGatewayScreen());
         } else {
@@ -623,43 +675,39 @@ class PreviewController extends GetxController {
       return null;
     }
 
-  final int? _selectedCarAreaId = _getSelectedCarAreaId();
-  
-  // Get token from bookingData (from preview API) or LocalStorage as fallback
-  final String bookingToken = bookingData.value?['token'] ?? 
-                               (bookingData.value?['booking_token'] ?? 
-                               LocalStorage.token);
-  
-  if (bookingToken.isEmpty) {
-    Get.snackbar(
-      'Error',
-      'Booking session expired. Please go back and try again.',
-      snackPosition: SnackPosition.BOTTOM,
-    );
-    return null;
-  }
+    final int? _selectedCarAreaId = _getSelectedCarAreaId();
+    
+    // Get token from bookingData (from preview API response)
+    final String bookingToken = bookingData.value?['token'] ?? '';
+    
+    if (bookingToken.isEmpty) {
+      Get.snackbar(
+        'Error',
+        'Booking session expired. Please go back and refresh your booking.',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return null;
+    }
 
-  Map<String, String> inputBody = {
-      'location': bookingData.value?['delivery_location'] ?? Get.find<BookingController>().locationController.text,
-      'message': bookingData.value?['notes'] ?? Get.find<BookingController>().noteController.text,
-      'mobile': bookingData.value?['phone'] ?? Get.find<BookingController>().mobileController.text,
-      'credentials': bookingData.value?['email'] ?? LocalStorage.email,
-      'car_slug': slug.value.isNotEmpty ? slug.value : 'car-${Id.value}', // Required by API
-      'car_id': Id.value,
-      'gateway_currency': 'SAR',
-      'payment': selectedMethodText,
-      'token': bookingToken,
-      'fees': (bookingData.value?['total'] ?? 0).toString(),
-      // New pricing fields
-      'quantity': (bookingData.value?['quantity'] ?? 0).toString(),
-      'pricing_type': (bookingData.value?['pricing_type'] ?? '').toString(),
-      'delivery_required': (bookingData.value?['delivery_required'] ?? false).toString(),
-      'delivery_charge': (bookingData.value?['delivery_charge'] ?? 0).toString(),
-      'subtotal': (bookingData.value?['subtotal'] ?? 0).toString(),
-      // Tax fields
-      'tax_amount': (bookingData.value?['tax_amount'] ?? 0).toString(),
-      'tax_enabled': (bookingData.value?['tax_enabled'] ?? false).toString(),
-      'tax_percentage': (bookingData.value?['tax_percentage'] ?? 0).toString(),
+    // Extract pickup date and time safely
+    final String pickupDateValue = (bookingData.value?['pickup_date'] is String) ? (bookingData.value?['pickup_date'] as String) : '';
+    final String pickupTimeValue = (bookingData.value?['pickup_time'] is String) ? (bookingData.value?['pickup_time'] as String) : '';
+
+    Map<String, String> inputBody = {
+      'car_id': Id.value, // Required: integer (as string for Map<String, String>)
+      'car_slug': slug.value.isNotEmpty ? slug.value : 'car-${Id.value}', // Required: string
+      'token': bookingToken, // Required: string
+      'mobile': bookingData.value?['phone'] ?? Get.find<BookingController>().mobileController.text, // Required: string
+      'pickup_date': pickupDateValue, // Required: date format (YYYY-MM-DD)
+      'pickup_time': pickupTimeValue, // Required: string (HH:mm)
+      'fees': (bookingData.value?['total'] ?? 0).toString(), // Required: numeric
+      'credentials': bookingData.value?['email'] ?? LocalStorage.email, // Nullable: email
+      'location': bookingData.value?['delivery_location'] ?? Get.find<BookingController>().locationController.text, // Nullable: string
+      'is_deliver': (bookingData.value?['delivery_required'] ?? false).toString(), // Nullable: boolean
+      'destination': bookingData.value?['destination'] ?? '', // Nullable: string
+      'distance': (bookingData.value?['delivery_distance'] ?? 0).toString(), // Nullable: numeric
+      'rental_days': (bookingData.value?['quantity'] ?? 0).toString(), // Nullable: integer
+      'message': bookingData.value?['notes'] ?? Get.find<BookingController>().noteController.text, // Nullable: string
     };
   if (_selectedCarAreaId != null) inputBody['car_area'] = _selectedCarAreaId.toString();
     final data = _manualInputModel.data.inputFields;
@@ -812,6 +860,10 @@ class PreviewController extends GetxController {
           : (bookingData.value?['total'] ?? bookingController.total.value);
     final int? _selectedCarAreaId = _getSelectedCarAreaId();
 
+      // Extract pickup date and time safely for PayTabs metadata
+      final String pickupDateValue = (bookingData.value?['pickup_date'] is String) ? (bookingData.value?['pickup_date'] as String) : '';
+      final String pickupTimeValue = (bookingData.value?['pickup_time'] is String) ? (bookingData.value?['pickup_time'] as String) : '';
+
       // Create payment with PayTabs
       final paymentResult = await PayTabsService.createPayment(
         cartId: cartId,
@@ -830,6 +882,8 @@ class PreviewController extends GetxController {
           'tax_amount': bookingData.value?['tax_amount'] ?? 0,
           'delivery_charge': bookingData.value?['delivery_charge'] ?? 0,
           'subtotal': bookingData.value?['subtotal'] ?? 0,
+          'pickup_date': pickupDateValue,
+          'pickup_time': pickupTimeValue,
           if (_selectedCarAreaId != null) 'car_area': _selectedCarAreaId,
         },
       );
@@ -896,10 +950,8 @@ class PreviewController extends GetxController {
     // Submit booking with payment confirmation
     final int? _selectedCarAreaId = _getSelectedCarAreaId();
     
-    // Get token from bookingData (from preview API) or LocalStorage as fallback
-    final String bookingToken = bookingData.value?['token'] ?? 
-                                 (bookingData.value?['booking_token'] ?? 
-                                 LocalStorage.token);
+    // Get token from bookingData (from preview API response)
+    final String bookingToken = bookingData.value?['token'] ?? '';
     
     if (bookingToken.isEmpty) {
       Get.snackbar(
@@ -910,28 +962,26 @@ class PreviewController extends GetxController {
       return;
     }
 
+    // Extract pickup date and time safely
+    final String pickupDateValue = (bookingData.value?['pickup_date'] is String) ? (bookingData.value?['pickup_date'] as String) : '';
+    final String pickupTimeValue = (bookingData.value?['pickup_time'] is String) ? (bookingData.value?['pickup_time'] as String) : '';
+
     Map<String, dynamic> inputBody = {
-      'location': bookingData.value?['delivery_location'] ?? Get.find<BookingController>().locationController.text,
-      'message': bookingData.value?['notes'] ?? Get.find<BookingController>().noteController.text,
-      'mobile': bookingData.value?['phone'] ?? Get.find<BookingController>().mobileController.text,
-      'credentials': bookingData.value?['email'] ?? LocalStorage.email,
-      'car_slug': slug.value.isNotEmpty ? slug.value : 'car-${Id.value}', // Required by API
-      'car_id': Id.value,
-      'gateway_currency': 'SAR',
-      'payment': selectedMethodText,
-      'token': bookingToken,
-      'fees': (bookingData.value?['total'] ?? 0).toString(),
+      'car_id': int.parse(Id.value), // Required: integer
+      'car_slug': slug.value.isNotEmpty ? slug.value : 'car-${Id.value}', // Required: string
+      'token': bookingToken, // Required: string
+      'mobile': bookingData.value?['phone'] ?? Get.find<BookingController>().mobileController.text, // Required: string
+      'pickup_date': pickupDateValue, // Required: date format (YYYY-MM-DD)
+      'pickup_time': pickupTimeValue, // Required: string (HH:mm)
+      'fees': double.parse((bookingData.value?['total'] ?? 0).toString()), // Required: numeric
+      'credentials': bookingData.value?['email'] ?? LocalStorage.email, // Nullable: email
+      'location': bookingData.value?['delivery_location'] ?? Get.find<BookingController>().locationController.text, // Nullable: string
+      'is_deliver': bookingData.value?['delivery_required'] ?? false, // Nullable: boolean
+      'destination': bookingData.value?['destination'] ?? '', // Nullable: string
+      'distance': bookingData.value?['delivery_distance'] ?? 0, // Nullable: numeric
+      'rental_days': bookingData.value?['quantity'], // Nullable: integer
+      'message': bookingData.value?['notes'] ?? Get.find<BookingController>().noteController.text, // Nullable: string
       'transaction_ref': transactionRef,
-      // New pricing fields
-      'quantity': bookingData.value?['quantity'],
-      'pricing_type': bookingData.value?['pricing_type'],
-      'delivery_required': bookingData.value?['delivery_required'] ?? false,
-      'delivery_charge': bookingData.value?['delivery_charge'] ?? 0,
-      'subtotal': bookingData.value?['subtotal'] ?? 0,
-      // Tax fields
-      'tax_amount': bookingData.value?['tax_amount'] ?? 0,
-      'tax_enabled': bookingData.value?['tax_enabled'] ?? false,
-      'tax_percentage': bookingData.value?['tax_percentage'] ?? 0,
     };
     if (_selectedCarAreaId != null) inputBody['car_area'] = _selectedCarAreaId;
 
@@ -949,5 +999,95 @@ class PreviewController extends GetxController {
         _confirmation(_commonSuccessModel);
       },
     );
+  }
+
+  /// Test booking confirmation without payment (for testing/QA)
+  Future<void> testConfirmBooking() async {
+    // Validate booking data exists
+    if (bookingData.value == null || bookingData.value!.isEmpty) {
+      CustomSnackBar.error('Booking data is missing. Please complete your booking again.');
+      return;
+    }
+
+    // Validate car identifiers
+    if (Id.value.isEmpty) {
+      CustomSnackBar.error('Car information is missing. Please try again.');
+      return;
+    }
+
+    // Validate payment amount
+    if (totalPayable.value <= 0) {
+      CustomSnackBar.error('Invalid payment amount. Please review your booking.');
+      return;
+    }
+
+    _isBookingLoading.value = true;
+    log.i('=== TEST CONFIRM BOOKING ===');
+    log.i('Car ID: ${Id.value}');
+    log.i('Car Slug: ${slug.value}');
+    log.i('Amount: ${totalPayable.value}');
+    log.i('Booking Data: ${bookingData.value}');
+    log.i('============================');
+
+    try {
+      final bookingController = Get.find<BookingController>();
+      final String bookingToken = bookingData.value?['token'] ?? '';
+
+      if (bookingToken.isEmpty) {
+        CustomSnackBar.error('Booking session expired. Please go back and try again.');
+        return;
+      }
+
+      // Extract pickup date and time with proper validation
+      final String? pickupDateValue = bookingData.value?['pickup_date'];
+      final String? pickupTimeValue = bookingData.value?['pickup_time'];
+      
+      // Only use non-null, non-empty string values
+      final String? validPickupDate = (pickupDateValue is String && pickupDateValue.isNotEmpty) ? pickupDateValue : null;
+      final String? validPickupTime = (pickupTimeValue is String && pickupTimeValue.isNotEmpty) ? pickupTimeValue : null;
+
+      // Call test confirmation service
+      final result = await CarBookingTestService.testConfirmBooking(
+        searchToken: bookingToken,
+        carId: int.parse(Id.value),
+        carSlug: slug.value.isNotEmpty ? slug.value : 'car-${Id.value}',
+        mobile: bookingController.mobileController.text,
+        fees: totalPayable.value,
+        credentials: LocalStorage.email,
+        location: bookingData.value?['delivery_location'] ?? bookingController.locationController.text,
+        isDeliver: bookingData.value?['delivery_required'] ?? false,
+        destination: bookingData.value?['destination'] ?? '',
+        distance: toDouble(bookingData.value?['delivery_distance']),
+        rentalDays: toInt(bookingData.value?['quantity']),
+        message: bookingData.value?['notes'] ?? bookingController.noteController.text,
+        pickupDate: validPickupDate,
+        pickupTime: validPickupTime,
+      );
+
+      if (result != null && result['type'] == 'success') {
+        log.i('✅ Test booking confirmed successfully!');
+        
+        // Show success message
+        Future.delayed(Duration.zero, () {
+          CustomSnackBar.success(
+            title: 'Success',
+            message: 'Test booking confirmed without payment!',
+          );
+        });
+
+        // Navigate to congratulations screen
+        Future.delayed(const Duration(milliseconds: 500), () {
+          Get.offAll(() => CongratulationsScreen());
+        });
+      } else {
+        log.e('Test booking failed: ${result?['message']}');
+        CustomSnackBar.error('Test booking failed. Please try again.');
+      }
+    } catch (e) {
+      log.e('Error in testConfirmBooking: $e');
+      CustomSnackBar.error('Error confirming booking: $e');
+    } finally {
+      _isBookingLoading.value = false;
+    }
   }
 }

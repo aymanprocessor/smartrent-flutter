@@ -1,5 +1,7 @@
 import 'package:carbo/base/utils/local_storage.dart';
 import 'package:carbo/views/all_vendors_dashboard/model/vendor_cars_model.dart';
+import 'package:carbo/views/all_vendors_dashboard/controller/all_vendors_dashboard_controller.dart';
+import 'package:carbo/views/dashboard/controller/dashboard_controller.dart';
 import 'package:carbo/languages/strings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -12,6 +14,10 @@ class BookingController extends GetxController {
   final noteController = TextEditingController();
   final mobileController = TextEditingController();
   final quantityController = TextEditingController(); // Days or Distance
+  
+  // Pickup date and time observables
+  RxString pickupDate = ''.obs;
+  RxString pickupTime = ''.obs;
   
   RxBool isFormValid = false.obs;
   RxBool isDeliver = false.obs;
@@ -57,6 +63,10 @@ class BookingController extends GetxController {
     mobileController.addListener(_updateFormValidity);
     locationController.addListener(_updateFormValidity);
     
+    // Listen to pickup date and time changes
+    ever(pickupDate, (_) => _updateFormValidity());
+    ever(pickupTime, (_) => _updateFormValidity());
+    
     // Recalculate when delivery toggle changes
     ever(isDeliver, (_) {
       _updateFormValidity();
@@ -77,6 +87,8 @@ class BookingController extends GetxController {
     isFormValid.value =
         emailController.text.isNotEmpty &&
         quantityController.text.isNotEmpty &&
+        pickupDate.value.isNotEmpty &&
+        pickupTime.value.isNotEmpty &&
         // pickup location is required only when isDeliver is true
         (isDeliver.value ? locationController.text.isNotEmpty : true) &&
         mobileController.text.isNotEmpty;
@@ -162,10 +174,42 @@ class BookingController extends GetxController {
 
   /// Prepare booking data for submission
   Map<String, dynamic> getBookingData() {
+    // Try to get booking token from multiple sources
+    String bookingToken = '';
+    
+    // First, try DashboardController
+    try {
+      final dashboardController = Get.find<DashboardController>();
+      if (dashboardController.carToken.value.isNotEmpty) {
+        bookingToken = dashboardController.carToken.value;
+      }
+    } catch (e) {
+      // DashboardController not found, try AllVendorsDashboardController
+    }
+    
+    // Second, try AllVendorsDashboardController if DashboardController didn't have token
+    if (bookingToken.isEmpty) {
+      try {
+        final allVendorsController = Get.find<AllVendorsDashboardController>();
+        if (allVendorsController.carToken.value.isNotEmpty) {
+          bookingToken = allVendorsController.carToken.value;
+        }
+      } catch (e) {
+        // AllVendorsDashboardController not found
+      }
+    }
+    
+    // Final fallback: use LocalStorage token if available
+    if (bookingToken.isEmpty) {
+      bookingToken = LocalStorage.token;
+    }
+    
     return {
       'email': emailController.text,
       'phone': mobileController.text,
       'quantity': quantityController.text,
+      'pickup_date': pickupDate.value,
+      'pickup_time': pickupTime.value,
       'pricing_type': pricingType.value,
       'pricing_unit': pricingUnit.value,
       'delivery_required': isDeliver.value,
@@ -181,6 +225,7 @@ class BookingController extends GetxController {
       'id': selectedCar.value?.id,  // Added: explicit id field for preview screen
       'car_name': '${selectedCar.value?.make} ${selectedCar.value?.model}',
       'currency': selectedCar.value?.currency ?? 'SAR',
+      'token': bookingToken,  // Booking token from vendor cars API or fallback
     };
   }
 }

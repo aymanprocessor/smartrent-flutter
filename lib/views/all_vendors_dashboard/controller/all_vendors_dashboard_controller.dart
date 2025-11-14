@@ -115,6 +115,13 @@ class AllVendorsDashboardController extends GetxController {
             vendorCars.value = vendorCarsModel.data.cars;
           }
 
+          // Update carToken from API response
+          if (vendorCarsModel.data.token != null && 
+              vendorCarsModel.data.token!.isNotEmpty) {
+            carToken.value = vendorCarsModel.data.token!;
+            log.i('Updated carToken from API: ${carToken.value}');
+          }
+
           pagination.value = vendorCarsModel.data.pagination;
           hasMore.value = vendorCarsModel.data.pagination.hasMore;
           metaInfo.value = vendorCarsModel.data.meta;

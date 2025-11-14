@@ -22,6 +22,7 @@ class PayTabsPaymentScreen extends StatefulWidget {
 class _PayTabsPaymentScreenState extends State<PayTabsPaymentScreen> {
   late final WebViewController _controller;
   bool _isLoading = true;
+  String? _error;
   final PreviewController previewController = Get.find<PreviewController>();
 
   @override
@@ -35,6 +36,7 @@ class _PayTabsPaymentScreenState extends State<PayTabsPaymentScreen> {
           onPageStarted: (String url) {
             setState(() {
               _isLoading = true;
+              _error = null;
             });
           },
           onPageFinished: (String url) {
@@ -48,6 +50,12 @@ class _PayTabsPaymentScreenState extends State<PayTabsPaymentScreen> {
                 url.contains('payment-callback')) {
               _handlePaymentReturn();
             }
+          },
+          onWebResourceError: (WebResourceError error) {
+            setState(() {
+              _error = 'Failed to load payment page: ${error.description}';
+              _isLoading = false;
+            });
           },
           onNavigationRequest: (NavigationRequest request) {
             // Check if user is being redirected back to the app
@@ -142,10 +150,37 @@ class _PayTabsPaymentScreenState extends State<PayTabsPaymentScreen> {
       ),
       body: Stack(
         children: [
-          WebViewWidget(controller: _controller),
+          // Show error UI if page failed to load
+          if (_error != null)
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                  const SizedBox(height: 16),
+                  Text(
+                    _error!,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                  const SizedBox(height: 24),
+                  ElevatedButton.icon(
+                    onPressed: () => Get.back(),
+                    icon: const Icon(Icons.arrow_back),
+                    label: const Text('Go Back'),
+                  ),
+                ],
+              ),
+            )
+          else
+            WebViewWidget(controller: _controller),
+          // Loading indicator
           if (_isLoading)
-            const Center(
-              child: CircularProgressIndicator(),
+            Container(
+              color: Colors.black.withOpacity(0.3),
+              child: const Center(
+                child: CircularProgressIndicator(),
+              ),
             ),
         ],
       ),

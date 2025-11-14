@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../../utils/basic_import.dart';
@@ -58,16 +59,32 @@ class PayTabsService {
           'hide_shipping': hideShipping,
           'user_defined': userDefined,
         }),
+      ).timeout(
+        const Duration(seconds: 30),
+        onTimeout: () {
+          throw TimeoutException('Payment creation request timeout');
+        },
       );
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        return data;
+        if (data['success'] == true) {
+          return data;
+        } else {
+          final errorMsg = data['message'] ?? 'Failed to create payment';
+          log.e('PayTabs Create Payment Error: $errorMsg');
+          CustomSnackBar.error(errorMsg);
+          return null;
+        }
       } else {
         log.e('PayTabs Create Payment Error: ${response.body}');
-        CustomSnackBar.error('Failed to create payment: ${response.body}');
+        CustomSnackBar.error('Failed to create payment: ${response.statusCode}');
         return null;
       }
+    } on TimeoutException catch (e) {
+      log.e('PayTabs Create Payment Timeout: ${e.message}');
+      CustomSnackBar.error('Payment creation timeout - please check your connection');
+      return null;
     } catch (e) {
       log.e('PayTabs Create Payment Exception: $e');
       CustomSnackBar.error('Error creating payment: $e');
@@ -92,6 +109,11 @@ class PayTabsService {
         body: jsonEncode({
           'transaction_ref': transactionRef,
         }),
+      ).timeout(
+        const Duration(seconds: 30),
+        onTimeout: () {
+          throw TimeoutException('Payment verification request timeout');
+        },
       );
 
       if (response.statusCode == 200) {
@@ -99,9 +121,13 @@ class PayTabsService {
         return data;
       } else {
         log.e('PayTabs Verify Payment Error: ${response.body}');
-        CustomSnackBar.error('Failed to verify payment: ${response.body}');
+        CustomSnackBar.error('Failed to verify payment: ${response.statusCode}');
         return null;
       }
+    } on TimeoutException catch (e) {
+      log.e('PayTabs Verify Payment Timeout: ${e.message}');
+      CustomSnackBar.error('Payment verification timeout - please check your connection');
+      return null;
     } catch (e) {
       log.e('PayTabs Verify Payment Exception: $e');
       CustomSnackBar.error('Error verifying payment: $e');
@@ -131,6 +157,11 @@ class PayTabsService {
           'refund_amount': refundAmount,
           'refund_reason': refundReason ?? 'Customer refund request',
         }),
+      ).timeout(
+        const Duration(seconds: 30),
+        onTimeout: () {
+          throw TimeoutException('Refund request timeout');
+        },
       );
 
       if (response.statusCode == 200) {
@@ -138,9 +169,13 @@ class PayTabsService {
         return data;
       } else {
         log.e('PayTabs Refund Payment Error: ${response.body}');
-        CustomSnackBar.error('Failed to refund payment: ${response.body}');
+        CustomSnackBar.error('Failed to refund payment: ${response.statusCode}');
         return null;
       }
+    } on TimeoutException catch (e) {
+      log.e('PayTabs Refund Payment Timeout: ${e.message}');
+      CustomSnackBar.error('Refund request timeout - please check your connection');
+      return null;
     } catch (e) {
       log.e('PayTabs Refund Payment Exception: $e');
       CustomSnackBar.error('Error refunding payment: $e');
@@ -160,6 +195,11 @@ class PayTabsService {
           'Accept': 'application/json',
           'Authorization': 'Bearer ${LocalStorage.token}',
         },
+      ).timeout(
+        const Duration(seconds: 30),
+        onTimeout: () {
+          throw TimeoutException('Get payment methods request timeout');
+        },
       );
 
       if (response.statusCode == 200) {
@@ -169,6 +209,9 @@ class PayTabsService {
         log.e('PayTabs Get Payment Methods Error: ${response.body}');
         return null;
       }
+    } on TimeoutException catch (e) {
+      log.e('PayTabs Get Payment Methods Timeout: ${e.message}');
+      return null;
     } catch (e) {
       log.e('PayTabs Get Payment Methods Exception: $e');
       return null;
@@ -187,6 +230,11 @@ class PayTabsService {
           'Accept': 'application/json',
           'Authorization': 'Bearer ${LocalStorage.token}',
         },
+      ).timeout(
+        const Duration(seconds: 30),
+        onTimeout: () {
+          throw TimeoutException('Get currencies request timeout');
+        },
       );
 
       if (response.statusCode == 200) {
@@ -196,8 +244,59 @@ class PayTabsService {
         log.e('PayTabs Get Currencies Error: ${response.body}');
         return null;
       }
+    } on TimeoutException catch (e) {
+      log.e('PayTabs Get Currencies Timeout: ${e.message}');
+      return null;
     } catch (e) {
       log.e('PayTabs Get Currencies Exception: $e');
+      return null;
+    }
+  }
+
+  /// Verify car booking payment
+  /// Uses the car-booking-specific endpoint with booking token
+  /// Returns booking confirmation details
+  static Future<Map<String, dynamic>?> verifyCarBookingPayment(
+      String bookingToken) async {
+    try {
+      final url = Uri.parse(ApiEndpoint.paytabsCarBookingVerify.url());
+
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': 'Bearer ${LocalStorage.token}',
+        },
+        body: jsonEncode({
+          'token': bookingToken,
+        }),
+      ).timeout(
+        const Duration(seconds: 30),
+        onTimeout: () {
+          throw TimeoutException('Car booking verification timeout');
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data;
+      } else if (response.statusCode == 404) {
+        log.e('PayTabs Car Booking Verify Error: Booking not found');
+        CustomSnackBar.error('Booking not found - invalid token');
+        return null;
+      } else {
+        log.e('PayTabs Car Booking Verify Error: ${response.body}');
+        CustomSnackBar.error('Failed to verify booking: ${response.statusCode}');
+        return null;
+      }
+    } on TimeoutException catch (e) {
+      log.e('PayTabs Car Booking Verify Timeout: ${e.message}');
+      CustomSnackBar.error('Booking verification timeout - please check your connection');
+      return null;
+    } catch (e) {
+      log.e('PayTabs Car Booking Verify Exception: $e');
+      CustomSnackBar.error('Error verifying booking: $e');
       return null;
     }
   }

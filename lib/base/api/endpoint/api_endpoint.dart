@@ -61,12 +61,16 @@ enum ApiEndpoint {
   getManualPaymentField('/user/car-booking/manual/input-fields'),
   rePayment('/user/car-booking/re-manual/input-fields'),
 
-  // PayTabs
-  paytabsCreatePayment('/api/paytabs/create-payment'),
-  paytabsVerifyPayment('/api/paytabs/verify-payment'),
-  paytabsRefundPayment('/api/paytabs/refund-payment'),
-  paytabsPaymentMethods('/api/paytabs/payment-methods'),
-  paytabsCurrencies('/api/paytabs/currencies'),
+  // PayTabs Generic Endpoints (Direct PayTabs calls)
+  paytabsCreatePayment('/paytabs/create-payment'),
+  paytabsVerifyPayment('/paytabs/verify-payment'),
+  paytabsRefundPayment('/paytabs/refund-payment'),
+  paytabsPaymentMethods('/paytabs/payment-methods'),
+  paytabsCurrencies('/paytabs/currencies'),
+
+  // PayTabs Car Booking Endpoints (Car booking specific)
+  paytabsCarBookingVerify('/user/car-booking/paytabs/verify'),
+  paytabsCarBookingCallback('/user/car-booking/paytabs/callback'),
 
   // Authorize
   authorizeSubmit("/user/car-booking/authorize-payment-submit");
