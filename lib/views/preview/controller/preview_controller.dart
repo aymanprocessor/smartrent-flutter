@@ -1077,7 +1077,13 @@ class PreviewController extends GetxController {
 
         // Navigate to congratulations screen
         Future.delayed(const Duration(milliseconds: 500), () {
-          Get.offAll(() => CongratulationsScreen());
+          final congratulation = Congratulation(
+            details: Strings.bookingSuccessfully,
+            route: Routes.dashboardScreen,
+            buttonText: Strings.backToHome,
+            type: Strings.payment,
+          );
+          Get.offAll(() => CongratulationsScreen(), arguments: congratulation);
         });
       } else {
         log.e('Test booking failed: ${result?['message']}');

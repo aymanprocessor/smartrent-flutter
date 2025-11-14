@@ -161,8 +161,21 @@ class Message {
 
   Message({required this.success});
 
-  factory Message.fromJson(Map<String, dynamic> json) =>
-      Message(success: List<String>.from(json["success"].map((x) => x)));
+  factory Message.fromJson(Map<String, dynamic> json) {
+    List<String> successList = [];
+    
+    if (json["success"] != null) {
+      if (json["success"] is List) {
+        successList = List<String>.from(
+          json["success"].map((x) => x?.toString() ?? ''),
+        );
+      } else if (json["success"] is String) {
+        successList = [json["success"].toString()];
+      }
+    }
+    
+    return Message(success: successList);
+  }
 
   Map<String, dynamic> toJson() => {
     "success": List<dynamic>.from(success.map((x) => x)),
