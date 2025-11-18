@@ -9,6 +9,7 @@ import '../../../base/utils/basic_import.dart';
 import '../controller/all_vendors_dashboard_controller.dart';
 import '../../dashboard/controller/dashboard_controller.dart';
 import '../model/vendor_cars_model.dart';
+import '../utils/custom_image_loader.dart';
 
 part 'all_vendors_dashboard_mobile_screen.dart';
 part '../widget/all_vendors_filter_box.dart';
@@ -24,5 +25,36 @@ class AllVendorsDashboardScreen extends GetView<AllVendorsDashboardController> {
   @override
   Widget build(BuildContext context) {
     return AllVendorsDashboardMobileScreen();
+  }
+}
+
+// Helper widget for loading network images with better error handling
+class NetworkImageLoader extends StatelessWidget {
+  final String imageUrl;
+  final double height;
+  final double width;
+  final BoxFit fit;
+  final Widget Function(BuildContext) loadingBuilder;
+  final Widget Function(BuildContext, Object, StackTrace) errorBuilder;
+
+  const NetworkImageLoader({
+    required this.imageUrl,
+    required this.height,
+    required this.width,
+    this.fit = BoxFit.cover,
+    required this.loadingBuilder,
+    required this.errorBuilder,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return CachedNetworkImage(
+      imageUrl: imageUrl,
+      height: height,
+      width: width,
+      fit: fit,
+      placeholder: (context, url) => loadingBuilder(context),
+      errorWidget: (context, url, error) => errorBuilder(context, error, StackTrace.current),
+    );
   }
 }

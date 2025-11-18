@@ -429,33 +429,57 @@ class AllVendorsCarListView extends GetView<AllVendorsDashboardController> {
                 ),
                 child: Stack(
                   children: [
-                    CachedNetworkImage(
-                      imageUrl: car.primaryImageUrl,
-                      height: MediaQuery.of(context).size.height * 0.18,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                      placeholder: (context, url) => Container(
-                        height: MediaQuery.of(context).size.height * 0.18,
-                        color: CustomColor.background,
-                        child: Center(
-                          child: CircularProgressIndicator(
-                            color: CustomColor.primary,
-                            strokeWidth: 2.5,
+                    Builder(
+                      builder: (context) {
+                        final imageUrl = car.modelImage?.trim() ?? '';
+                        // If no image URL available, show placeholder
+                        if (imageUrl.isEmpty || 
+                            imageUrl.toLowerCase() == 'null' ||
+                            imageUrl.contains('/null')) {
+                          return Container(
+                            height: MediaQuery.of(context).size.height * 0.18,
+                            color: CustomColor.background.withOpacity(0.5),
+                            child: Center(
+                              child: Image.asset(
+                                'assets/background/smartrent.jpg',
+                                height: double.infinity,
+                                width: double.infinity,
+                                fit: BoxFit.contain,
+                              ),
+                            ),
+                          );
+                        }
+                        
+                        return RetryableNetworkImage(
+                          imageUrl: imageUrl,
+                          height: MediaQuery.of(context).size.height * 0.18,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                          maxRetries: 3,
+                          loadingBuilder: (context) => Container(
+                            height: MediaQuery.of(context).size.height * 0.18,
+                            color: CustomColor.background,
+                            child: Center(
+                              child: CircularProgressIndicator(
+                                color: CustomColor.primary,
+                                strokeWidth: 2.5,
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
-                      errorWidget: (context, url, error) => Container(
-                        height: MediaQuery.of(context).size.height * 0.18,
-                        color: CustomColor.background.withOpacity(0.5),
-                        child: Center(
-                          child: Image.asset(
-                            'assets/background/smartrent.jpg',
-                            height: double.infinity,
-                            width: double.infinity,
-                            fit: BoxFit.contain,
+                          errorBuilder: (context) => Container(
+                            height: MediaQuery.of(context).size.height * 0.18,
+                            color: CustomColor.background.withOpacity(0.5),
+                            child: Center(
+                              child: Image.asset(
+                                'assets/background/smartrent.jpg',
+                                height: double.infinity,
+                                width: double.infinity,
+                                fit: BoxFit.contain,
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
+                        );
+                      },
                     ),
 
                     // Subtle gradient overlay for better badge visibility

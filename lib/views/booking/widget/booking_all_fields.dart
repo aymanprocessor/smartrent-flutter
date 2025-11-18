@@ -18,11 +18,11 @@ class BookingAllFields extends GetView<BookingController> {
         Sizes.height.betweenInputBox,
         PrimaryInputWidget(
           skipEnterText: true,
-          optionalText: Strings.Optional,
-          label: Strings.note,
+          optionalText: DynamicLanguage.key(Strings.Optional),
+          label: DynamicLanguage.key(Strings.note),
           maxLines: 4,
           controller: controller.noteController,
-          hintText: Strings.writeHere,
+          hintText: DynamicLanguage.key(Strings.writeHere),
           textInputType: TextInputType.name,
           showBorderSide: true,
         ),
@@ -50,8 +50,8 @@ class BookingAllFields extends GetView<BookingController> {
         // Pickup Date
         CustomDatePicker(
           selectedDate: controller.pickupDate,
-          label: Strings.PickUpDate,
-          subtitle: Strings.SelectADate,
+          label: DynamicLanguage.key(Strings.PickUpdate),
+          subtitle: DynamicLanguage.key(Strings.SelectADate),
           showBorder: true,
         ),
         Sizes.height.betweenInputBox,
@@ -59,8 +59,8 @@ class BookingAllFields extends GetView<BookingController> {
         // Pickup Time
         CustomTimePicker(
           selectedTime: controller.pickupTime,
-          label: Strings.PickUpTime,
-          subtitle: Strings.SelectATime,
+          label: DynamicLanguage.key(Strings.PickUpTime),
+          subtitle: DynamicLanguage.key(Strings.SelectATime),
           showBorder: true,
         ),
       ],
@@ -95,8 +95,8 @@ class BookingAllFields extends GetView<BookingController> {
           () => controller.isDeliver.value
               ? PrimaryInputWidget(
                   controller: controller.locationController,
-                  label: Strings.PickUpLocation,
-                  hintText: Strings.PickUpLocation,
+                  label: DynamicLanguage.key(Strings.PickUpLocation),
+                  hintText: DynamicLanguage.key(Strings.PickUpLocation),
                   showBorderSide: true,
                 )
               : const SizedBox.shrink(),

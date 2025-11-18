@@ -109,6 +109,7 @@ class VendorCar {
   double vendorRating;
   String make;
   String model;
+  String? modelImage;
   String type;
   int year;
   String color;
@@ -142,6 +143,7 @@ class VendorCar {
     required this.vendorRating,
     required this.make,
     required this.model,
+    this.modelImage,
     required this.type,
     required this.year,
     required this.color,
@@ -176,6 +178,7 @@ class VendorCar {
     vendorRating: (json["vendor_rating"] ?? 0).toDouble(),
     make: json["make"] ?? '',
     model: json["model"] ?? '',
+    modelImage: json["model_image"],
     type: json["type"] ?? '',
     year: json["year"] ?? 0,
     color: json["color"] ?? 'Not specified',
@@ -222,6 +225,7 @@ class VendorCar {
     "vendor_rating": vendorRating,
     "make": make,
     "model": model,
+    "model_image": modelImage,
     "type": type,
     "year": year,
     "color": color,
@@ -248,25 +252,6 @@ class VendorCar {
     "cancellation_policy": cancellationPolicy,
     "vendor_location": vendorLocation?.toJson(),
   };
-
-  String get primaryImageUrl {
-    if (images.isEmpty) {
-      // Return empty string to signal use of local asset placeholder
-      return '';
-    }
-    final primaryImage = images.firstWhere(
-      (img) => img.isPrimary,
-      orElse: () => images.first,
-    );
-    final url = primaryImage.url.trim();
-    // Guard against common bad values that lead to URLs like '/null' or 'null'
-    if (url.isEmpty) return '';
-    if (url.toLowerCase() == 'null') return '';
-    if (url.contains('/null') || url.endsWith('/null')) {
-      return '';
-    }
-    return url;
-  }
 
   String get displayName => '$make $model';
 

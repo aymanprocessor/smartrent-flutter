@@ -88,36 +88,34 @@ class AllVendorsCarCarousel extends GetView<AllVendorsDashboardController> {
                                 ),
                                 child: Builder(
                                   builder: (context) {
-                                    // Use the model's primaryImageUrl which already
-                                    // applies basic sanitization. If it's relative or empty,
-                                    // use local asset placeholder.
-                                    final primary = car.primaryImageUrl;
-                                    if (primary.isEmpty) {
+                                    // Use modelImage directly
+                                    final imageUrl = car.modelImage?.trim() ?? '';
+                                    
+                                    if (imageUrl.isEmpty || 
+                                        imageUrl.toLowerCase() == 'null' ||
+                                        imageUrl.contains('/null')) {
                                       return Image.asset(
                                         'assets/background/smartrent.jpg',
                                         fit: BoxFit.cover,
                                         width: double.infinity,
                                       );
                                     }
-                                    final imageUrlToUse =
-                                        primary.startsWith('http')
-                                        ? primary
-                                        : '${controller.carImgUrl.value}$primary';
 
-                                    return CachedNetworkImage(
-                                      imageUrl: imageUrlToUse,
+                                    return RetryableNetworkImage(
+                                      imageUrl: imageUrl,
                                       fit: BoxFit.cover,
                                       width: double.infinity,
-                                      placeholder: (context, url) => Center(
+                                      height: double.infinity,
+                                      maxRetries: 3,
+                                      loadingBuilder: (context) => Center(
                                         child: CircularProgressIndicator(
                                           color: CustomColor.primary,
                                         ),
                                       ),
-                                      errorWidget: (context, url, error) =>
-                                          Image.asset(
-                                            'assets/background/smartrent.jpg',
-                                            fit: BoxFit.cover,
-                                          ),
+                                      errorBuilder: (context) => Image.asset(
+                                        'assets/background/smartrent.jpg',
+                                        fit: BoxFit.cover,
+                                      ),
                                     );
                                   },
                                 ),

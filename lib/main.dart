@@ -8,10 +8,12 @@ import 'base/maintenance/maintenance_dialog.dart';
 import 'base/utils/basic_import.dart';
 import 'initializer.dart';
 import 'routes/routes.dart';
+import 'views/all_vendors_dashboard/utils/custom_image_loader.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await AppInitializer.init();
+  configureHttpClient();
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       systemNavigationBarIconBrightness: Brightness.dark,
