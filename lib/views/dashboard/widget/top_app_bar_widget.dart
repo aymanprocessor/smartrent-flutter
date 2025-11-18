@@ -10,11 +10,11 @@ class TopAppBarWidget extends GetView<DashboardController> {
       scrolledUnderElevation: 0,
       backgroundColor: Colors.transparent,
       title: Obx(
-        () => CachedNetworkImage(
+        () => AppCachedImage(
           imageUrl: BasicServices.appBasicLogoWhite.value,
-          placeholder: (context, url) => const Text(''),
-          errorWidget: (context, url, error) => const Text(''),
           height: MediaQuery.of(context).size.height * 0.023,
+          fit: BoxFit.contain,
+          useShimmer: false,
         ),
       ),
       actions: [
@@ -44,20 +44,14 @@ class TopAppBarWidget extends GetView<DashboardController> {
                 backgroundColor: Colors.transparent,
                 child: ClipOval(
                   child: isValidUrl(profileImageUrl)
-                      ? CachedNetworkImage(
-                          placeholder: (context, url) => Text(''),
+                      ? AppCachedImage(
                           imageUrl: profileImageUrl,
-                          errorWidget: (context, url, error) =>
-                              _buildFallbackImage(defaultImageUrl),
-                          imageBuilder: (context, imageProvider) => Container(
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              image: DecorationImage(
-                                image: imageProvider,
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                          ),
+                          width: Dimensions.radius * 2.4,
+                          height: Dimensions.radius * 2.4,
+                          fit: BoxFit.cover,
+                          shape: BoxShape.circle,
+                          useShimmer: true,
+                          errorWidget: _buildFallbackImage(defaultImageUrl),
                         )
                       : _buildFallbackImage(defaultImageUrl),
                 ),

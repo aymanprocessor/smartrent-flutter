@@ -88,34 +88,18 @@ class AllVendorsCarCarousel extends GetView<AllVendorsDashboardController> {
                                 ),
                                 child: Builder(
                                   builder: (context) {
-                                    // Use modelImage directly
                                     final imageUrl = car.modelImage?.trim() ?? '';
                                     
-                                    if (imageUrl.isEmpty || 
-                                        imageUrl.toLowerCase() == 'null' ||
-                                        imageUrl.contains('/null')) {
-                                      return Image.asset(
-                                        'assets/background/smartrent.jpg',
-                                        fit: BoxFit.cover,
-                                        width: double.infinity,
-                                      );
-                                    }
-
-                                    return RetryableNetworkImage(
+                                    return AppCachedImage(
                                       imageUrl: imageUrl,
-                                      fit: BoxFit.cover,
                                       width: double.infinity,
                                       height: double.infinity,
-                                      maxRetries: 3,
-                                      loadingBuilder: (context) => Center(
-                                        child: CircularProgressIndicator(
-                                          color: CustomColor.primary,
-                                        ),
+                                      fit: BoxFit.cover,
+                                      borderRadius: BorderRadius.circular(
+                                        Dimensions.radius * 0.5,
                                       ),
-                                      errorBuilder: (context) => Image.asset(
-                                        'assets/background/smartrent.jpg',
-                                        fit: BoxFit.cover,
-                                      ),
+                                      useShimmer: true,
+                                      fadeIn: true,
                                     );
                                   },
                                 ),

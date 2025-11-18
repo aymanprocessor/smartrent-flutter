@@ -432,52 +432,18 @@ class AllVendorsCarListView extends GetView<AllVendorsDashboardController> {
                     Builder(
                       builder: (context) {
                         final imageUrl = car.modelImage?.trim() ?? '';
-                        // If no image URL available, show placeholder
-                        if (imageUrl.isEmpty || 
-                            imageUrl.toLowerCase() == 'null' ||
-                            imageUrl.contains('/null')) {
-                          return Container(
-                            height: MediaQuery.of(context).size.height * 0.18,
-                            color: CustomColor.background.withOpacity(0.5),
-                            child: Center(
-                              child: Image.asset(
-                                'assets/background/smartrent.jpg',
-                                height: double.infinity,
-                                width: double.infinity,
-                                fit: BoxFit.contain,
-                              ),
-                            ),
-                          );
-                        }
                         
-                        return RetryableNetworkImage(
+                        return AppCachedImage(
                           imageUrl: imageUrl,
                           height: MediaQuery.of(context).size.height * 0.18,
                           width: double.infinity,
                           fit: BoxFit.cover,
-                          maxRetries: 3,
-                          loadingBuilder: (context) => Container(
-                            height: MediaQuery.of(context).size.height * 0.18,
-                            color: CustomColor.background,
-                            child: Center(
-                              child: CircularProgressIndicator(
-                                color: CustomColor.primary,
-                                strokeWidth: 2.5,
-                              ),
-                            ),
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(Dimensions.radius * 1.2),
+                            topRight: Radius.circular(Dimensions.radius * 1.2),
                           ),
-                          errorBuilder: (context) => Container(
-                            height: MediaQuery.of(context).size.height * 0.18,
-                            color: CustomColor.background.withOpacity(0.5),
-                            child: Center(
-                              child: Image.asset(
-                                'assets/background/smartrent.jpg',
-                                height: double.infinity,
-                                width: double.infinity,
-                                fit: BoxFit.contain,
-                              ),
-                            ),
-                          ),
+                          useShimmer: true,
+                          fadeIn: true,
                         );
                       },
                     ),

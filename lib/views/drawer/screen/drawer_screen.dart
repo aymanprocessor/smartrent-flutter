@@ -1,7 +1,7 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dynamic_languages/dynamic_languages.dart';
 import 'package:flutter/material.dart';
 import '../../../base/utils/basic_import.dart';
+import '../../../base/widgets/app_cached_image.dart';
 import '../../../routes/routes.dart';
 import '../../auth/login/controller/login_controller.dart';
 import '../../auth/register/widget/web_screen.dart';

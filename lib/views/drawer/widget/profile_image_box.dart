@@ -13,26 +13,20 @@ class ProfileHeaderWidget extends GetView<DashboardController> {
             shape: BoxShape.circle,
             border: Border.all(width: 2, color: CustomColor.primary),
           ),
-          child: CircleAvatar(
-            radius: Dimensions.radius * 4.5,
-            backgroundColor: Colors.transparent,
-            child: ClipOval(
-              child: CachedNetworkImage(
-                imageUrl: controller.userProfileImage.value,
-                errorWidget: (context, url, error) => Image.network(
-                  controller.userDefaultImageUrl.value,
-                  fit: BoxFit.cover,
-                ),
-                imageBuilder: (context, imageProvider) => Container(
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    image: DecorationImage(
-                      image: imageProvider,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
-              ),
+          child: AppCachedImage(
+            imageUrl: controller.userProfileImage.value,
+            width: Dimensions.radius * 9,
+            height: Dimensions.radius * 9,
+            fit: BoxFit.cover,
+            shape: BoxShape.circle,
+            useShimmer: true,
+            errorWidget: AppCachedImage(
+              imageUrl: controller.userDefaultImageUrl.value,
+              width: Dimensions.radius * 9,
+              height: Dimensions.radius * 9,
+              fit: BoxFit.cover,
+              shape: BoxShape.circle,
+              useShimmer: false,
             ),
           ),
         ),

@@ -1,9 +1,9 @@
 import 'dart:io';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carbo/views/update_profile/controller/update_profile_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../../base/utils/basic_import.dart';
+import '../../../../base/widgets/app_cached_image.dart';
 import '../../dashboard/controller/dashboard_controller.dart';
 
 class ProfileImagePicker extends GetView<UpdateProfileController> {
@@ -53,32 +53,24 @@ class ProfileImagePicker extends GetView<UpdateProfileController> {
                               color: CustomColor.primary,
                             ),
                           ),
-                          child: CircleAvatar(
-                            radius: Dimensions.radius * 4.5,
-                            backgroundColor: Colors.transparent,
-                            child: ClipOval(
-                              child: CachedNetworkImage(
-                                imageUrl: Get.find<DashboardController>()
-                                    .userProfileImage
-                                    .value,
-                                errorWidget: (context, url, error) =>
-                                    Image.network(
-                                      Get.find<DashboardController>()
-                                          .userDefaultImageUrl
-                                          .value,
-                                      fit: BoxFit.cover,
-                                    ),
-                                imageBuilder: (context, imageProvider) =>
-                                    Container(
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        image: DecorationImage(
-                                          image: imageProvider,
-                                          fit: BoxFit.cover,
-                                        ),
-                                      ),
-                                    ),
-                              ),
+                          child: AppCachedImage(
+                            imageUrl: Get.find<DashboardController>()
+                                .userProfileImage
+                                .value,
+                            width: Dimensions.radius * 9,
+                            height: Dimensions.radius * 9,
+                            fit: BoxFit.cover,
+                            shape: BoxShape.circle,
+                            useShimmer: true,
+                            errorWidget: AppCachedImage(
+                              imageUrl: Get.find<DashboardController>()
+                                  .userDefaultImageUrl
+                                  .value,
+                              width: Dimensions.radius * 9,
+                              height: Dimensions.radius * 9,
+                              fit: BoxFit.cover,
+                              shape: BoxShape.circle,
+                              useShimmer: false,
                             ),
                           ),
                         ),

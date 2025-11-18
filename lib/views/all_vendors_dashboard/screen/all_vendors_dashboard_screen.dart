@@ -6,10 +6,10 @@ import 'package:dynamic_languages/dynamic_languages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../base/utils/basic_import.dart';
+import '../../../base/widgets/app_cached_image.dart';
 import '../controller/all_vendors_dashboard_controller.dart';
 import '../../dashboard/controller/dashboard_controller.dart';
 import '../model/vendor_cars_model.dart';
-import '../utils/custom_image_loader.dart';
 
 part 'all_vendors_dashboard_mobile_screen.dart';
 part '../widget/all_vendors_filter_box.dart';
