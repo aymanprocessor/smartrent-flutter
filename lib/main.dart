@@ -6,6 +6,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'base/api/endpoint/api_endpoint.dart';
 import 'base/maintenance/maintenance_dialog.dart';
 import 'base/utils/basic_import.dart';
+import 'base/services/location_service.dart';
+import 'base/services/delivery_service.dart';
 import 'initializer.dart';
 import 'routes/routes.dart';
 import 'views/all_vendors_dashboard/utils/custom_image_loader.dart';
@@ -45,6 +47,9 @@ class MyApp extends StatelessWidget {
         themeMode: ThemeMode.light,
         initialBinding: BindingsBuilder(() async {
           Get.put(SystemMaintenanceController());
+          // Initialize location and delivery services
+          await Get.putAsync(() async => LocationService());
+          Get.put(DeliveryService());
           try {
             DynamicLanguage.init(url: ApiConfig.languageUrl);
           } catch (e) {

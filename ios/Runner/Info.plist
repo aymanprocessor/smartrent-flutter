@@ -51,5 +51,9 @@
     <string>to choose user profile image or scan qr code</string>
     <key>NSMicrophoneUsageDescription</key>
     <string>to take user profile image or scan qr code</string>
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>We need your location to check if car delivery is available in your area</string>
+    <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+    <string>We need your location to check if car delivery is available in your area</string>
   </dict>
 </plist>

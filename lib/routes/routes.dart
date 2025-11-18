@@ -8,6 +8,8 @@ import '../bindings/all_vendors_dashboard_binding.dart';
 import '../bindings/history_binding.dart';
 import '../bindings/login_binding.dart';
 import '../bindings/otp_login_binding.dart';
+import '../bindings/profile_completion_binding.dart';
+import '../bindings/kyc_submission_binding.dart';
 import '../bindings/new_password_binding.dart';
 import '../bindings/notification_binding.dart';
 import '../bindings/onboard_binding.dart';
@@ -40,6 +42,8 @@ import '../views/product_details/screen/product_details_screen.dart';
 import '../views/setting/screen/setting_screen.dart';
 import '../views/splash/screen/splash_screen.dart';
 import '../views/update_profile/screen/update_profile_screen.dart';
+import '../views/profile_completion/screen/profile_completion_screen.dart';
+import '../views/kyc_submission/screen/kyc_submission_screen.dart';
 
 part '../routes/route_pages.dart';
 
@@ -75,4 +79,6 @@ class Routes {
   static const String paymentManualField = '/paymentManualField';
   static const String RePaymentManualField = '/RePaymentManualField';
   static const String settingScreen = '/settingScreen';
+  static const String profileCompletionScreen = '/profileCompletionScreen';
+  static const String kycSubmissionScreen = '/kycSubmissionScreen';
 }

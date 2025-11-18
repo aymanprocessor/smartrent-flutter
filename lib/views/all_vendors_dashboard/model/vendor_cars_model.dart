@@ -107,6 +107,7 @@ class VendorCar {
   int vendorId;
   String vendorName;
   double vendorRating;
+  int? branchId;
   String make;
   String model;
   String? modelImage;
@@ -141,6 +142,7 @@ class VendorCar {
     required this.vendorId,
     required this.vendorName,
     required this.vendorRating,
+    this.branchId,
     required this.make,
     required this.model,
     this.modelImage,
@@ -176,6 +178,7 @@ class VendorCar {
     vendorId: json["vendor_id"] ?? 0,
     vendorName: json["vendor_name"] ?? '',
     vendorRating: (json["vendor_rating"] ?? 0).toDouble(),
+    branchId: json["branch_id"],
     make: json["make"] ?? '',
     model: json["model"] ?? '',
     modelImage: json["model_image"],
@@ -223,6 +226,7 @@ class VendorCar {
     "vendor_id": vendorId,
     "vendor_name": vendorName,
     "vendor_rating": vendorRating,
+    if (branchId != null) "branch_id": branchId,
     "make": make,
     "model": model,
     "model_image": modelImage,

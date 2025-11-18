@@ -3,8 +3,11 @@ import 'package:dynamic_languages/dynamic_languages.dart';
 import 'package:carbo/base/widgets/logger.dart';
 import '../../../base/api/endpoint/api_endpoint.dart';
 import '../model/vendor_cars_model.dart';
+import '../model/delivery_check_model.dart';
 import 'package:http/http.dart' as http;
 import 'package:carbo/base/utils/local_storage.dart';
+import 'package:carbo/base/services/location_service.dart';
+import 'package:carbo/base/services/delivery_service.dart';
 
 final log = logger(AllVendorsDashboardController);
 
@@ -49,7 +52,12 @@ class AllVendorsDashboardController extends GetxController {
       'popularity'.obs; // popularity, priceLowToHigh, priceHighToLow, rating
 
   // Quick filters
-  RxString quickFilter = 'all'.obs; // all, available
+  RxString quickFilter = 'all'.obs; // all, available, deliveryAvailable
+
+  // Delivery tracking
+  final deliveryAvailabilityMap = <int, bool>{}.obs; // branchId -> isAvailable
+  RxBool isCheckingDelivery = false.obs;
+  RxBool locationPermissionDenied = false.obs;
 
   @override
   void onInit() {
@@ -126,6 +134,11 @@ class AllVendorsDashboardController extends GetxController {
           hasMore.value = vendorCarsModel.data.pagination.hasMore;
           metaInfo.value = vendorCarsModel.data.meta;
 
+          // Check delivery availability after loading cars
+          if (!loadMore) {
+            _checkDeliveryForCars();
+          }
+
           if (vendorCars.isEmpty && !loadMore) {
             CustomSnackBar.error(
               DynamicLanguage.isLoading
@@ -162,6 +175,72 @@ class AllVendorsDashboardController extends GetxController {
     log.i('Refreshing vendor cars list');
     await searchAllVendorsCars();
     _isRefreshing.value = false;
+  }
+
+  // Check delivery availability for loaded cars
+  Future<void> _checkDeliveryForCars() async {
+    try {
+      isCheckingDelivery.value = true;
+      locationPermissionDenied.value = false;
+
+      // Get user location
+      final locationService = Get.find<LocationService>();
+      final position = await locationService.getUserLocation();
+
+      if (position == null) {
+        // Location permission denied or unavailable
+        locationPermissionDenied.value = locationService.locationPermissionDenied.value;
+        log.w('Cannot check delivery: location unavailable');
+        isCheckingDelivery.value = false;
+        return;
+      }
+
+      // Extract unique branch IDs from cars
+      final branchIds = vendorCars
+          .where((car) => car.branchId != null)
+          .map((car) => car.branchId!)
+          .toSet()
+          .toList();
+
+      if (branchIds.isEmpty) {
+        log.w('No branch IDs found in cars');
+        isCheckingDelivery.value = false;
+        return;
+      }
+
+      log.i('Checking delivery for ${branchIds.length} branches');
+
+      // Check delivery for all unique branches
+      final deliveryService = Get.find<DeliveryService>();
+      final results = await deliveryService.checkMultipleBranches(
+        branchIds: branchIds,
+        userLat: position.latitude,
+        userLng: position.longitude,
+      );
+
+      // Update delivery availability map
+      deliveryAvailabilityMap.clear();
+      results.forEach((branchId, response) {
+        deliveryAvailabilityMap[branchId] = response.isAvailable;
+      });
+
+      log.i('Delivery check complete: ${deliveryAvailabilityMap.length} branches checked');
+    } catch (e) {
+      log.e('Error checking delivery: $e');
+    } finally {
+      isCheckingDelivery.value = false;
+    }
+  }
+
+  // Check if a car has delivery available
+  bool isDeliveryAvailable(VendorCar car) {
+    if (car.branchId == null) return false;
+    return deliveryAvailabilityMap[car.branchId] ?? false;
+  }
+
+  // Manually trigger delivery check (when user enables location)
+  Future<void> retryDeliveryCheck() async {
+    await _checkDeliveryForCars();
   }
 
   // Toggle favorite
@@ -202,6 +281,10 @@ class AllVendorsDashboardController extends GetxController {
     if (quickFilter.value == 'available') {
       filteredCars = filteredCars
           .where((car) => car.availabilityStatus == 'available')
+          .toList();
+    } else if (quickFilter.value == 'deliveryAvailable') {
+      filteredCars = filteredCars
+          .where((car) => isDeliveryAvailable(car))
           .toList();
     }
 

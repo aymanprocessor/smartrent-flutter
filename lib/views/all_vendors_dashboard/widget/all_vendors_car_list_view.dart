@@ -87,6 +87,16 @@ class AllVendorsCarListView extends GetView<AllVendorsDashboardController> {
                 child: SizedBox(height: Dimensions.verticalSize * 0.5),
               ),
 
+              // Location permission banner
+              if (controller.locationPermissionDenied.value)
+                SliverToBoxAdapter(
+                  child: _buildLocationPermissionBanner(context),
+                ),
+
+              SliverToBoxAdapter(
+                child: SizedBox(height: Dimensions.verticalSize * 0.5),
+              ),
+
               // Quick filter chips
               SliverToBoxAdapter(child: _buildQuickFilterChips()),
 
@@ -260,9 +270,52 @@ class AllVendorsCarListView extends GetView<AllVendorsDashboardController> {
               Strings.available,
               Icons.check_circle,
             ),
+            if (!controller.locationPermissionDenied.value)
+              _buildDeliveryFilterChip(),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildDeliveryFilterChip() {
+    final isSelected = controller.quickFilter.value == 'deliveryAvailable';
+    return FilterChip(
+      selected: isSelected,
+      label: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.local_shipping_rounded,
+            size: 14,
+            color: isSelected ? Colors.white : Color(0xFF6B7280),
+          ),
+          SizedBox(width: 6),
+          Text(
+            'Delivery',
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.1,
+            ),
+          ),
+        ],
+      ),
+      onSelected: (_) => controller.changeQuickFilter('deliveryAvailable'),
+      selectedColor: CustomColor.primary,
+      backgroundColor: Color(0xFFF3F4F6),
+      checkmarkColor: Colors.white,
+      labelStyle: TextStyle(
+        color: isSelected ? Colors.white : Color(0xFF1F2937),
+      ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+        side: BorderSide(
+          color: isSelected ? CustomColor.primary : Color(0xFFE5E7EB),
+          width: 1,
+        ),
+      ),
+      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
     );
   }
 
@@ -507,6 +560,53 @@ class AllVendorsCarListView extends GetView<AllVendorsDashboardController> {
                         ),
                       ),
                     ),
+
+                    // Delivery available badge
+                    if (controller.isDeliveryAvailable(car))
+                      Positioned(
+                        top: Dimensions.verticalSize * 0.75,
+                        left: Dimensions.horizontalSize * 0.75,
+                        child: Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: Dimensions.horizontalSize * 0.7,
+                            vertical: Dimensions.verticalSize * 0.35,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Color(0xFF3B82F6),
+                            borderRadius: BorderRadius.circular(
+                              Dimensions.radius * 0.6,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Color(0xFF3B82F6).withOpacity(0.3),
+                                blurRadius: 8,
+                                offset: Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.local_shipping_rounded,
+                                size: 12,
+                                color: Colors.white,
+                              ),
+                              SizedBox(width: 4),
+                              Text(
+                                'Delivery',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                  letterSpacing: 0.3,
+                                  height: 1.2,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
                   ],
                 ),
               ),
@@ -706,6 +806,91 @@ class AllVendorsCarListView extends GetView<AllVendorsDashboardController> {
 
   Widget _buildSpecDivider() {
     return Container(height: 32, width: 1, color: Color(0xFFE5E7EB));
+  }
+
+  Widget _buildLocationPermissionBanner(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: Dimensions.defaultHorizontalSize,
+      ),
+      child: Container(
+        padding: EdgeInsets.all(Dimensions.defaultHorizontalSize),
+        decoration: BoxDecoration(
+          color: Color(0xFFFEF3C7),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: Color(0xFFF59E0B).withOpacity(0.3),
+            width: 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Color(0xFFF59E0B).withOpacity(0.2),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(
+                Icons.location_off_rounded,
+                size: 20,
+                color: Color(0xFFD97706),
+              ),
+            ),
+            SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Location Access Needed',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF92400E),
+                      height: 1.3,
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    'Enable location to see delivery options for cars',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xFFB45309),
+                      height: 1.4,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(width: 8),
+            TextButton(
+              onPressed: () async {
+                final locationService = Get.find<LocationService>();
+                await locationService.openAppSettings();
+                await controller.retryDeliveryCheck();
+              },
+              style: TextButton.styleFrom(
+                backgroundColor: Color(0xFFF59E0B),
+                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: Text(
+                'Enable',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _buildEmptyState() {

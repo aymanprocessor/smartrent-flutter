@@ -12,6 +12,17 @@ class RoutePageList {
       page: () => const NotificationScreen(),
       binding: NotificationBinding(),
     ),
+    // Profile Completion & KYC Routes
+    GetPage(
+      name: Routes.profileCompletionScreen,
+      page: () => const ProfileCompletionScreen(),
+      binding: ProfileCompletionBinding(),
+    ),
+    GetPage(
+      name: Routes.kycSubmissionScreen,
+      page: () => const KycSubmissionScreen(),
+      binding: KycSubmissionBinding(),
+    ),
     // OTP verification routes removed
     GetPage(
       name: Routes.change_passwordScreen,

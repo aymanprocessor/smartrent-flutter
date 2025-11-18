@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../base/utils/basic_import.dart';
 import '../../../base/widgets/app_cached_image.dart';
+import '../../../base/services/location_service.dart';
 import '../controller/all_vendors_dashboard_controller.dart';
 import '../../dashboard/controller/dashboard_controller.dart';
 import '../model/vendor_cars_model.dart';

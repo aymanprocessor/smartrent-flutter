@@ -18,13 +18,19 @@ enum ApiEndpoint {
   emailOtpVerify('/authorize/mail/verify/code'),
   resendEmailOtp('/authorize/mail/resend/code'),
   kycInfo('/user/kyc-input-fields'),
-  kycSubmit('/user/kyc-submit'),
 
   // OTP for Mobile Authentication
   sendOtp('/otp/send'),
   verifyOtp('/otp/verify'),
   loginViaOtp('/otp/login-via-otp'),
   resendOtp('/otp/resend'),
+
+  // Profile Completion & KYC
+  profileComplete('/user/profile/complete'),
+  profileStatus('/user/profile/status'),
+  kycFields('/user/kyc/fields'),
+  kycSubmit('/user/kyc/submit'),
+  kycStatus('/user/kyc/status'),
 
   // 2FA
   twoFaInfo('/user/google-2fa'),
@@ -73,7 +79,10 @@ enum ApiEndpoint {
   paytabsCarBookingCallback('/user/car-booking/paytabs/callback'),
 
   // Authorize
-  authorizeSubmit("/user/car-booking/authorize-payment-submit");
+  authorizeSubmit("/user/car-booking/authorize-payment-submit"),
+
+  // Delivery Zone Check
+  deliveryCheck('/api/delivery/check');
 
   final String path;
 

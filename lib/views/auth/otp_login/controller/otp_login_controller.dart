@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:phone_numbers_parser/phone_numbers_parser.dart';
 import '../../../../base/api/services/auth_services.dart';
+import '../../../../base/api/services/profile_kyc_service.dart';
+import '../../../../base/utils/next_action_guard.dart';
+import '../../../../base/widgets/custom_snackbar.dart';
 import '../../../../languages/strings.dart';
 
 class OtpLoginController extends GetxController {
@@ -130,19 +133,30 @@ class OtpLoginController extends GetxController {
       return;
     }
 
-    return AuthServices.verifyUserOtp(
+    _isLoading.value = true;
+
+    // Use new service with next_action support
+    final response = await ProfileKycService.verifyOtpWithNextAction(
       mobileCode: mobileCode.value,
       mobile: mobileController.text,
       otpCode: otp.value,
-      isLoading: _isLoading,
-    ).then((value) {
-      if (value != null) {
-        // Clear form
-        mobileController.clear();
-        otpController.clear();
-        otp.value = '';
-        isOtpSent.value = false;
-      }
-    });
+    );
+
+    _isLoading.value = false;
+
+    if (response != null && response.success && response.data != null) {
+      // Clear form
+      mobileController.clear();
+      otpController.clear();
+      otp.value = '';
+      isOtpSent.value = false;
+
+      // Use NextActionGuard to handle routing based on next_action
+      await NextActionGuard.handlePostAuth(response.data!);
+    } else {
+      CustomSnackBar.error(
+        response?.message ?? 'Failed to verify OTP. Please try again.',
+      );
+    }
   }
 }
