@@ -490,10 +490,13 @@ class AllVendorsCarListView extends GetView<AllVendorsDashboardController> {
                     Builder(
                       builder: (context) {
                         final imageUrl = car.modelImage?.trim() ?? '';
+                        final screenWidth = MediaQuery.of(context).size.width -
+                            (Dimensions.defaultHorizontalSize * 2);
+                        final imageHeight = screenWidth * 3 / 4; // 4:3 ratio
                         
                         return AppCachedImage(
                           imageUrl: imageUrl,
-                          height: MediaQuery.of(context).size.height * 0.18,
+                          height: imageHeight,
                           width: double.infinity,
                           fit: BoxFit.cover,
                           borderRadius: BorderRadius.only(

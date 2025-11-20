@@ -94,7 +94,7 @@ class AllVendorsCarCarousel extends GetView<AllVendorsDashboardController> {
                                       imageUrl: imageUrl,
                                       width: double.infinity,
                                       height: double.infinity,
-                                      fit: BoxFit.cover,
+                                      fit: BoxFit.contain,
                                       borderRadius: BorderRadius.circular(
                                         Dimensions.radius * 0.5,
                                       ),

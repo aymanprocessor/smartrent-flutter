@@ -19,6 +19,8 @@ class AllVendorsDashboardController extends GetxController {
 
   // Cars list - New vendor cars model
   var vendorCars = <VendorCar>[].obs;
+  // Keep a master copy of loaded cars so filters can be toggled on/off
+  var allVendorCars = <VendorCar>[].obs;
   RxString carImgUrl = ''.obs;
 
   // Pagination
@@ -77,6 +79,7 @@ class AllVendorsDashboardController extends GetxController {
       currentPage.value++;
     } else {
       vendorCars.clear();
+      allVendorCars.clear();
       currentPage.value = 1;
       _isSearchingCar.value = true;
     }
@@ -117,9 +120,13 @@ class AllVendorsDashboardController extends GetxController {
 
         if (vendorCarsModel.success) {
           if (loadMore) {
+            // append to master list and current view
+            allVendorCars.addAll(vendorCarsModel.data.cars);
             vendorCars.addAll(vendorCarsModel.data.cars);
           } else {
-            vendorCars.value = vendorCarsModel.data.cars;
+            // replace master list and current view
+            allVendorCars.value = vendorCarsModel.data.cars;
+            vendorCars.value = List<VendorCar>.from(allVendorCars);
           }
 
           // Update carToken from API response
@@ -133,8 +140,11 @@ class AllVendorsDashboardController extends GetxController {
           hasMore.value = vendorCarsModel.data.pagination.hasMore;
           metaInfo.value = vendorCarsModel.data.meta;
 
-          // Check delivery availability after loading cars
+          // Check delivery availability after loading cars (always check for all loaded cars)
           if (!loadMore) {
+            _checkDeliveryForCars();
+          } else {
+            // For load more we also want to check delivery for newly added branches
             _checkDeliveryForCars();
           }
 
@@ -196,8 +206,8 @@ class AllVendorsDashboardController extends GetxController {
 
       log.i('User current location - Lat: ${position.latitude}, Lng: ${position.longitude}');
 
-      // Extract unique branch IDs from cars
-      final branchIds = vendorCars
+        // Extract unique branch IDs from all loaded cars (master list)
+        final branchIds = allVendorCars
           .where((car) => car.branchId != null)
           .map((car) => car.branchId!)
           .toSet()
@@ -285,7 +295,8 @@ class AllVendorsDashboardController extends GetxController {
 
   // Apply sorting and filtering
   void _applySortAndFilter() {
-    var filteredCars = List<VendorCar>.from(vendorCars);
+    // Start from the master unfiltered list so toggling filters restores all items
+    var filteredCars = List<VendorCar>.from(allVendorCars);
 
     // Apply filter
     if (quickFilter.value == 'available') {
@@ -296,6 +307,8 @@ class AllVendorsDashboardController extends GetxController {
       filteredCars = filteredCars
           .where((car) => isDeliveryAvailable(car))
           .toList();
+    } else if (quickFilter.value == 'all') {
+      // no-op, keep full list
     }
 
     // Apply sort
