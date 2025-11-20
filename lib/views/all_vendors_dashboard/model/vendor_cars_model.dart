@@ -344,10 +344,12 @@ class VendorLocation {
   factory VendorLocation.fromJson(Map<String, dynamic> json) => VendorLocation(
     city: json["city"],
     address: json["address"],
-    latitude: json["latitude"] != null ? (json["latitude"]).toDouble() : null,
+    latitude: json["latitude"] != null 
+        ? (json["latitude"]).toDouble() 
+        : (json["lat"] != null ? (json["lat"]).toDouble() : null),
     longitude: json["longitude"] != null
         ? (json["longitude"]).toDouble()
-        : null,
+        : (json["long"] != null ? (json["long"]).toDouble() : null),
   );
 
   Map<String, dynamic> toJson() => {

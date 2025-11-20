@@ -69,39 +69,48 @@ class BookingAllFields extends GetView<BookingController> {
 
   /// Delivery Section: Checkbox and Location Input
   _deliverySection() {
-    return Column(
-      children: [
-        Obx(
-          () => Row(
-            children: [
-              Checkbox(
-                value: controller.isDeliver.value,
-                onChanged: (v) => controller.isDeliver.value = v ?? false,
-                // use app primary color when checked
-                fillColor: MaterialStateProperty.resolveWith<Color?>((states) {
-                  if (states.contains(MaterialState.selected)) return CustomColor.primary;
-                  return null;
-                }),
+    return Obx(
+      () {
+        // Hide delivery section entirely if delivery is not available
+        if (!controller.isDeliveryAvailable()) {
+          return const SizedBox.shrink();
+        }
+
+        return Column(
+          children: [
+            Obx(
+              () => Row(
+                children: [
+                  Checkbox(
+                    value: controller.isDeliver.value,
+                    onChanged: (v) => controller.isDeliver.value = v ?? false,
+                    // use app primary color when checked
+                    fillColor: MaterialStateProperty.resolveWith<Color?>((states) {
+                      if (states.contains(MaterialState.selected)) return CustomColor.primary;
+                      return null;
+                    }),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(DynamicLanguage.isLoading ? '' : DynamicLanguage.key(Strings.deliveryCar)),
+                ],
               ),
-              const SizedBox(width: 8),
-              Text(DynamicLanguage.isLoading ? '' : DynamicLanguage.key(Strings.deliveryCar)),
-            ],
-          ),
-        ),
-        Sizes.height.v5,
-        
-        // Show pickup location only when deliver is enabled
-        Obx(
-          () => controller.isDeliver.value
-              ? PrimaryInputWidget(
-                  controller: controller.locationController,
-                  label: DynamicLanguage.key(Strings.PickUpLocation),
-                  hintText: DynamicLanguage.key(Strings.PickUpLocation),
-                  showBorderSide: true,
-                )
-              : const SizedBox.shrink(),
-        ),
-      ],
+            ),
+            Sizes.height.v5,
+            
+            // Show pickup location only when deliver is enabled
+            Obx(
+              () => controller.isDeliver.value
+                  ? PrimaryInputWidget(
+                      controller: controller.locationController,
+                      label: DynamicLanguage.key(Strings.PickUpLocation),
+                      hintText: DynamicLanguage.key(Strings.PickUpLocation),
+                      showBorderSide: true,
+                    )
+                  : const SizedBox.shrink(),
+            ),
+          ],
+        );
+      },
     );
   }
 

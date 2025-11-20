@@ -1,6 +1,6 @@
 import 'package:carbo/routes/routes.dart';
-import 'package:dynamic_languages/dynamic_languages.dart';
 import 'package:flutter/material.dart';
+import '../../../base/localization/dynamic_language_shim.dart';
 import '../../../base/utils/basic_import.dart';
 import '../../../base/widgets/custom_date_picker.dart';
 import '../../../base/widgets/custom_time_picker.dart';

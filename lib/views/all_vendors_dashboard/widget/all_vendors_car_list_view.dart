@@ -160,7 +160,12 @@ class AllVendorsCarListView extends GetView<AllVendorsDashboardController> {
                     }
 
                     final car = controller.vendorCars[index];
-                    return _buildCarCard(context, car);
+                    return Obx(
+                      () => _buildShimmerWrapper(
+                        isLoading: controller.isCheckingDelivery.value,
+                        child: _buildCarCard(context, car),
+                      ),
+                    );
                   },
                   childCount:
                       controller.vendorCars.length +
@@ -894,54 +899,121 @@ class AllVendorsCarListView extends GetView<AllVendorsDashboardController> {
   }
 
   Widget _buildEmptyState() {
-    return Center(
-      child: Padding(
-        padding: EdgeInsets.symmetric(
-          vertical: Dimensions.verticalSize * 4,
-          horizontal: Dimensions.defaultHorizontalSize,
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 120,
-              height: 120,
-              decoration: BoxDecoration(
-                color: Color(0xFFF9FAFB),
-                shape: BoxShape.circle,
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          // Header with filter chips
+          Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: Dimensions.defaultHorizontalSize,
+              vertical: Dimensions.verticalSize * 0.5,
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 10,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Color(0xFFF9FAFB),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: Color(0xFFE5E7EB),
+                        width: 1,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.directions_car_rounded,
+                          size: 18,
+                          color: CustomColor.primary,
+                        ),
+                        SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            '0 ${DynamicLanguage.key(Strings.carsAvailable)}',
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF1F2937),
+                              height: 1.4,
+                              letterSpacing: 0,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                SizedBox(width: 8),
+                // Sort dropdown
+                _buildSortDropdown(),
+              ],
+            ),
+          ),
+          SizedBox(height: Dimensions.verticalSize * 0.5),
+          
+          // Quick filter chips
+          _buildQuickFilterChips(),
+          SizedBox(height: Dimensions.verticalSize * 2),
+          
+          // Empty state content
+          Center(
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                vertical: Dimensions.verticalSize * 2,
+                horizontal: Dimensions.defaultHorizontalSize,
               ),
-              child: Icon(
-                Icons.search_off_rounded,
-                size: 56,
-                color: Color(0xFF9CA3AF),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 120,
+                    height: 120,
+                    decoration: BoxDecoration(
+                      color: Color(0xFFF9FAFB),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.search_off_rounded,
+                      size: 56,
+                      color: Color(0xFF9CA3AF),
+                    ),
+                  ),
+                  SizedBox(height: Dimensions.verticalSize * 1.5),
+                  Text(
+                    DynamicLanguage.key(Strings.noCarsFound),
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF1F2937),
+                      height: 1.3,
+                      letterSpacing: -0.3,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: Dimensions.verticalSize * 0.5),
+                  Text(
+                    DynamicLanguage.key(Strings.tryDifferentFilters),
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xFF6B7280),
+                      height: 1.5,
+                      letterSpacing: 0,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
               ),
             ),
-            SizedBox(height: Dimensions.verticalSize * 1.5),
-            Text(
-              DynamicLanguage.key(Strings.noCarsFound),
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
-                color: Color(0xFF1F2937),
-                height: 1.3,
-                letterSpacing: -0.3,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: Dimensions.verticalSize * 0.5),
-            Text(
-              DynamicLanguage.key(Strings.tryDifferentFilters),
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: Color(0xFF6B7280),
-                height: 1.5,
-                letterSpacing: 0,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -974,5 +1046,43 @@ class AllVendorsCarListView extends GetView<AllVendorsDashboardController> {
     }
     
     Get.toNamed(Routes.bookingScreen, arguments: {'car': car});
+  }
+
+  // Build shimmer wrapper for delivery check loading
+  Widget _buildShimmerWrapper({
+    required bool isLoading,
+    required Widget child,
+  }) {
+    if (!isLoading) {
+      return child;
+    }
+
+    return Stack(
+      children: [
+        // Original card content (slightly dimmed)
+        Opacity(
+          opacity: 0.5,
+          child: child,
+        ),
+        // Shimmer overlay
+        Positioned.fill(
+          child: Shimmer.fromColors(
+            baseColor: Colors.grey[300]!,
+            highlightColor: Colors.grey[100]!,
+            enabled: true,
+            child: Container(
+              margin: EdgeInsets.symmetric(
+                horizontal: Dimensions.defaultHorizontalSize,
+                vertical: Dimensions.verticalSize * 0.5,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(Dimensions.radius * 1.2),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }

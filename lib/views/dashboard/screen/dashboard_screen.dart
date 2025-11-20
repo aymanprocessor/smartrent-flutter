@@ -4,7 +4,7 @@ import 'package:carbo/routes/routes.dart';
 import 'package:carbo/views/drawer/screen/drawer_screen.dart';
 import 'package:carbo/views/update_profile/controller/update_profile_controller.dart';
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:dynamic_languages/dynamic_languages.dart';
+import '../../../base/localization/dynamic_language_shim.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';

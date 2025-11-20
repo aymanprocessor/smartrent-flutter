@@ -1,7 +1,7 @@
-import 'package:dynamic_languages/dynamic_languages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../localization/dynamic_language_shim.dart';
 import '../utils/basic_import.dart';
 
 /// >>> Border Side Style
@@ -305,6 +305,14 @@ class _PrimaryInputWidgetState extends State<PrimaryInputWidget> {
   }
 
   _setPrefixIcon() {
+    bool controllerHasText() {
+      try {
+        return widget.controller.text.isNotEmpty;
+      } catch (_) {
+        return false;
+      }
+    }
+
     return widget.prefixIcon ??
         (widget.prefixIconPath != ''
             ? Padding(
@@ -316,13 +324,11 @@ class _PrimaryInputWidgetState extends State<PrimaryInputWidget> {
                   children: [
                     CustomImageWidget(
                       path: widget.prefixIconPath!,
-                      color:
-                          focusNode!.hasFocus ||
-                              widget.controller.text.isNotEmpty
+                      color: focusNode!.hasFocus || controllerHasText()
                           ? CustomColor.typography
                           : Get.isDarkMode
-                          ? Colors.white
-                          : CustomColor.disableColor,
+                              ? Colors.white
+                              : CustomColor.disableColor,
                     ),
                     Visibility(
                       visible: widget.phoneCode != '',
@@ -387,7 +393,7 @@ class _PrimaryInputWidgetState extends State<PrimaryInputWidget> {
         ? null
         : (String? value) {
             if (value!.isEmpty) {
-              return Strings.pleaseFillOutTheField;
+              return DynamicLanguage.key(Strings.pleaseFillOutTheField);
             } else {
               return null;
             }

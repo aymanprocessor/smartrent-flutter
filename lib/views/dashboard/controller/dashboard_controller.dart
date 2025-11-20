@@ -3,7 +3,7 @@ import 'package:carbo/views/dashboard/model/area_has_type_model.dart';
 import 'package:carbo/views/dashboard/model/car_area_model.dart';
 import 'package:carbo/views/dashboard/model/type_has_model.dart';
 import '../model/model_has_years.dart';
-import 'package:dynamic_languages/dynamic_languages.dart';
+import '../../../base/localization/dynamic_language_shim.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;

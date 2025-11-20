@@ -1,13 +1,15 @@
 import 'package:carbo/views/dashboard/controller/dashboard_controller.dart';
-import 'package:dynamic_languages/dynamic_languages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'base/api/endpoint/api_endpoint.dart';
 import 'base/maintenance/maintenance_dialog.dart';
 import 'base/utils/basic_import.dart';
 import 'base/services/location_service.dart';
 import 'base/services/delivery_service.dart';
+import 'base/localization/dynamic_language_shim.dart';
+import 'generated/l10n/app_localizations.dart';
 import 'initializer.dart';
 import 'routes/routes.dart';
 import 'views/all_vendors_dashboard/utils/custom_image_loader.dart';
@@ -45,6 +47,16 @@ class MyApp extends StatelessWidget {
         darkTheme: Themes.dark,
         getPages: Routes.list,
         themeMode: ThemeMode.light,
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: const [
+          Locale('en'),
+          Locale('ar'),
+        ],
         initialBinding: BindingsBuilder(() async {
           Get.put(SystemMaintenanceController());
           // Initialize location and delivery services

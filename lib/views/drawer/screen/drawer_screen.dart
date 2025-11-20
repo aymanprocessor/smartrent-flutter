@@ -1,4 +1,4 @@
-import 'package:dynamic_languages/dynamic_languages.dart';
+import '../../../base/localization/dynamic_language_shim.dart';
 import 'package:flutter/material.dart';
 import '../../../base/utils/basic_import.dart';
 import '../../../base/widgets/app_cached_image.dart';

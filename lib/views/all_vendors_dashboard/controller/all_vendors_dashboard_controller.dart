@@ -1,9 +1,8 @@
 import 'package:carbo/base/utils/basic_import.dart';
-import 'package:dynamic_languages/dynamic_languages.dart';
+import 'package:carbo/base/localization/dynamic_language_shim.dart';
 import 'package:carbo/base/widgets/logger.dart';
 import '../../../base/api/endpoint/api_endpoint.dart';
 import '../model/vendor_cars_model.dart';
-import '../model/delivery_check_model.dart';
 import 'package:http/http.dart' as http;
 import 'package:carbo/base/utils/local_storage.dart';
 import 'package:carbo/base/services/location_service.dart';
@@ -195,6 +194,8 @@ class AllVendorsDashboardController extends GetxController {
         return;
       }
 
+      log.i('User current location - Lat: ${position.latitude}, Lng: ${position.longitude}');
+
       // Extract unique branch IDs from cars
       final branchIds = vendorCars
           .where((car) => car.branchId != null)
@@ -204,27 +205,28 @@ class AllVendorsDashboardController extends GetxController {
 
       if (branchIds.isEmpty) {
         log.w('No branch IDs found in cars');
-        isCheckingDelivery.value = false;
-        return;
+        // Note: Delivery badge will show based on vendor location availability
+        // Cars with vendor_location data will display delivery badge
+        // Shimmer will remain visible until completion in finally block
+      } else {
+        log.i('Checking delivery for ${branchIds.length} branches');
+
+        // Check delivery for all unique branches
+        final deliveryService = Get.find<DeliveryService>();
+        final results = await deliveryService.checkMultipleBranches(
+          branchIds: branchIds,
+          userLat: position.latitude,
+          userLng: position.longitude,
+        );
+
+        // Update delivery availability map
+        deliveryAvailabilityMap.clear();
+        results.forEach((branchId, response) {
+          deliveryAvailabilityMap[branchId] = response.isAvailable;
+        });
+
+        log.i('Delivery check complete: ${deliveryAvailabilityMap.length} branches checked');
       }
-
-      log.i('Checking delivery for ${branchIds.length} branches');
-
-      // Check delivery for all unique branches
-      final deliveryService = Get.find<DeliveryService>();
-      final results = await deliveryService.checkMultipleBranches(
-        branchIds: branchIds,
-        userLat: position.latitude,
-        userLng: position.longitude,
-      );
-
-      // Update delivery availability map
-      deliveryAvailabilityMap.clear();
-      results.forEach((branchId, response) {
-        deliveryAvailabilityMap[branchId] = response.isAvailable;
-      });
-
-      log.i('Delivery check complete: ${deliveryAvailabilityMap.length} branches checked');
     } catch (e) {
       log.e('Error checking delivery: $e');
     } finally {
@@ -234,8 +236,16 @@ class AllVendorsDashboardController extends GetxController {
 
   // Check if a car has delivery available
   bool isDeliveryAvailable(VendorCar car) {
-    if (car.branchId == null) return false;
-    return deliveryAvailabilityMap[car.branchId] ?? false;
+    // Check by branch ID if available
+    if (car.branchId != null) {
+      return deliveryAvailabilityMap[car.branchId] ?? false;
+    }
+    // Fallback: Show delivery available if car has vendor location with coordinates
+    // This indicates the vendor has a physical location and can potentially deliver
+    if (car.vendorLocation?.latitude != null && car.vendorLocation?.longitude != null) {
+      return true; // Show delivery badge for cars with location data
+    }
+    return false;
   }
 
   // Manually trigger delivery check (when user enables location)

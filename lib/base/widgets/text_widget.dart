@@ -5,8 +5,7 @@ import 'package:get/get.dart';
 import '../themes/model.dart';
 import '../themes/token.dart';
 import '../utils/custom_style.dart';
-
-import 'package:dynamic_languages/dynamic_languages.dart';
+import '../localization/dynamic_language_shim.dart';
 
 class TextWidget extends StatelessWidget {
   const TextWidget(

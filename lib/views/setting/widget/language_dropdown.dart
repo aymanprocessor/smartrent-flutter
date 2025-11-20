@@ -1,6 +1,6 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
-import 'package:dynamic_languages/dynamic_languages.dart';
 import 'package:flutter/material.dart';
+import '../../../../base/localization/dynamic_language_shim.dart';
 import '../../../../base/utils/basic_import.dart';
 
 class ChangeLanguageWidget extends StatelessWidget {

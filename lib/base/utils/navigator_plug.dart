@@ -1,7 +1,7 @@
 import 'dart:async';
-import 'package:dynamic_languages/dynamic_languages.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../localization/dynamic_language_shim.dart';
 import '../maintenance/maintenance_dialog.dart';
 
 // FOR MAINTENANCE MODE - - - - - - - - - - - - - - - - -

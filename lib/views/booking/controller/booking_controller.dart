@@ -126,11 +126,11 @@ class BookingController extends GetxController {
   String getQuantityLabel() {
     switch (pricingType.value) {
       case 'per_day':
-        return Strings.rentalDays; // Number of rental days
+        return Strings.rentalDays; // Number of rental days (already wrapped in TextWidget)
       case 'per_km':
-        return Strings.distance; // Distance
+        return Strings.distance; // Distance (already wrapped in TextWidget)
       default:
-        return Strings.quantity; // Quantity
+        return Strings.quantity; // Quantity (already wrapped in TextWidget)
     }
   }
 
@@ -138,11 +138,11 @@ class BookingController extends GetxController {
   String getQuantityHint() {
     switch (pricingType.value) {
       case 'per_day':
-        return Strings.enterDays;
+        return Strings.enterDays; // (already wrapped in PrimaryInputWidget hintText)
       case 'per_km':
-        return Strings.enterDistance;
+        return Strings.enterDistance; // (already wrapped in PrimaryInputWidget hintText)
       default:
-        return Strings.enterQuantity;
+        return Strings.enterQuantity; // (already wrapped in PrimaryInputWidget hintText)
     }
   }
 
@@ -227,6 +227,31 @@ class BookingController extends GetxController {
       'currency': selectedCar.value?.currency ?? 'SAR',
       'token': bookingToken,  // Booking token from vendor cars API or fallback
     };
+  }
+
+  /// Check if delivery is available for the selected car
+  bool isDeliveryAvailable() {
+    if (selectedCar.value == null) return false;
+    
+    final car = selectedCar.value!;
+    
+    try {
+      final vendorController = Get.find<AllVendorsDashboardController>();
+      
+      // Check by branch ID if available
+      if (car.branchId != null) {
+        return vendorController.deliveryAvailabilityMap[car.branchId] ?? false;
+      }
+    } catch (e) {
+      // Controller not found, fall through to location check
+    }
+    
+    // Fallback: Check if car has vendor location with coordinates
+    if (car.vendorLocation?.latitude != null && car.vendorLocation?.longitude != null) {
+      return true;
+    }
+    
+    return false;
   }
 }
 
