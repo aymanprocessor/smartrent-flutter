@@ -44,6 +44,7 @@ import '../views/splash/screen/splash_screen.dart';
 import '../views/update_profile/screen/update_profile_screen.dart';
 import '../views/profile_completion/screen/profile_completion_screen.dart';
 import '../views/kyc_submission/screen/kyc_submission_screen.dart';
+import '../views/wallet/wallet_screen.dart';
 
 part '../routes/route_pages.dart';
 
@@ -76,6 +77,7 @@ class Routes {
   static const String notificationScreen = '/notificationScreen';
   static const String drawerScreen = '/drawerScreen';
   static const String historyScreen = '/historyScreen';
+  static const String walletScreen = '/walletScreen';
   static const String paymentManualField = '/paymentManualField';
   static const String RePaymentManualField = '/RePaymentManualField';
   static const String settingScreen = '/settingScreen';

@@ -109,5 +109,9 @@ class RoutePageList {
       page: () => HistoryScreen(),
       binding: HistoryBinding(),
     ),
+    GetPage(
+      name: Routes.walletScreen,
+      page: () => const WalletScreen(),
+    ),
   ];
 }

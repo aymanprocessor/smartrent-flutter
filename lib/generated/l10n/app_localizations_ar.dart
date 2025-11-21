@@ -21,7 +21,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get appLFromCamera => 'من الكاميرا';
 
   @override
-  String get appLHistory => 'التاريخ';
+  String get appLHistory => 'السجل';
 
   @override
   String get appLPrivacyPolicy => 'سياسة الخصوصية';
@@ -156,7 +156,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get appLNoNotification => 'لا توجد إشعارات';
 
   @override
-  String get appLNoHistory => 'لا يوجد تاريخ';
+  String get appLNoHistory => 'لا يوجد سجلات';
 
   @override
   String get appLLoginNow => 'سجل الدخول الآن';
@@ -605,4 +605,126 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get appLEnterQuantity => 'أدخل الكمية';
+
+  @override
+  String get appLMyWallet => 'محفظتي';
+
+  @override
+  String get appLWalletBalance => 'رصيد المحفظة';
+
+  @override
+  String get appLAvailableBalance => 'الرصيد المتاح';
+
+  @override
+  String get appLTopUpWallet => 'إضافة رصيد للمحفظة';
+
+  @override
+  String get appLTopUp => 'إضافة رصيد';
+
+  @override
+  String get appLTransactions => 'المعاملات';
+
+  @override
+  String get appLRecentTransactions => 'المعاملات الأخيرة';
+
+  @override
+  String get appLNoTransactions => 'لا توجد معاملات بعد';
+
+  @override
+  String get appLLoadingTransactions => 'جاري تحميل المعاملات...';
+
+  @override
+  String get appLLoadingBalance => 'جاري تحميل الرصيد...';
+
+  @override
+  String get appLTopUpSuccess => 'تمت إضافة الرصيد بنجاح!';
+
+  @override
+  String get appLTopUpFailed => 'فشلت إضافة الرصيد';
+
+  @override
+  String get appLPaymentProcessing =>
+      'جاري معالجة الدفع - تحقق من المعاملات لاحقاً';
+
+  @override
+  String get appLInsufficientBalance => 'رصيد المحفظة غير كافي';
+
+  @override
+  String get appLInsufficientBalanceMessage =>
+      'رصيد محفظتك غير كافي. يرجى إضافة رصيد.';
+
+  @override
+  String get appLWalletChargedSuccess => 'تم الخصم من المحفظة بنجاح';
+
+  @override
+  String get appLWalletChargeFailed => 'فشل الخصم من المحفظة';
+
+  @override
+  String get appLEnterAmount => 'أدخل المبلغ';
+
+  @override
+  String get appLAmount => 'المبلغ';
+
+  @override
+  String get appLCurrency => 'العملة';
+
+  @override
+  String get appLPaymentType => 'نوع الدفع';
+
+  @override
+  String get appLDebit => 'دفع';
+
+  @override
+  String get appLRefund => 'استرجاع';
+
+  @override
+  String get appLRefundToWallet => 'استرجاع للمحفظة';
+
+  @override
+  String get appLRefundToCard => 'استرجاع للبطاقة';
+
+  @override
+  String get appLTransactionId => 'معرّف المعاملة';
+
+  @override
+  String get appLTransactionStatus => 'الحالة';
+
+  @override
+  String get appLTransactionDate => 'التاريخ';
+
+  @override
+  String get appLProcessing => 'جاري المعالجة...';
+
+  @override
+  String get appLCompleted => 'مكتمل';
+
+  @override
+  String get appLFailed => 'فشل';
+
+  @override
+  String get appLCancelled => 'ملغي';
+
+  @override
+  String get appLRetry => 'إعادة المحاولة';
+
+  @override
+  String get appLNoWalletBalance => 'لا يوجد رصيد في المحفظة';
+
+  @override
+  String get appLPartialWalletPayment => 'دفع جزئي من المحفظة';
+
+  @override
+  String appLPartialPaymentMessage(
+    Object balance,
+    Object currency,
+    Object shortfall,
+  ) {
+    return 'محفظتك تحتوي على $balance $currency. هل تريد دفع $shortfall $currency عبر البطاقة؟';
+  }
+
+  @override
+  String get appLYesContinue => 'نعم، متابعة';
+
+  @override
+  String get appLWalletPayment => 'دفع من المحفظة';
 }

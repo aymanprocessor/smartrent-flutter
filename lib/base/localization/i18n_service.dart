@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import '../../../generated/l10n/app_localizations.dart';
-import 'remote_language_service.dart';
+// Remote runtime translations are intentionally disabled. Use ARB (AppLocalizations) only.
 
 /// I18n service that provides unified access to translations
 /// Priority: 1) Runtime server translations, 2) Generated ARB translations, 3) Fallback to key
@@ -19,15 +19,15 @@ class I18nService extends GetxController {
   bool get isLoading => _isLoading.value;
   RxBool get isLoadingValue => _isLoading;
   
-  // Runtime translations from server (cached)
+  // Runtime translations from server (cached) - not used in ARB-only mode
   final Map<String, Map<String, String>> _runtimeTranslations = {};
-  
-  // Available languages from server
+
+  // Available languages (populated from local ARB files)
   final RxList<LanguageModel> _languages = <LanguageModel>[].obs;
   List<LanguageModel> get languages => _languages;
-  
-  // Remote service
-  late RemoteLanguageService _remoteService;
+
+  // Reactive accessor for UI bindings
+  RxList<LanguageModel> get languagesRx => _languages;
   
   // Cache for AppLocalizations instance
   AppLocalizations? _cachedAppLocalizations;
@@ -35,44 +35,36 @@ class I18nService extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    _remoteService = RemoteLanguageService(this);
+    // Do not initialize remote language service — use ARB translations only.
     _loadSavedLanguage();
+
+    // Populate supported local languages (derived from lib/l10n/*.arb)
+    // Keep list minimal and deterministic to avoid relying on remote service.
+    _languages.value = [
+      LanguageModel(code: 'en', name: 'English', direction: 'ltr'),
+      LanguageModel(code: 'ar', name: 'العربية', direction: 'rtl'),
+    ];
   }
   
-  /// Initialize with server URL to fetch runtime translations
+  /// Initialize kept for API compatibility. Remote fetches disabled — no-op.
   Future<void> init({required String url}) async {
-    _isLoading.value = true;
-    
-    try {
-      // Fetch from remote service
-      await _remoteService.fetchTranslations(url);
-      _isLoading.value = false;
-    } catch (e) {
-      debugPrint('I18n init error: $e');
-      _isLoading.value = false;
-    }
+    _isLoading.value = false;
+    // Intentionally no-op: this app uses generated ARB translations only.
+    return;
   }
   
-  /// Get translation for a key using AppLocalizations getter map
+  /// Get translation for a key using AppLocalizations getter map (ARB-only)
   String key(String translationKey, {BuildContext? context}) {
-    // Priority 1: Runtime translations from server (if available)
+    // Use the generated ARB translations via AppLocalizations only.
     final currentLangCode = _currentLocale.value.languageCode;
-    if (_runtimeTranslations.containsKey(currentLangCode)) {
-      final translation = _runtimeTranslations[currentLangCode]![translationKey];
-      if (translation != null && translation.isNotEmpty) {
-        return translation;
-      }
-    }
-    
-    // Priority 2: Generated ARB translations via AppLocalizations
+
     try {
       // Create AppLocalizations for current locale if not cached
-      if (_cachedAppLocalizations == null || 
+      if (_cachedAppLocalizations == null ||
           _cachedAppLocalizations!.localeName != currentLangCode) {
-        // Use the lookupAppLocalizations function to get the correct implementation
         _cachedAppLocalizations = lookupAppLocalizations(Locale(currentLangCode));
       }
-      
+
       // Use the getter map to retrieve translation
       final translation = _translationGetters[translationKey]?.call(_cachedAppLocalizations!);
       if (translation != null && translation.isNotEmpty) {
@@ -81,8 +73,8 @@ class I18nService extends GetxController {
     } catch (e) {
       debugPrint('AppLocalizations error for key $translationKey: $e');
     }
-    
-    // Priority 3: Fallback to key itself
+
+    // Fallback to key itself when translation not available
     return translationKey;
   }
   
@@ -286,6 +278,46 @@ class I18nService extends GetxController {
     'appLEnterDays': (l) => l.appLEnterDays,
     'appLEnterDistance': (l) => l.appLEnterDistance,
     'appLEnterQuantity': (l) => l.appLEnterQuantity,
+    // Wallet / Payments
+    'appLMyWallet': (l) => l.appLMyWallet,
+    'appLWalletBalance': (l) => l.appLWalletBalance,
+    'appLAvailableBalance': (l) => l.appLAvailableBalance,
+    'appLTopUpWallet': (l) => l.appLTopUpWallet,
+    'appLTopUp': (l) => l.appLTopUp,
+    'appLTransactions': (l) => l.appLTransactions,
+    'appLRecentTransactions': (l) => l.appLRecentTransactions,
+    'appLNoTransactions': (l) => l.appLNoTransactions,
+    'appLLoadingTransactions': (l) => l.appLLoadingTransactions,
+    'appLLoadingBalance': (l) => l.appLLoadingBalance,
+    'appLTopUpSuccess': (l) => l.appLTopUpSuccess,
+    'appLTopUpFailed': (l) => l.appLTopUpFailed,
+    'appLPaymentProcessing': (l) => l.appLPaymentProcessing,
+    'appLInsufficientBalance': (l) => l.appLInsufficientBalance,
+    'appLInsufficientBalanceMessage': (l) => l.appLInsufficientBalanceMessage,
+    'appLWalletChargedSuccess': (l) => l.appLWalletChargedSuccess,
+    'appLWalletChargeFailed': (l) => l.appLWalletChargeFailed,
+    'appLEnterAmount': (l) => l.appLEnterAmount,
+    'appLAmount': (l) => l.appLAmount,
+    'appLCurrency': (l) => l.appLCurrency,
+    'appLPaymentType': (l) => l.appLPaymentType,
+    'appLDebit': (l) => l.appLDebit,
+    'appLRefund': (l) => l.appLRefund,
+    'appLRefundToWallet': (l) => l.appLRefundToWallet,
+    'appLRefundToCard': (l) => l.appLRefundToCard,
+    'appLTransactionId': (l) => l.appLTransactionId,
+    'appLTransactionStatus': (l) => l.appLTransactionStatus,
+    'appLTransactionDate': (l) => l.appLTransactionDate,
+    'appLProcessing': (l) => l.appLProcessing,
+    'appLCompleted': (l) => l.appLCompleted,
+    'appLFailed': (l) => l.appLFailed,
+    'appLCancelled': (l) => l.appLCancelled,
+    'appLRetry': (l) => l.appLRetry,
+    'appLNoWalletBalance': (l) => l.appLNoWalletBalance,
+    'appLPartialWalletPayment': (l) => l.appLPartialWalletPayment,
+    // Note: parameterized translations like appLPartialPaymentMessage are
+    // called directly where needed via AppLocalizations.appLPartialPaymentMessage(...)
+    'appLYesContinue': (l) => l.appLYesContinue,
+    'appLWalletPayment': (l) => l.appLWalletPayment,
   };
   
   /// Change current language

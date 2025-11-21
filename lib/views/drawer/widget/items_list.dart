@@ -24,6 +24,11 @@ class OthersWidgets extends StatelessWidget {
           () => Get.toNamed(Routes.historyScreen),
         ),
         _itemCard(
+          Icons.account_balance_wallet_outlined,
+          Strings.myWallet,
+          () => Get.toNamed(Routes.walletScreen),
+        ),
+        _itemCard(
           Icons.language,
           Strings.language,
           () => Get.toNamed(Routes.settingScreen),

@@ -1,5 +1,7 @@
 import 'package:carbo/base/extensions/extensions.dart';
 import 'package:get/get.dart';
+import 'package:flutter/foundation.dart';
+import '../../../debug/print_auth_token.dart';
 import '../../../routes/routes.dart';
 import '../../../views/auth/login/model/log_in_model.dart';
 import '../../../views/auth/register/model/register_model.dart';
@@ -59,6 +61,11 @@ class AuthServices {
           number: data.userInfo.fullMobile, // Save the full phone number from API
           kycStatus: data.userInfo.kycVerified,
         );
+        // In debug builds, print token presence to console for local development.
+        if (kDebugMode) {
+          // Fire-and-forget; do not block navigation.
+          printAuthTokenDebug(revealRaw: true);
+        }
         // OTP verification removed; always go to dashboard
         if (data.userInfo.twoFactorStatus == 1 &&
             data.userInfo.twoFactorVerified == 0) {

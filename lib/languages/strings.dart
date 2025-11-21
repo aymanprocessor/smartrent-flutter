@@ -129,6 +129,7 @@ class Strings {
   static const String ConfirmBooking = "appLConfirmBooking";
   static const String language = "appLLanguage";
   static const String areYouSure = "appLAreYouSure";
+  static const String myWallet = "appLMyWallet";
   static const String areYouSureDelete = "appLAreYouSureDelete";
   static const String locationNotAbleAble = "appLLocationNotAbleAble";
   static const String logOut = "appLLogOut";

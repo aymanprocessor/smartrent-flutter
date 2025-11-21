@@ -1285,6 +1285,238 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enter Quantity'**
   String get appLEnterQuantity;
+
+  /// No description provided for @appLMyWallet.
+  ///
+  /// In en, this message translates to:
+  /// **'My Wallet'**
+  String get appLMyWallet;
+
+  /// No description provided for @appLWalletBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Wallet Balance'**
+  String get appLWalletBalance;
+
+  /// No description provided for @appLAvailableBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Available Balance'**
+  String get appLAvailableBalance;
+
+  /// No description provided for @appLTopUpWallet.
+  ///
+  /// In en, this message translates to:
+  /// **'Top Up Wallet'**
+  String get appLTopUpWallet;
+
+  /// No description provided for @appLTopUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Top Up'**
+  String get appLTopUp;
+
+  /// No description provided for @appLTransactions.
+  ///
+  /// In en, this message translates to:
+  /// **'Transactions'**
+  String get appLTransactions;
+
+  /// No description provided for @appLRecentTransactions.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent Transactions'**
+  String get appLRecentTransactions;
+
+  /// No description provided for @appLNoTransactions.
+  ///
+  /// In en, this message translates to:
+  /// **'No transactions yet'**
+  String get appLNoTransactions;
+
+  /// No description provided for @appLLoadingTransactions.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading transactions...'**
+  String get appLLoadingTransactions;
+
+  /// No description provided for @appLLoadingBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading balance...'**
+  String get appLLoadingBalance;
+
+  /// No description provided for @appLTopUpSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Wallet top-up successful!'**
+  String get appLTopUpSuccess;
+
+  /// No description provided for @appLTopUpFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Wallet top-up failed'**
+  String get appLTopUpFailed;
+
+  /// No description provided for @appLPaymentProcessing.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment processing - please check transactions later'**
+  String get appLPaymentProcessing;
+
+  /// No description provided for @appLInsufficientBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Insufficient wallet balance'**
+  String get appLInsufficientBalance;
+
+  /// No description provided for @appLInsufficientBalanceMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your wallet has insufficient funds. Please top up.'**
+  String get appLInsufficientBalanceMessage;
+
+  /// No description provided for @appLWalletChargedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Wallet charged successfully'**
+  String get appLWalletChargedSuccess;
+
+  /// No description provided for @appLWalletChargeFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to charge wallet'**
+  String get appLWalletChargeFailed;
+
+  /// No description provided for @appLEnterAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter amount'**
+  String get appLEnterAmount;
+
+  /// No description provided for @appLAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get appLAmount;
+
+  /// No description provided for @appLCurrency.
+  ///
+  /// In en, this message translates to:
+  /// **'Currency'**
+  String get appLCurrency;
+
+  /// No description provided for @appLPaymentType.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment Type'**
+  String get appLPaymentType;
+
+  /// No description provided for @appLDebit.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment'**
+  String get appLDebit;
+
+  /// No description provided for @appLRefund.
+  ///
+  /// In en, this message translates to:
+  /// **'Refund'**
+  String get appLRefund;
+
+  /// No description provided for @appLRefundToWallet.
+  ///
+  /// In en, this message translates to:
+  /// **'Refund to Wallet'**
+  String get appLRefundToWallet;
+
+  /// No description provided for @appLRefundToCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Refund to Card'**
+  String get appLRefundToCard;
+
+  /// No description provided for @appLTransactionId.
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction ID'**
+  String get appLTransactionId;
+
+  /// No description provided for @appLTransactionStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get appLTransactionStatus;
+
+  /// No description provided for @appLTransactionDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get appLTransactionDate;
+
+  /// No description provided for @appLProcessing.
+  ///
+  /// In en, this message translates to:
+  /// **'Processing...'**
+  String get appLProcessing;
+
+  /// No description provided for @appLCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get appLCompleted;
+
+  /// No description provided for @appLFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed'**
+  String get appLFailed;
+
+  /// No description provided for @appLCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get appLCancelled;
+
+  /// No description provided for @appLRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get appLRetry;
+
+  /// No description provided for @appLNoWalletBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'No wallet balance available'**
+  String get appLNoWalletBalance;
+
+  /// No description provided for @appLPartialWalletPayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Partial Wallet Payment'**
+  String get appLPartialWalletPayment;
+
+  /// No description provided for @appLPartialPaymentMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your wallet has {balance} {currency}. Pay {shortfall} {currency} via card?'**
+  String appLPartialPaymentMessage(
+    Object balance,
+    Object currency,
+    Object shortfall,
+  );
+
+  /// No description provided for @appLYesContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, Continue'**
+  String get appLYesContinue;
+
+  /// No description provided for @appLWalletPayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Wallet Payment'**
+  String get appLWalletPayment;
 }
 
 class _AppLocalizationsDelegate

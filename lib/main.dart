@@ -17,6 +17,7 @@ import 'views/all_vendors_dashboard/utils/custom_image_loader.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await AppInitializer.init();
+  // Debug: print presence of auth token(s) at startup (redacted by default)
   configureHttpClient();
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(

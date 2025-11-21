@@ -603,4 +603,126 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get appLEnterQuantity => 'Enter Quantity';
+
+  @override
+  String get appLMyWallet => 'My Wallet';
+
+  @override
+  String get appLWalletBalance => 'Wallet Balance';
+
+  @override
+  String get appLAvailableBalance => 'Available Balance';
+
+  @override
+  String get appLTopUpWallet => 'Top Up Wallet';
+
+  @override
+  String get appLTopUp => 'Top Up';
+
+  @override
+  String get appLTransactions => 'Transactions';
+
+  @override
+  String get appLRecentTransactions => 'Recent Transactions';
+
+  @override
+  String get appLNoTransactions => 'No transactions yet';
+
+  @override
+  String get appLLoadingTransactions => 'Loading transactions...';
+
+  @override
+  String get appLLoadingBalance => 'Loading balance...';
+
+  @override
+  String get appLTopUpSuccess => 'Wallet top-up successful!';
+
+  @override
+  String get appLTopUpFailed => 'Wallet top-up failed';
+
+  @override
+  String get appLPaymentProcessing =>
+      'Payment processing - please check transactions later';
+
+  @override
+  String get appLInsufficientBalance => 'Insufficient wallet balance';
+
+  @override
+  String get appLInsufficientBalanceMessage =>
+      'Your wallet has insufficient funds. Please top up.';
+
+  @override
+  String get appLWalletChargedSuccess => 'Wallet charged successfully';
+
+  @override
+  String get appLWalletChargeFailed => 'Failed to charge wallet';
+
+  @override
+  String get appLEnterAmount => 'Enter amount';
+
+  @override
+  String get appLAmount => 'Amount';
+
+  @override
+  String get appLCurrency => 'Currency';
+
+  @override
+  String get appLPaymentType => 'Payment Type';
+
+  @override
+  String get appLDebit => 'Payment';
+
+  @override
+  String get appLRefund => 'Refund';
+
+  @override
+  String get appLRefundToWallet => 'Refund to Wallet';
+
+  @override
+  String get appLRefundToCard => 'Refund to Card';
+
+  @override
+  String get appLTransactionId => 'Transaction ID';
+
+  @override
+  String get appLTransactionStatus => 'Status';
+
+  @override
+  String get appLTransactionDate => 'Date';
+
+  @override
+  String get appLProcessing => 'Processing...';
+
+  @override
+  String get appLCompleted => 'Completed';
+
+  @override
+  String get appLFailed => 'Failed';
+
+  @override
+  String get appLCancelled => 'Cancelled';
+
+  @override
+  String get appLRetry => 'Retry';
+
+  @override
+  String get appLNoWalletBalance => 'No wallet balance available';
+
+  @override
+  String get appLPartialWalletPayment => 'Partial Wallet Payment';
+
+  @override
+  String appLPartialPaymentMessage(
+    Object balance,
+    Object currency,
+    Object shortfall,
+  ) {
+    return 'Your wallet has $balance $currency. Pay $shortfall $currency via card?';
+  }
+
+  @override
+  String get appLYesContinue => 'Yes, Continue';
+
+  @override
+  String get appLWalletPayment => 'Wallet Payment';
 }

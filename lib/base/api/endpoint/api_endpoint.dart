@@ -82,7 +82,19 @@ enum ApiEndpoint {
   authorizeSubmit("/user/car-booking/authorize-payment-submit"),
 
   // Delivery Zone Check
-  deliveryCheck('/api/delivery/check');
+  deliveryCheck('/api/delivery/check'),
+
+  // Wallet Endpoints
+  walletBalance('/wallet/balance'),
+  walletTransactions('/wallet/transactions'),
+  walletTopUp('/wallet/top-up'),
+  // QA / test-only top-up endpoint (immediately credits wallet without payment)
+  walletTopUpTest('/wallet/topup/test'),
+  walletChargeForBooking('/wallet/charge'),
+  walletRefundToWallet('/wallet/refund-to-wallet'),
+  walletRefundToCard('/wallet/refund-to-card'),
+  walletPayTabsWebhook('/wallet/paytabs/webhook'),
+  walletPayTabsReturn('/wallet/paytabs/return');
 
   final String path;
 

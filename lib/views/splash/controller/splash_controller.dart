@@ -1,8 +1,10 @@
 import 'package:get/get.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../../base/utils/local_storage.dart';
 import '../../../base/utils/navigator_plug.dart';
 import '../../../routes/routes.dart';
+import '../../../../debug/print_auth_token.dart';
 
 class SplashController extends GetxController {
   final navigatorPlug = NavigatorPlug();
@@ -10,6 +12,12 @@ class SplashController extends GetxController {
   @override
   void onReady() {
     super.onReady();
+    // In debug builds, print whether auth tokens exist when splash is shown.
+    if (kDebugMode) {
+      // Fire-and-forget; don't block splash navigation.
+      printAuthTokenDebug(revealRaw: true);
+    }
+
     navigatorPlug.startListening(
       seconds: 3,
       onChanged: () {
