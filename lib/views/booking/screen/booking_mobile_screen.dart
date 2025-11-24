@@ -12,15 +12,50 @@ class BookingMobileScreen extends GetView<BookingController> {
           vertical: Dimensions.verticalSize,
         ),
         child: Obx(
-          () => PrimaryButton(
-            title: Strings.continuee,
-            disable: !controller.isFormValid.value,
-            onPressed: () {
-              if (controller.isFormValid.value) {
-                Get.toNamed(Routes.previewScreen, arguments: controller.getBookingData());
-              }
-            },
-          ),
+          () {
+            // Show button and, when disabled, a compact list of missing fields to help users.
+            final disabled = !controller.isFormValid.value;
+            final missing = controller.getMissingFields();
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                PrimaryButton(
+                  title: Strings.continuee,
+                  // Button enabled based solely on form validity.
+                  disable: disabled,
+                  onPressed: () {
+                    if (controller.isFormValid.value) {
+                      Get.toNamed(Routes.previewScreen,
+                          arguments: controller.getBookingData());
+                    }
+                  },
+                ),
+                if (disabled && missing.isNotEmpty) ...[
+                  SizedBox(height: 8),
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: Colors.red.shade50,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.red.shade100),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          DynamicLanguage.key(Strings.pleaseFillOutTheField),
+                          style: TextStyle(fontWeight: FontWeight.w600, color: Colors.red.shade700),
+                        ),
+                        SizedBox(height: 6),
+                        ...missing.map((m) => Text('• ' + m, style: TextStyle(color: Colors.red.shade700))).toList(),
+                      ],
+                    ),
+                  ),
+                ]
+              ],
+            );
+          },
         ),
       ),
       appBar: CustomAppBar(

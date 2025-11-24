@@ -21,7 +21,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get appLFromCamera => 'من الكاميرا';
 
   @override
-  String get appLHistory => 'السجل';
+  String get appLHistory => 'سجلاتي';
 
   @override
   String get appLPrivacyPolicy => 'سياسة الخصوصية';
@@ -33,7 +33,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get appLLogOutAlert => 'هل أنت متأكد أنك تريد تسجيل الخروج؟';
 
   @override
-  String get appLAboutUs => 'معلومات عنا';
+  String get appLAboutUs => 'عن التطبيق';
 
   @override
   String get appLBookingPreview => 'معاينة الحجز';
@@ -150,7 +150,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get appLLogin => 'تسجيل الدخول';
 
   @override
-  String get appLNotification => 'الإشعارات';
+  String get appLNotification => 'اشعاراتي';
 
   @override
   String get appLNoNotification => 'لا توجد إشعارات';
@@ -598,6 +598,42 @@ class AppLocalizationsAr extends AppLocalizations {
   String get appLQuantity => 'الكمية';
 
   @override
+  String get appLSnappedOutsideAllowed =>
+      'الموقع الذي اخترته كان خارج النطاق المسموح — تم تقريبه إلى أقرب نقطة مسموح بها.';
+
+  @override
+  String get appLSnappedShort => 'تم تقريبه إلى المنطقة المسموحة';
+
+  @override
+  String get appLCurrentLocation => 'الموقع الحالي';
+
+  @override
+  String get appLCenter => 'المركز';
+
+  @override
+  String appLLatLngFormat(Object lat, Object lng) {
+    return 'خط عرض: $lat, خط طول: $lng';
+  }
+
+  @override
+  String get appLSelectedLocation => 'الموقع المختار:';
+
+  @override
+  String appLDistanceLabel(Object km) {
+    return 'المسافة: $km كم';
+  }
+
+  @override
+  String get appLConfirmLocation => 'تأكيد الموقع';
+
+  @override
+  String get appLLocationPermissionDenied =>
+      'تم رفض إذن الوصول إلى الموقع. افتح الإعدادات لتمكينه.';
+
+  @override
+  String get appLOpenSettings => 'افتح الإعدادات';
+
+  @override
   String get appLEnterDays => 'أدخل الأيام';
 
   @override
@@ -727,4 +763,58 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get appLWalletPayment => 'دفع من المحفظة';
+
+  @override
+  String get appLKycRequired => 'التحقق من الهوية مطلوب';
+
+  @override
+  String get appLKycVerification => 'التحقق من الهوية';
+
+  @override
+  String get appLCompleteKycToEnableBooking =>
+      'أكمل التحقق من الهوية لتفعيل الحجز';
+
+  @override
+  String get appLPleaseCompleteKycVerification =>
+      'يرجى إكمال التحقق من الهوية لحجز السيارات.';
+
+  @override
+  String get appLKycPending => 'قيد المراجعة';
+
+  @override
+  String get appLKycPendingReview => 'جاري مراجعة بيانات التحقق من الهوية';
+
+  @override
+  String get appLKycPendingMessage =>
+      'يجاري مراجعة بيانات التحقق من الهوية الخاصة بك. سيتم إخطارك عند التحقق منها.';
+
+  @override
+  String get appLCompleteYourProfile => 'أكمل ملفك الشخصي';
+
+  @override
+  String get appLPleaseCompleteYourProfile => 'يرجى إكمال ملفك الشخصي للمتابعة';
+
+  @override
+  String get appLEnterYourFirstName => 'أدخل اسمك الأول';
+
+  @override
+  String get appLEnterYourLastName => 'أدخل اسمك الأخير';
+
+  @override
+  String get appLEnterYourEmailAddress => 'أدخل عنوان بريدك الإلكتروني';
+
+  @override
+  String get appLFirstNameRequired => 'الاسم الأول مطلوب';
+
+  @override
+  String get appLLastNameRequired => 'الاسم الأخير مطلوب';
+
+  @override
+  String get appLEmailRequired => 'البريد الإلكتروني مطلوب';
+
+  @override
+  String get appLInvalidEmail => 'يرجى إدخال بريد إلكتروني صحيح';
+
+  @override
+  String get appLContinue => 'متابعة';
 }

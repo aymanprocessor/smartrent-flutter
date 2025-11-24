@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../base/utils/basic_import.dart';
+import '../../../base/localization/dynamic_language_shim.dart';
 import '../controller/profile_completion_controller.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 
@@ -26,7 +27,7 @@ class ProfileCompletionMobileScreen extends StatelessWidget {
       backgroundColor: CustomColor.whiteColor,
       appBar: AppBar(
         title: Text(
-          'Complete Your Profile',
+          DynamicLanguage.key(Strings.completeYourProfile),
           style: TextStyle(
             fontSize: Dimensions.titleLarge,
             color: CustomColor.typography,
@@ -49,7 +50,7 @@ class ProfileCompletionMobileScreen extends StatelessWidget {
             SizedBox(height: Dimensions.heightSize * 2),
             
             Text(
-              'Please complete your profile to continue',
+              DynamicLanguage.key(Strings.pleaseCompleteYourProfile),
               style: TextStyle(
                 fontSize: Dimensions.titleMedium,
                 color: CustomColor.typographyShade[40],
@@ -58,12 +59,12 @@ class ProfileCompletionMobileScreen extends StatelessWidget {
 
             SizedBox(height: Dimensions.heightSize * 3),
 
-            _buildLabel('First Name'),
+            _buildLabel(DynamicLanguage.key(Strings.firstName)),
             SizedBox(height: Dimensions.heightSize * 0.5),
             TextFormField(
               controller: controller.firstnameController,
               decoration: InputDecoration(
-                hintText: 'Enter your first name',
+                hintText: DynamicLanguage.key(Strings.enterYourFirstName),
                 filled: true,
                 fillColor: CustomColor.typographyShade[0]!.withOpacity(0.5),
                 border: OutlineInputBorder(
@@ -76,7 +77,7 @@ class ProfileCompletionMobileScreen extends StatelessWidget {
                 ),
               ),
               validator: FormBuilderValidators.compose([
-                FormBuilderValidators.required(errorText: 'First name is required'),
+                FormBuilderValidators.required(errorText: DynamicLanguage.key(Strings.firstNameRequired)),
                 FormBuilderValidators.minLength(2, errorText: 'Must be at least 2 characters'),
                 FormBuilderValidators.maxLength(50, errorText: 'Maximum 50 characters'),
               ]),
@@ -84,12 +85,12 @@ class ProfileCompletionMobileScreen extends StatelessWidget {
 
             SizedBox(height: Dimensions.heightSize * 2),
 
-            _buildLabel('Last Name'),
+            _buildLabel(DynamicLanguage.key(Strings.lastName)),
             SizedBox(height: Dimensions.heightSize * 0.5),
             TextFormField(
               controller: controller.lastnameController,
               decoration: InputDecoration(
-                hintText: 'Enter your last name',
+                hintText: DynamicLanguage.key(Strings.enterYourLastName),
                 filled: true,
                 fillColor: CustomColor.typographyShade[0]!.withOpacity(0.5),
                 border: OutlineInputBorder(
@@ -102,7 +103,7 @@ class ProfileCompletionMobileScreen extends StatelessWidget {
                 ),
               ),
               validator: FormBuilderValidators.compose([
-                FormBuilderValidators.required(errorText: 'Last name is required'),
+                FormBuilderValidators.required(errorText: DynamicLanguage.key(Strings.lastNameRequired)),
                 FormBuilderValidators.minLength(2, errorText: 'Must be at least 2 characters'),
                 FormBuilderValidators.maxLength(50, errorText: 'Maximum 50 characters'),
               ]),
@@ -110,13 +111,13 @@ class ProfileCompletionMobileScreen extends StatelessWidget {
 
             SizedBox(height: Dimensions.heightSize * 2),
 
-            _buildLabel('Email'),
+            _buildLabel(DynamicLanguage.key(Strings.email)),
             SizedBox(height: Dimensions.heightSize * 0.5),
             TextFormField(
               controller: controller.emailController,
               keyboardType: TextInputType.emailAddress,
               decoration: InputDecoration(
-                hintText: 'Enter your email address',
+                hintText: DynamicLanguage.key(Strings.enterYourEmailAddress),
                 filled: true,
                 fillColor: CustomColor.typographyShade[0]!.withOpacity(0.5),
                 border: OutlineInputBorder(
@@ -129,8 +130,8 @@ class ProfileCompletionMobileScreen extends StatelessWidget {
                 ),
               ),
               validator: FormBuilderValidators.compose([
-                FormBuilderValidators.required(errorText: 'Email is required'),
-                FormBuilderValidators.email(errorText: 'Please enter a valid email'),
+                FormBuilderValidators.required(errorText: DynamicLanguage.key(Strings.emailRequired)),
+                FormBuilderValidators.email(errorText: DynamicLanguage.key(Strings.invalidEmail)),
               ]),
             ),
 
@@ -161,7 +162,7 @@ class ProfileCompletionMobileScreen extends StatelessWidget {
                           ),
                         )
                       : Text(
-                          'Continue',
+                          DynamicLanguage.key(Strings.continuee),
                           style: TextStyle(
                             fontSize: Dimensions.titleMedium,
                             color: Colors.white,

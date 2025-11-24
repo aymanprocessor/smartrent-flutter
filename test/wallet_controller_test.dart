@@ -1,7 +1,7 @@
 import 'package:carbo/controllers/wallet_controller.dart';
 import 'package:carbo/models/wallet_balance.dart';
 import 'package:carbo/models/wallet_transaction.dart';
-import 'package:carbo/services/wallet_service.dart';
+import 'package:carbo/views/wallet/service/wallet_service.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;

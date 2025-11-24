@@ -35,14 +35,29 @@ class Data {
 }
 
 class History {
+  int? id;
+  int? vendorId;
+  int? branchId;
+  String? approvedBy;
+  DateTime? approvedAt;
+  int? carId;
+  int? userId;
+  String? slug;
+  String? phone;
+  String? email;
+  int? tripId;
   String? location;
-  String destination;
+  bool? isDeliver;
+  String? destination;
   String paymentType;
+  String? trxId;
+  dynamic amount;
+  dynamic charges;
   int distance;
+  int rentalDays;
   String pickupTime;
   String? roundPickupTime;
   String? roundPickupDate;
-  dynamic amount;
   DateTime pickupDate;
   String message;
   int status;
@@ -51,13 +66,28 @@ class History {
   Cars cars;
 
   History({
+    this.id,
+    this.vendorId,
+    this.branchId,
+    this.approvedBy,
+    this.approvedAt,
+    this.carId,
+    this.userId,
+    this.slug,
+    this.phone,
+    this.email,
+    this.tripId,
     this.location,
+    this.isDeliver,
     required this.destination,
     required this.paymentType,
+    this.trxId,
+    required this.amount,
+    this.charges,
     required this.distance,
+    required this.rentalDays,
     required this.pickupTime,
     this.roundPickupTime,
-    required this.amount,
     required this.pickupDate,
     this.roundPickupDate,
     required this.message,
@@ -68,15 +98,30 @@ class History {
   });
 
   factory History.fromJson(Map<String, dynamic> json) => History(
+    id: json["id"],
+    vendorId: json["vendor_id"],
+    branchId: json["branch_id"],
+    approvedBy: json["approved_by"]?.toString(),
+    approvedAt: json["approved_at"] == null ? null : DateTime.tryParse(json["approved_at"]),
+    carId: json["car_id"],
+    userId: json["user_id"],
+    slug: json["slug"]?.toString(),
+    phone: json["phone"]?.toString(),
+    email: json["email"]?.toString(),
+    tripId: json["trip_id"],
     location: (json["location"] == null || json["location"].toString().trim().isEmpty)
         ? null
         : json["location"].toString(),
+    isDeliver: json["is_deliver"],
     destination: json["destination"],
     paymentType: json["payment_type"],
-    distance: json["distance"],
+    trxId: json["trx_id"]?.toString(),
+    amount: json["amount"],
+    charges: json["charges"],
+    distance: json["distance"] ?? 0,
+    rentalDays: json["rental_days"] ?? 0,
     pickupTime: json["pickup_time"],
     roundPickupTime: json["round_pickup_time"]?.toString(),
-    amount: json["amount"],
     pickupDate: DateTime.parse(json["pickup_date"]),
     roundPickupDate: json["round_pickup_date"]?.toString(),
     message: json["message"],
@@ -87,10 +132,26 @@ class History {
   );
 
   Map<String, dynamic> toJson() => {
+    "id": id,
+    "vendor_id": vendorId,
+    "branch_id": branchId,
+    "approved_by": approvedBy,
+    "approved_at": approvedAt?.toIso8601String(),
+    "car_id": carId,
+    "user_id": userId,
+    "slug": slug,
+    "phone": phone,
+    "email": email,
+    "trip_id": tripId,
     "location": location,
+    "is_deliver": isDeliver,
     "destination": destination,
     "payment_type": paymentType,
+    "trx_id": trxId,
+    "amount": amount,
+    "charges": charges,
     "distance": distance,
+    "rental_days": rentalDays,
     "pickup_time": pickupTime,
     "round_pickup_time": roundPickupTime,
     "pickup_date":

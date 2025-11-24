@@ -1,8 +1,6 @@
 import 'dart:convert';
-import 'package:carbo/base/api/endpoint/api_endpoint.dart';
-import 'package:carbo/models/wallet_balance.dart';
 import 'package:carbo/models/wallet_transaction.dart';
-import 'package:carbo/services/wallet_service.dart';
+import 'package:carbo/views/wallet/service/wallet_service.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:flutter/services.dart';

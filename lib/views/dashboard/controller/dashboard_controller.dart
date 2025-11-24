@@ -59,6 +59,12 @@ class DashboardController extends GetxController {
       showErrorMessage: false,
       onSuccess: (value) {
         _dashboardInfoModel = value!;
+        // Update LocalStorage with latest KYC status from server
+        final kycStatus = _dashboardInfoModel.data.userInfo.kycVerified;
+        LocalStorage.save(
+          kycStatus: kycStatus,
+          isKycVerified: kycStatus == 1,
+        );
         _getDashboardInfo();
         typeList.clear();
         getAllTypes(); // Fetch all types directly

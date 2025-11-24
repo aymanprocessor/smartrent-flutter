@@ -56,7 +56,12 @@ class I18nService extends GetxController {
   /// Get translation for a key using AppLocalizations getter map (ARB-only)
   String key(String translationKey, {BuildContext? context}) {
     // Use the generated ARB translations via AppLocalizations only.
-    final currentLangCode = _currentLocale.value.languageCode;
+    var currentLangCode = _currentLocale.value.languageCode;
+
+    // Normalize / fallback
+    if (currentLangCode.isEmpty) {
+      currentLangCode = 'en';
+    }
 
     try {
       // Create AppLocalizations for current locale if not cached
@@ -70,9 +75,31 @@ class I18nService extends GetxController {
       if (translation != null && translation.isNotEmpty) {
         return translation;
       }
+
+      // If a BuildContext is provided, try AppLocalizations.of(context)
+      if (context != null) {
+        try {
+          final ctxLocal = AppLocalizations.of(context);
+          if (ctxLocal != null) {
+            final ctxTranslation = _translationGetters[translationKey]?.call(ctxLocal);
+            if (ctxTranslation != null && ctxTranslation.isNotEmpty) {
+              return ctxTranslation;
+            }
+          }
+        } catch (_) {
+          // ignore context fallback failures
+        }
+      }
     } catch (e) {
       debugPrint('AppLocalizations error for key $translationKey: $e');
     }
+
+    // Final fallback: try English lookup directly
+    try {
+      final enLocal = lookupAppLocalizations(const Locale('en'));
+      final enTranslation = _translationGetters[translationKey]?.call(enLocal);
+      if (enTranslation != null && enTranslation.isNotEmpty) return enTranslation;
+    } catch (_) {}
 
     // Fallback to key itself when translation not available
     return translationKey;
@@ -275,6 +302,21 @@ class I18nService extends GetxController {
     'appLTax': (l) => l.appLTax,
     'appLTotal': (l) => l.appLTotal,
     'appLQuantity': (l) => l.appLQuantity,
+    'appLSnappedOutsideAllowed': (l) => l.appLSnappedOutsideAllowed,
+    'appLSnappedShort': (l) => l.appLSnappedShort,
+    'appLCurrentLocation': (l) => l.appLCurrentLocation,
+    'appLCenter': (l) => l.appLCenter,
+    'appLSelectedLocation': (l) => l.appLSelectedLocation,
+    // Parameterized translations (with placeholders) are invoked directly
+    // via AppLocalizations in code, e.g. AppLocalizations.of(context).appLLatLngFormat(...)
+    // Note: Keys present in ARB but not listed above are typically
+    // parameterized and must be called with parameters. Current examples:
+    // - appLLatLngFormat(lat, lng)
+    // - appLDistanceLabel(km)
+    // - appLPartialPaymentMessage(balance, currency, shortfall)
+    'appLConfirmLocation': (l) => l.appLConfirmLocation,
+    'appLLocationPermissionDenied': (l) => l.appLLocationPermissionDenied,
+    'appLOpenSettings': (l) => l.appLOpenSettings,
     'appLEnterDays': (l) => l.appLEnterDays,
     'appLEnterDistance': (l) => l.appLEnterDistance,
     'appLEnterQuantity': (l) => l.appLEnterQuantity,
@@ -318,6 +360,24 @@ class I18nService extends GetxController {
     // called directly where needed via AppLocalizations.appLPartialPaymentMessage(...)
     'appLYesContinue': (l) => l.appLYesContinue,
     'appLWalletPayment': (l) => l.appLWalletPayment,
+    // KYC Verification related strings
+    'appLKycRequired': (l) => l.appLKycRequired,
+    'appLKycVerification': (l) => l.appLKycVerification,
+    'appLCompleteKycToEnableBooking': (l) => l.appLCompleteKycToEnableBooking,
+    'appLPleaseCompleteKycVerification': (l) => l.appLPleaseCompleteKycVerification,
+    'appLKycPending': (l) => l.appLKycPending,
+    'appLKycPendingReview': (l) => l.appLKycPendingReview,
+    'appLKycPendingMessage': (l) => l.appLKycPendingMessage,
+    // Profile Completion related strings
+    'appLCompleteYourProfile': (l) => l.appLCompleteYourProfile,
+    'appLPleaseCompleteYourProfile': (l) => l.appLPleaseCompleteYourProfile,
+    'appLEnterYourFirstName': (l) => l.appLEnterYourFirstName,
+    'appLEnterYourLastName': (l) => l.appLEnterYourLastName,
+    'appLEnterYourEmailAddress': (l) => l.appLEnterYourEmailAddress,
+    'appLFirstNameRequired': (l) => l.appLFirstNameRequired,
+    'appLLastNameRequired': (l) => l.appLLastNameRequired,
+    'appLEmailRequired': (l) => l.appLEmailRequired,
+    'appLInvalidEmail': (l) => l.appLInvalidEmail,
   };
   
   /// Change current language

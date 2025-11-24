@@ -5,6 +5,8 @@ import '../../../base/utils/basic_import.dart';
 import '../../../base/widgets/custom_date_picker.dart';
 import '../../../base/widgets/custom_time_picker.dart';
 import '../controller/booking_controller.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import '../widget/location_picker_widget.dart';
 part 'booking_tablet_screen.dart';
 part 'booking_mobile_screen.dart';
 part '../widget/booking_all_fields.dart';

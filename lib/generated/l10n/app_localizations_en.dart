@@ -21,7 +21,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appLFromCamera => 'From Camera';
 
   @override
-  String get appLHistory => 'History';
+  String get appLHistory => 'My History';
 
   @override
   String get appLPrivacyPolicy => 'Privacy Policy';
@@ -33,7 +33,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appLLogOutAlert => 'Are you sure you want to log out?';
 
   @override
-  String get appLAboutUs => 'About Us';
+  String get appLAboutUs => 'About App';
 
   @override
   String get appLBookingPreview => 'Booking Preview';
@@ -596,6 +596,42 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appLQuantity => 'Quantity';
 
   @override
+  String get appLSnappedOutsideAllowed =>
+      'Selected location was outside the allowed area — snapped to nearest allowed point.';
+
+  @override
+  String get appLSnappedShort => 'Snapped to allowed area';
+
+  @override
+  String get appLCurrentLocation => 'Current Location';
+
+  @override
+  String get appLCenter => 'Center';
+
+  @override
+  String appLLatLngFormat(Object lat, Object lng) {
+    return 'Lat: $lat, Lng: $lng';
+  }
+
+  @override
+  String get appLSelectedLocation => 'Selected Location:';
+
+  @override
+  String appLDistanceLabel(Object km) {
+    return 'Distance: $km km';
+  }
+
+  @override
+  String get appLConfirmLocation => 'Confirm Location';
+
+  @override
+  String get appLLocationPermissionDenied =>
+      'Location permission denied. Open settings to enable location.';
+
+  @override
+  String get appLOpenSettings => 'Open Settings';
+
+  @override
   String get appLEnterDays => 'Enter Days';
 
   @override
@@ -725,4 +761,58 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get appLWalletPayment => 'Wallet Payment';
+
+  @override
+  String get appLKycRequired => 'KYC Required';
+
+  @override
+  String get appLKycVerification => 'KYC Verification';
+
+  @override
+  String get appLCompleteKycToEnableBooking => 'Complete KYC to enable booking';
+
+  @override
+  String get appLPleaseCompleteKycVerification =>
+      'Please complete KYC verification to book cars.';
+
+  @override
+  String get appLKycPending => 'Pending';
+
+  @override
+  String get appLKycPendingReview => 'Your KYC is being reviewed';
+
+  @override
+  String get appLKycPendingMessage =>
+      'Your KYC is pending review. We will notify you once it is verified.';
+
+  @override
+  String get appLCompleteYourProfile => 'Complete Your Profile';
+
+  @override
+  String get appLPleaseCompleteYourProfile =>
+      'Please complete your profile to continue';
+
+  @override
+  String get appLEnterYourFirstName => 'Enter your first name';
+
+  @override
+  String get appLEnterYourLastName => 'Enter your last name';
+
+  @override
+  String get appLEnterYourEmailAddress => 'Enter your email address';
+
+  @override
+  String get appLFirstNameRequired => 'First name is required';
+
+  @override
+  String get appLLastNameRequired => 'Last name is required';
+
+  @override
+  String get appLEmailRequired => 'Email is required';
+
+  @override
+  String get appLInvalidEmail => 'Please enter a valid email';
+
+  @override
+  String get appLContinue => 'Continue';
 }

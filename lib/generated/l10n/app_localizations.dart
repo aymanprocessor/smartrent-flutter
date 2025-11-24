@@ -125,7 +125,7 @@ abstract class AppLocalizations {
   /// No description provided for @appLHistory.
   ///
   /// In en, this message translates to:
-  /// **'History'**
+  /// **'My History'**
   String get appLHistory;
 
   /// No description provided for @appLPrivacyPolicy.
@@ -149,7 +149,7 @@ abstract class AppLocalizations {
   /// No description provided for @appLAboutUs.
   ///
   /// In en, this message translates to:
-  /// **'About Us'**
+  /// **'About App'**
   String get appLAboutUs;
 
   /// No description provided for @appLBookingPreview.
@@ -1268,6 +1268,66 @@ abstract class AppLocalizations {
   /// **'Quantity'**
   String get appLQuantity;
 
+  /// No description provided for @appLSnappedOutsideAllowed.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected location was outside the allowed area — snapped to nearest allowed point.'**
+  String get appLSnappedOutsideAllowed;
+
+  /// No description provided for @appLSnappedShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Snapped to allowed area'**
+  String get appLSnappedShort;
+
+  /// No description provided for @appLCurrentLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Current Location'**
+  String get appLCurrentLocation;
+
+  /// No description provided for @appLCenter.
+  ///
+  /// In en, this message translates to:
+  /// **'Center'**
+  String get appLCenter;
+
+  /// No description provided for @appLLatLngFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'Lat: {lat}, Lng: {lng}'**
+  String appLLatLngFormat(Object lat, Object lng);
+
+  /// No description provided for @appLSelectedLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected Location:'**
+  String get appLSelectedLocation;
+
+  /// No description provided for @appLDistanceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Distance: {km} km'**
+  String appLDistanceLabel(Object km);
+
+  /// No description provided for @appLConfirmLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Location'**
+  String get appLConfirmLocation;
+
+  /// No description provided for @appLLocationPermissionDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Location permission denied. Open settings to enable location.'**
+  String get appLLocationPermissionDenied;
+
+  /// No description provided for @appLOpenSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Settings'**
+  String get appLOpenSettings;
+
   /// No description provided for @appLEnterDays.
   ///
   /// In en, this message translates to:
@@ -1517,6 +1577,108 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Wallet Payment'**
   String get appLWalletPayment;
+
+  /// No description provided for @appLKycRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'KYC Required'**
+  String get appLKycRequired;
+
+  /// No description provided for @appLKycVerification.
+  ///
+  /// In en, this message translates to:
+  /// **'KYC Verification'**
+  String get appLKycVerification;
+
+  /// No description provided for @appLCompleteKycToEnableBooking.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete KYC to enable booking'**
+  String get appLCompleteKycToEnableBooking;
+
+  /// No description provided for @appLPleaseCompleteKycVerification.
+  ///
+  /// In en, this message translates to:
+  /// **'Please complete KYC verification to book cars.'**
+  String get appLPleaseCompleteKycVerification;
+
+  /// No description provided for @appLKycPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get appLKycPending;
+
+  /// No description provided for @appLKycPendingReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Your KYC is being reviewed'**
+  String get appLKycPendingReview;
+
+  /// No description provided for @appLKycPendingMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your KYC is pending review. We will notify you once it is verified.'**
+  String get appLKycPendingMessage;
+
+  /// No description provided for @appLCompleteYourProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete Your Profile'**
+  String get appLCompleteYourProfile;
+
+  /// No description provided for @appLPleaseCompleteYourProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Please complete your profile to continue'**
+  String get appLPleaseCompleteYourProfile;
+
+  /// No description provided for @appLEnterYourFirstName.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your first name'**
+  String get appLEnterYourFirstName;
+
+  /// No description provided for @appLEnterYourLastName.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your last name'**
+  String get appLEnterYourLastName;
+
+  /// No description provided for @appLEnterYourEmailAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your email address'**
+  String get appLEnterYourEmailAddress;
+
+  /// No description provided for @appLFirstNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'First name is required'**
+  String get appLFirstNameRequired;
+
+  /// No description provided for @appLLastNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Last name is required'**
+  String get appLLastNameRequired;
+
+  /// No description provided for @appLEmailRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Email is required'**
+  String get appLEmailRequired;
+
+  /// No description provided for @appLInvalidEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid email'**
+  String get appLInvalidEmail;
+
+  /// No description provided for @appLContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get appLContinue;
 }
 
 class _AppLocalizationsDelegate

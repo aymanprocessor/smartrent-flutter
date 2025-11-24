@@ -1,4 +1,5 @@
 import 'package:carbo/base/utils/basic_import.dart';
+import '../localization/dynamic_language_shim.dart';
 import 'package:flutter/material.dart';
 
 class CustomTimePicker extends StatefulWidget {
@@ -137,7 +138,7 @@ class _CustomTimePickerState extends State<CustomTimePicker>
                               children: [
                                 TextWidget(
                                   widget.selectedTime.value.isEmpty
-                                      ? Strings.SelectATime
+                                      ? DynamicLanguage.key(Strings.SelectATime)
                                       : widget.selectedTime.value,
                                   fontSize:
                                       widget.hintFontSize ??

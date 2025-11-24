@@ -64,7 +64,8 @@ class MyApp extends StatelessWidget {
           await Get.putAsync(() async => LocationService());
           Get.put(DeliveryService());
           try {
-            DynamicLanguage.init(url: ApiConfig.languageUrl);
+            // Ensure DynamicLanguage/I18n initialization completes before UI builds
+            await DynamicLanguage.init(url: ApiConfig.languageUrl);
           } catch (e) {
             // Fallback if language loading fails
             print('Language initialization error: $e');

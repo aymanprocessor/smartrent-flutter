@@ -80,8 +80,8 @@ class NextActionGuard {
     // Show success message based on KYC status
     if (data.kycStatus == 2) {
       CustomSnackBar.success(
-        title: 'Success',
-        message: 'KYC submitted successfully! Admin will review your documents.',
+        title: 'Pending',
+        message: 'Your KYC is pending review. We will notify you once it is verified.',
       );
     }
 

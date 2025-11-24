@@ -54,13 +54,15 @@ class PrimaryButton extends StatelessWidget {
                 height: height ?? Dimensions.buttonHeight * 0.8,
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {
-                    isPadding.value = !isPadding.value;
-                    Future.delayed(const Duration(milliseconds: 220), () {
-                      isPadding.value = !isPadding.value;
-                    });
-                    onPressed();
-                  },
+                  onPressed: disable
+                      ? null
+                      : () {
+                          isPadding.value = !isPadding.value;
+                          Future.delayed(const Duration(milliseconds: 220), () {
+                            isPadding.value = !isPadding.value;
+                          });
+                          onPressed();
+                        },
                   style: ElevatedButton.styleFrom(
                     elevation: 0,
                     shape:

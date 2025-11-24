@@ -38,9 +38,7 @@ class KycSubmissionMobileScreen extends StatelessWidget {
       body: Obx(() {
         if (controller.isLoadingFields.value) {
           return Center(
-            child: CircularProgressIndicator(
-              color: CustomColor.primary,
-            ),
+            child: CircularProgressIndicator(color: CustomColor.primary),
           );
         }
 
@@ -114,7 +112,9 @@ class KycSubmissionMobileScreen extends StatelessWidget {
                       : controller.submitKyc,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: CustomColor.primary,
-                    disabledBackgroundColor: CustomColor.primary.withOpacity(0.6),
+                    disabledBackgroundColor: CustomColor.primary.withOpacity(
+                      0.6,
+                    ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(Dimensions.radius),
                     ),
@@ -148,7 +148,9 @@ class KycSubmissionMobileScreen extends StatelessWidget {
   }
 
   Widget _buildDynamicField(
-      KycField field, KycSubmissionController controller) {
+    KycField field,
+    KycSubmissionController controller,
+  ) {
     switch (field.type) {
       case KycFieldType.text:
       case KycFieldType.number:
@@ -198,7 +200,8 @@ class KycSubmissionMobileScreen extends StatelessWidget {
           validator: field.required
               ? FormBuilderValidators.compose([
                   FormBuilderValidators.required(
-                      errorText: '${field.label} is required'),
+                    errorText: '${field.label} is required',
+                  ),
                   if (field.maxLength != null)
                     FormBuilderValidators.maxLength(
                       field.maxLength!,
@@ -212,7 +215,9 @@ class KycSubmissionMobileScreen extends StatelessWidget {
   }
 
   Widget _buildTextAreaField(
-      KycField field, KycSubmissionController controller) {
+    KycField field,
+    KycSubmissionController controller,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -233,7 +238,8 @@ class KycSubmissionMobileScreen extends StatelessWidget {
           ),
           validator: field.required
               ? FormBuilderValidators.required(
-                  errorText: '${field.label} is required')
+                  errorText: '${field.label} is required',
+                )
               : null,
         ),
       ],
@@ -277,7 +283,8 @@ class KycSubmissionMobileScreen extends StatelessWidget {
           },
           validator: field.required
               ? FormBuilderValidators.required(
-                  errorText: '${field.label} is required')
+                  errorText: '${field.label} is required',
+                )
               : null,
         ),
       ],
@@ -314,12 +321,13 @@ class KycSubmissionMobileScreen extends StatelessWidget {
             }).toList(),
             onChanged: (value) {
               if (value != null) {
-                controller.selectedValues[field.name] = value;
+                controller.selectDropdownValue(field.name, value);
               }
             },
             validator: field.required
                 ? FormBuilderValidators.required(
-                    errorText: '${field.label} is required')
+                    errorText: '${field.label} is required',
+                  )
                 : null,
           ),
         ),
@@ -333,86 +341,77 @@ class KycSubmissionMobileScreen extends StatelessWidget {
       children: [
         _buildLabel(field.label, field.required),
         SizedBox(height: Dimensions.heightSize * 0.5),
-        Obx(
-          () {
-            final hasFile = controller.fileNames.containsKey(field.name);
+        Obx(() {
+          final hasFile = controller.fileNames.containsKey(field.name);
 
-            return Container(
-              decoration: BoxDecoration(
-                color: CustomColor.typographyShade[0]!.withOpacity(0.5),
-                borderRadius: BorderRadius.circular(Dimensions.radius),
-              ),
-              padding: EdgeInsets.all(Dimensions.paddingSize),
-              child: Column(
-                children: [
-                  if (hasFile) ...[
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.check_circle,
-                          color: Colors.green,
-                          size: 20,
-                        ),
-                        SizedBox(width: Dimensions.widthSize),
-                        Expanded(
-                          child: Text(
-                            controller.fileNames[field.name]!,
-                            style: TextStyle(
-                              fontSize: Dimensions.titleSmall,
-                              color: CustomColor.typography,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        IconButton(
-                          onPressed: () {
-                            controller.removeFile(field.name);
-                          },
-                          icon: Icon(
-                            Icons.close,
-                            color: Colors.red,
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: Dimensions.heightSize),
-                  ],
+          return Container(
+            decoration: BoxDecoration(
+              color: CustomColor.typographyShade[0]!.withOpacity(0.5),
+              borderRadius: BorderRadius.circular(Dimensions.radius),
+            ),
+            padding: EdgeInsets.all(Dimensions.paddingSize),
+            child: Column(
+              children: [
+                if (hasFile) ...[
                   Row(
                     children: [
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: () => controller.pickFile(field.name),
-                          icon: Icon(Icons.upload_file),
-                          label: Text(hasFile ? 'Change File' : 'Choose File'),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: CustomColor.primary,
-                            padding: EdgeInsets.symmetric(
-                              vertical: Dimensions.paddingSize * 0.6,
-                            ),
-                          ),
-                        ),
-                      ),
+                      Icon(Icons.check_circle, color: Colors.green, size: 20),
                       SizedBox(width: Dimensions.widthSize),
                       Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: () => controller.pickImage(field.name),
-                          icon: Icon(Icons.camera_alt),
-                          label: Text(hasFile ? 'Change Photo' : 'Take Photo'),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: CustomColor.primary,
-                            padding: EdgeInsets.symmetric(
-                              vertical: Dimensions.paddingSize * 0.6,
-                            ),
+                        child: Text(
+                          controller.fileNames[field.name]!,
+                          style: TextStyle(
+                            fontSize: Dimensions.titleSmall,
+                            color: CustomColor.typography,
                           ),
+                          overflow: TextOverflow.ellipsis,
                         ),
+                      ),
+                      IconButton(
+                        onPressed: () {
+                          controller.removeFile(field.name);
+                        },
+                        icon: Icon(Icons.close, color: Colors.red),
                       ),
                     ],
                   ),
+                  SizedBox(height: Dimensions.heightSize),
                 ],
-              ),
-            );
-          },
-        ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () => controller.pickFile(field.name),
+                        icon: Icon(Icons.upload_file),
+                        label: Text(hasFile ? 'Change File' : 'Choose File'),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: CustomColor.primary,
+                          padding: EdgeInsets.symmetric(
+                            vertical: Dimensions.paddingSize * 0.6,
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: Dimensions.widthSize),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () => controller.pickImage(field.name),
+                        icon: Icon(Icons.camera_alt),
+                        label: Text(hasFile ? 'Change Photo' : 'Take Photo'),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: CustomColor.primary,
+                          padding: EdgeInsets.symmetric(
+                            vertical: Dimensions.paddingSize * 0.6,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          );
+        }),
       ],
     );
   }
@@ -430,9 +429,7 @@ class KycSubmissionMobileScreen extends StatelessWidget {
           if (required)
             TextSpan(
               text: ' *',
-              style: TextStyle(
-                color: Colors.red,
-              ),
+              style: TextStyle(color: Colors.red),
             ),
         ],
       ),

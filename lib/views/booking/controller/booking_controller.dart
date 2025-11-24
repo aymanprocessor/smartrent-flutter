@@ -3,6 +3,8 @@ import 'package:carbo/views/all_vendors_dashboard/model/vendor_cars_model.dart';
 import 'package:carbo/views/all_vendors_dashboard/controller/all_vendors_dashboard_controller.dart';
 import 'package:carbo/views/dashboard/controller/dashboard_controller.dart';
 import 'package:carbo/languages/strings.dart';
+import '../../../base/localization/dynamic_language_shim.dart';
+import 'package:carbo/views/booking/model/pickup_location_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -18,6 +20,11 @@ class BookingController extends GetxController {
   // Pickup date and time observables
   RxString pickupDate = ''.obs;
   RxString pickupTime = ''.obs;
+  
+  // Pickup location with lat/long
+  Rxn<PickupLocation> pickupLocation = Rxn<PickupLocation>();
+  RxDouble pickupLatitude = 0.0.obs;
+  RxDouble pickupLongitude = 0.0.obs;
   
   RxBool isFormValid = false.obs;
   RxBool isDeliver = false.obs;
@@ -45,6 +52,8 @@ class BookingController extends GetxController {
         initializeWithCar(car);
       }
     }
+    // Ensure initial form validity is evaluated (accounts for auto-filled fields)
+    _updateFormValidity();
   }
 
   void _initializeUserData() {
@@ -67,10 +76,24 @@ class BookingController extends GetxController {
     ever(pickupDate, (_) => _updateFormValidity());
     ever(pickupTime, (_) => _updateFormValidity());
     
+    // Listen to pickup location changes
+    ever(pickupLocation, (_) => _updateFormValidity());
+    
     // Recalculate when delivery toggle changes
     ever(isDeliver, (_) {
       _updateFormValidity();
       _calculateCharges();
+    });
+    // Debug: print validity changes to help trace why Continue is disabled
+    ever(isFormValid, (val) {
+      debugPrint('BookingController.isFormValid changed: \\$val');
+      debugPrint('  email: "' + emailController.text + '"');
+      debugPrint('  mobile: "' + mobileController.text + '"');
+      debugPrint('  quantity: "' + quantityController.text + '"');
+      debugPrint('  pickupDate: "' + pickupDate.value + '"');
+      debugPrint('  pickupTime: "' + pickupTime.value + '"');
+      debugPrint('  isDeliver: ' + isDeliver.value.toString());
+      debugPrint('  pickupLocation: ' + (pickupLocation.value == null ? 'null' : pickupLocation.value!.address));
     });
   }
 
@@ -85,13 +108,11 @@ class BookingController extends GetxController {
 
   void _updateFormValidity() {
     isFormValid.value =
-        emailController.text.isNotEmpty &&
         quantityController.text.isNotEmpty &&
         pickupDate.value.isNotEmpty &&
         pickupTime.value.isNotEmpty &&
         // pickup location is required only when isDeliver is true
-        (isDeliver.value ? locationController.text.isNotEmpty : true) &&
-        mobileController.text.isNotEmpty;
+      (isDeliver.value ? pickupLocation.value != null : true);
   }
 
   void _calculateCharges() {
@@ -126,11 +147,11 @@ class BookingController extends GetxController {
   String getQuantityLabel() {
     switch (pricingType.value) {
       case 'per_day':
-        return Strings.rentalDays; // Number of rental days (already wrapped in TextWidget)
+        return DynamicLanguage.key(Strings.rentalDays); // Localized label
       case 'per_km':
-        return Strings.distance; // Distance (already wrapped in TextWidget)
+        return DynamicLanguage.key(Strings.distance); // Localized label
       default:
-        return Strings.quantity; // Quantity (already wrapped in TextWidget)
+        return DynamicLanguage.key(Strings.quantity); // Localized label
     }
   }
 
@@ -138,11 +159,11 @@ class BookingController extends GetxController {
   String getQuantityHint() {
     switch (pricingType.value) {
       case 'per_day':
-        return Strings.enterDays; // (already wrapped in PrimaryInputWidget hintText)
+        return DynamicLanguage.key(Strings.enterDays);
       case 'per_km':
-        return Strings.enterDistance; // (already wrapped in PrimaryInputWidget hintText)
+        return DynamicLanguage.key(Strings.enterDistance);
       default:
-        return Strings.enterQuantity; // (already wrapped in PrimaryInputWidget hintText)
+        return DynamicLanguage.key(Strings.enterQuantity);
     }
   }
 
@@ -213,7 +234,12 @@ class BookingController extends GetxController {
       'pricing_type': pricingType.value,
       'pricing_unit': pricingUnit.value,
       'delivery_required': isDeliver.value,
-      'delivery_location': isDeliver.value ? locationController.text : null,
+      'delivery_location': isDeliver.value ? pickupLocation.value?.address ?? locationController.text : null,
+      'delivery_latitude': isDeliver.value ? pickupLocation.value?.latitude : null,
+      'delivery_longitude': isDeliver.value ? pickupLocation.value?.longitude : null,
+      // Also include pickup coordinates with API-friendly keys
+      'pickup_lat': pickupLocation.value?.latitude ?? pickupLatitude.value,
+      'pickup_lng': pickupLocation.value?.longitude ?? pickupLongitude.value,
       'notes': noteController.text,
       'subtotal': subtotal.value,
       'delivery_charge': deliveryCharge.value,
@@ -252,6 +278,17 @@ class BookingController extends GetxController {
     }
     
     return false;
+  }
+
+  /// Return a list of human-readable field names that are missing/invalid
+  List<String> getMissingFields() {
+    final missing = <String>[];
+    // Email is optional, not included in validation
+    if (quantityController.text.isEmpty) missing.add(DynamicLanguage.key(Strings.quantity));
+    if (pickupDate.value.isEmpty) missing.add(DynamicLanguage.key(Strings.PickUpdate));
+    if (pickupTime.value.isEmpty) missing.add(DynamicLanguage.key(Strings.PickUpTime));
+    if (isDeliver.value && pickupLocation.value == null) missing.add(DynamicLanguage.key(Strings.PickUpLocation));
+    return missing;
   }
 }
 

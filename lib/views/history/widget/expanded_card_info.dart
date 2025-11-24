@@ -15,13 +15,13 @@ class ExpandedCardInfo extends GetView<HistoryController> {
   _moreInfoShow(int index) {
     final info = controller.historyList[index];
     return Container(
-      decoration: BoxDecoration(
-        color: CustomColor.whiteColor,
-        borderRadius: BorderRadius.circular(Dimensions.radius * 0.8),
-      ),
+      // decoration: BoxDecoration(
+      //   color: CustomColor.whiteColor,
+      //   borderRadius: BorderRadius.circular(Dimensions.radius * 0.8),
+      // ),
       padding: EdgeInsets.symmetric(
-        horizontal: Dimensions.defaultHorizontalSize * 2,
-        vertical: Dimensions.verticalSize * 0.2,
+        horizontal: Dimensions.defaultHorizontalSize,
+        vertical: Dimensions.verticalSize * 0.5,
       ),
       child: Column(
         children: [

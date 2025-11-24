@@ -338,8 +338,9 @@ class VendorLocation {
   String? address;
   double? latitude;
   double? longitude;
+  double? radiusKm;
 
-  VendorLocation({this.city, this.address, this.latitude, this.longitude});
+  VendorLocation({this.city, this.address, this.latitude, this.longitude, this.radiusKm});
 
   factory VendorLocation.fromJson(Map<String, dynamic> json) => VendorLocation(
     city: json["city"],
@@ -350,6 +351,9 @@ class VendorLocation {
     longitude: json["longitude"] != null
         ? (json["longitude"]).toDouble()
         : (json["long"] != null ? (json["long"]).toDouble() : null),
+    radiusKm: json["radius_km"] != null
+        ? (json["radius_km"]).toDouble()
+        : (json["max_radius_km"] != null ? (json["max_radius_km"]).toDouble() : null),
   );
 
   Map<String, dynamic> toJson() => {
@@ -357,6 +361,7 @@ class VendorLocation {
     "address": address,
     "latitude": latitude,
     "longitude": longitude,
+    if (radiusKm != null) "radius_km": radiusKm,
   };
 
   String get displayLocation {
@@ -369,6 +374,14 @@ class VendorLocation {
     }
     return 'Location not specified';
   }
+
+  /// Compatibility alias: some parts of the codebase expect `maxRadiusKm`.
+  /// Keep this computed getter to avoid lookup failures when reflecting getters.
+  double? get maxRadiusKm => radiusKm;
+
+  /// Backwards-compatible snake_case alias in case any reflection
+  /// or generated code looks for `max_radius_km` as a getter name.
+  double? get max_radius_km => radiusKm;
 }
 
 class Pagination {

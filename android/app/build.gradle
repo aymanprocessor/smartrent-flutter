@@ -23,6 +23,14 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        // Inject Google Maps API key into the Android manifest via manifest placeholders.
+        // Prefer setting MAPS_API_KEY in local.properties (do not commit) or an environment variable.
+            manifestPlaceholders = [
+                'com.google.android.geo.API_KEY': project.hasProperty('MAPS_API_KEY') ? project.property('MAPS_API_KEY') : "AIzaSyDBtOCLLOaWvNjc5WPOQjBbHkSGSy3Y-9k",
+                // Provide a default applicationName placeholder so the manifest's ${applicationName} resolves.
+                // Using android.app.Application as a safe default; change if your app uses a custom Application subclass.
+                'applicationName': project.hasProperty('APPLICATION_NAME') ? project.property('APPLICATION_NAME') : "android.app.Application"
+        ]
     }
 
     buildTypes {

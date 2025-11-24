@@ -110,6 +110,25 @@ class LocalStorage {
 
   static String get number => _storage.read(userNumberKey) ?? '';
 
+  /// Convenience alias for `number` to make intent clearer in calling code.
+  static String get mobile => number;
+
+  /// Returns true when an email value exists in storage (non-empty after trim).
+  static bool get hasEmail => email.toString().trim().isNotEmpty;
+
+  /// Returns true when a mobile/number value exists in storage (non-empty after trim).
+  static bool get hasMobile => mobile.toString().trim().isNotEmpty;
+
+  /// Simple email format validator. Not exhaustive but sufficient for quick checks.
+  static bool isValidEmail(String? e) {
+    if (e == null) return false;
+    final emailStr = e.trim();
+    if (emailStr.isEmpty) return false;
+    // Basic regex: local@domain.tld (does not cover all edge cases).
+    final regExp = RegExp(r"^[\w\-\.]+@[\w\-]+(\.[\w\-]+)+$");
+    return regExp.hasMatch(emailStr);
+  }
+
   static int get kycStatus => _storage.read(kycStatusKey) ?? 0;
 
   // Clear all stored data

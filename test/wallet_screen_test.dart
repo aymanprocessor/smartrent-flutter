@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:carbo/services/wallet_service.dart';
+import 'package:carbo/views/wallet/service/wallet_service.dart';
 
 // Minimal mock service to avoid network calls during widget tests.
 class MockWalletService extends WalletService {

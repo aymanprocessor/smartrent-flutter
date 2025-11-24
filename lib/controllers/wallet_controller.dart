@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:carbo/models/wallet_balance.dart';
 import 'package:carbo/models/wallet_transaction.dart';
-import 'package:carbo/services/wallet_service.dart';
+import 'package:carbo/views/wallet/service/wallet_service.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';

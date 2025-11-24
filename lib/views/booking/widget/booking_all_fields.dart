@@ -97,18 +97,128 @@ class BookingAllFields extends GetView<BookingController> {
             ),
             Sizes.height.v5,
             
-            // Show pickup location only when deliver is enabled
+            // Show pickup location map picker only when deliver is enabled
             Obx(
               () => controller.isDeliver.value
-                  ? PrimaryInputWidget(
-                      controller: controller.locationController,
-                      label: DynamicLanguage.key(Strings.PickUpLocation),
-                      hintText: DynamicLanguage.key(Strings.PickUpLocation),
-                      showBorderSide: true,
-                    )
+                  ? _buildLocationPickerButton()
                   : const SizedBox.shrink(),
             ),
           ],
+        );
+      },
+    );
+  }
+
+  /// Build location picker button that navigates to map
+  Widget _buildLocationPickerButton() {
+    return Obx(
+      () {
+        final hasLocation = controller.pickupLocation.value != null;
+        return GestureDetector(
+          onTap: () {
+            // Determine center and radius from selected car's vendorLocation if available
+            final vendorLoc = controller.selectedCar.value?.vendorLocation;
+            LatLng? center;
+            double? radiusMeters;
+            if (vendorLoc != null && vendorLoc.latitude != null && vendorLoc.longitude != null) {
+              center = LatLng(vendorLoc.latitude!, vendorLoc.longitude!);
+              if (vendorLoc.radiusKm != null) {
+                radiusMeters = vendorLoc.radiusKm! * 1000.0;
+              }
+            }
+
+            Get.to(
+              () => LocationPickerWidget(
+                onLocationSelected: (location) {
+                  controller.pickupLocation.value = location;
+                  controller.pickupLatitude.value = location.latitude;
+                  controller.pickupLongitude.value = location.longitude;
+                },
+                initialLocation: controller.pickupLocation.value,
+                center: center,
+                radiusMeters: radiusMeters,
+              ),
+            );
+          },
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border.all(
+                color: hasLocation ? CustomColor.primary : Colors.grey.shade300,
+                width: 1.5,
+              ),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.location_on,
+                  color: hasLocation ? CustomColor.primary : Colors.grey.shade400,
+                  size: 20,
+                ),
+                SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        DynamicLanguage.key(Strings.PickUpLocation),
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.grey.shade600,
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      if (hasLocation)
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              controller.pickupLocation.value!.address,
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFF1F2937),
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            SizedBox(height: 4),
+                            Text(
+                              'Lat: ${controller.pickupLocation.value!.latitude.toStringAsFixed(4)}, Lng: ${controller.pickupLocation.value!.longitude.toStringAsFixed(4)}',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w400,
+                                color: Colors.grey.shade500,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        )
+                      else
+                        Text(
+                          DynamicLanguage.key(Strings.PickUpLocation),
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey.shade400,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                SizedBox(width: 8),
+                Icon(
+                  Icons.arrow_forward_ios,
+                  size: 16,
+                  color: CustomColor.primary,
+                ),
+              ],
+            ),
+          ),
         );
       },
     );

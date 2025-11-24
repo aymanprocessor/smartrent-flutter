@@ -4,7 +4,7 @@ import '../../../base/utils/basic_import.dart';
 import '../../../base/widgets/app_cached_image.dart';
 import '../../../routes/routes.dart';
 import '../../auth/login/controller/login_controller.dart';
-import '../../auth/register/widget/web_screen.dart';
+import '../../common/html_screen.dart';
 import '../../dashboard/controller/dashboard_controller.dart';
 part 'drawer_tablet_screen.dart';
 part 'drawer_mobile_screen.dart';

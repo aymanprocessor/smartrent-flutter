@@ -39,19 +39,19 @@ class OthersWidgets extends StatelessWidget {
           DynamicLanguage.isLoading
               ? ""
               : DynamicLanguage.key(Strings.contactUs),
-          () => Get.to(() => WebViewScreen(title: Strings.contactUs)),
+          () => _openContact(),
         ),
         _itemCard(
           Icons.privacy_tip_outlined,
           DynamicLanguage.isLoading
               ? ""
               : DynamicLanguage.key(Strings.privacyPolicy),
-          () => Get.to(() => WebViewScreen(title: Strings.privacyPolicy)),
+          () => _openPrivacyPolicy(),
         ),
         _itemCard(
           Icons.info_outline,
           Strings.aboutUs,
-          () => Get.to(() => WebViewScreen(title: Strings.aboutUs)),
+          () => _openAbout(),
         ),
         _itemCard(
           Icons.logout,
@@ -74,6 +74,30 @@ class OthersWidgets extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  void _openPrivacyPolicy() {
+    final lang = DynamicLanguage.selectedLanguage.value;
+    final asset = (lang.startsWith('en'))
+        ? 'assets/html/privacy-policy-en.html'
+        : 'assets/html/privacy-policy-ar.html';
+    Get.to(() => HtmlScreen(title: Strings.privacyPolicy, asset: asset));
+  }
+
+  void _openAbout() {
+    final lang = DynamicLanguage.selectedLanguage.value;
+    final asset = (lang.startsWith('en'))
+        ? 'assets/html/about_smartrent_en.html'
+        : 'assets/html/about_smartrent_ar.html';
+    Get.to(() => HtmlScreen(title: Strings.aboutUs, asset: asset));
+  }
+
+  void _openContact() {
+    final lang = DynamicLanguage.selectedLanguage.value;
+    final asset = (lang.startsWith('en'))
+        ? 'assets/html/contact-us-en.html'
+        : 'assets/html/contact-us-ar.html';
+    Get.to(() => HtmlScreen(title: Strings.contactUs, asset: asset));
   }
 
   _itemCard(IconData icon, String title, VoidCallback onTap, [Color? color]) {

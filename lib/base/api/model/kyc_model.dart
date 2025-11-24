@@ -41,14 +41,36 @@ class KycFieldsResponseModel {
   });
 
   factory KycFieldsResponseModel.fromJson(Map<String, dynamic> json) {
+    // Extract message properly - handle nested success message
+    String messageText = '';
+    if (json['message'] is Map) {
+      final msgMap = json['message'] as Map<String, dynamic>;
+      if (msgMap['success'] is List && (msgMap['success'] as List).isNotEmpty) {
+        messageText = (msgMap['success'] as List).first.toString();
+      } else if (msgMap['error'] is List && (msgMap['error'] as List).isNotEmpty) {
+        messageText = (msgMap['error'] as List).first.toString();
+      }
+    } else if (json['message'] is List) {
+      messageText = (json['message'] as List).join(', ');
+    } else {
+      messageText = json['message']?.toString() ?? '';
+    }
+
+    // Extract kyc_fields from nested data object
+    List<KycField> fieldsList = [];
+    if (json['data'] != null && json['data'] is Map) {
+      final dataMap = json['data'] as Map<String, dynamic>;
+      if (dataMap['kyc_fields'] != null && dataMap['kyc_fields'] is List) {
+        fieldsList = (dataMap['kyc_fields'] as List)
+            .map((e) => KycField.fromJson(e as Map<String, dynamic>))
+            .toList();
+      }
+    }
+
     return KycFieldsResponseModel(
-      success: json['success'] ?? true,
-      message: (json['message'] is List)
-          ? (json['message'] as List).join(', ')
-          : json['message']?.toString() ?? '',
-      fields: json['data'] != null && json['data'] is List
-          ? (json['data'] as List).map((e) => KycField.fromJson(e)).toList()
-          : [],
+      success: (json['type'] == 'success') || (json['success'] ?? false),
+      message: messageText,
+      fields: fieldsList,
     );
   }
 }
@@ -75,6 +97,17 @@ class KycField {
   });
 
   factory KycField.fromJson(Map<String, dynamic> json) {
+    // Extract maxLength from validation.max if available
+    int? maxLength;
+    if (json['validation'] is Map) {
+      final validation = json['validation'] as Map<String, dynamic>;
+      if (validation['max'] != null) {
+        maxLength = int.tryParse(validation['max'].toString());
+      }
+    } else if (json['max_length'] != null) {
+      maxLength = int.tryParse(json['max_length'].toString());
+    }
+
     return KycField(
       name: json['name']?.toString() ?? '',
       label: json['label']?.toString() ?? '',
@@ -84,7 +117,7 @@ class KycField {
           ? (json['options'] as List).map((e) => e.toString()).toList()
           : null,
       placeholder: json['placeholder']?.toString(),
-      maxLength: json['max_length'] != null ? int.tryParse(json['max_length'].toString()) : null,
+      maxLength: maxLength,
       validationRegex: json['validation_regex']?.toString(),
     );
   }

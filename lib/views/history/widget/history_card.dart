@@ -15,7 +15,10 @@ class HistoryCard extends GetView<HistoryController> {
           vertical: Dimensions.verticalSize * 0.2,
           horizontal: Dimensions.defaultHorizontalSize,
         ),
-        elevation: 0,
+        elevation: 1,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(Dimensions.radius),
+        ),
         child: Column(
           children: [
             ListTile(

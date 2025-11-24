@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../utils/basic_import.dart';
+import '../localization/dynamic_language_shim.dart';
 
 class CustomDatePicker extends StatefulWidget {
   final RxString selectedDate; // Observable date string
@@ -140,7 +141,7 @@ class _CustomDatePickerState extends State<CustomDatePicker>
                               children: [
                                 TextWidget(
                                   widget.selectedDate.value.isEmpty
-                                      ? Strings.SelectADate
+                                      ? DynamicLanguage.key(Strings.SelectADate)
                                       : widget.selectedDate.value,
                                   fontSize:
                                       widget.hintFontSize ??

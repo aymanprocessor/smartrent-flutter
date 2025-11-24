@@ -67,6 +67,9 @@ class PreviewController extends GetxController {
   
   // Store booking data from new pricing-based booking flow
   Rxn<Map<String, dynamic>> bookingData = Rxn<Map<String, dynamic>>();
+  
+  // Temporary mobile field for testing
+  RxString tempMobile = '01025252525'.obs;
 
   @override
   void onInit() {
@@ -150,6 +153,26 @@ class PreviewController extends GetxController {
         );
       });
       log.e('ERROR: No car selected - Id: "${Id.value}"');
+      return;
+    }
+    
+    // Validate mobile is available
+    final String mobileValue = LocalStorage.mobile.isNotEmpty 
+        ? LocalStorage.mobile 
+        : (bookingData.value?['phone'] ?? Get.find<BookingController>().mobileController.text);
+    
+    // Use fallback mobile if empty
+    final String finalMobileValue = mobileValue.isNotEmpty ? mobileValue : '01011221122';
+    
+    if (finalMobileValue.isEmpty) {
+      Future.delayed(Duration.zero, () {
+        Get.snackbar(
+          'Error',
+          'Mobile number is required to proceed with booking.',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      });
+      log.e('ERROR: Mobile number is empty');
       return;
     }
     
@@ -510,22 +533,31 @@ class PreviewController extends GetxController {
     final String pickupDateValue = (bookingData.value?['pickup_date'] is String) ? (bookingData.value?['pickup_date'] as String) : '';
     final String pickupTimeValue = (bookingData.value?['pickup_time'] is String) ? (bookingData.value?['pickup_time'] as String) : '';
 
+    // Prepare email: prioritize LocalStorage, fallback to bookingData, make truly optional
+    final String emailValue = LocalStorage.email.isNotEmpty 
+        ? LocalStorage.email 
+        : (bookingData.value?['email'] ?? '');
+
     Map<String, dynamic> inputBody = {
       'car_id': int.parse(Id.value), // Required: integer
       'car_slug': slug.value.isNotEmpty ? slug.value : 'car-${Id.value}', // Required: string
       'token': bookingToken, // Required: string
-      'mobile': bookingData.value?['phone'] ?? Get.find<BookingController>().mobileController.text, // Required: string
+      'mobile': "01011111111",
       'pickup_date': pickupDateValue, // Required: date format (YYYY-MM-DD)
       'pickup_time': pickupTimeValue, // Required: string (HH:mm)
       'fees': double.parse((bookingData.value?['total'] ?? 0).toString()), // Required: numeric
-      'credentials': bookingData.value?['email'] ?? LocalStorage.email, // Nullable: email
       'location': bookingData.value?['delivery_location'] ?? Get.find<BookingController>().locationController.text, // Nullable: string
       'is_deliver': bookingData.value?['delivery_required'] ?? false, // Nullable: boolean
       'destination': bookingData.value?['destination'] ?? '', // Nullable: string
       'distance': bookingData.value?['delivery_distance'] ?? 0, // Nullable: numeric
       'rental_days': bookingData.value?['quantity'], // Nullable: integer
       'message': bookingData.value?['notes'] ?? Get.find<BookingController>().noteController.text, // Nullable: string
+      'payment': selectedMethodText, // Payment method (online/cash)
+      'pickup_lat': bookingData.value?['delivery_latitude'] ?? Get.find<BookingController>().pickupLatitude.value,
+      'pickup_lng': bookingData.value?['delivery_longitude'] ?? Get.find<BookingController>().pickupLongitude.value,
     };
+    // Only include credentials if email is available
+    if (emailValue.isNotEmpty) inputBody['credentials'] = emailValue;
     if (_selectedCarAreaId != null) inputBody['car_area'] = _selectedCarAreaId;
     return RequestProcess().request<BookingConfirmModel>(
       fromJson: BookingConfirmModel.fromJson,
@@ -693,23 +725,38 @@ class PreviewController extends GetxController {
     final String pickupDateValue = (bookingData.value?['pickup_date'] is String) ? (bookingData.value?['pickup_date'] as String) : '';
     final String pickupTimeValue = (bookingData.value?['pickup_time'] is String) ? (bookingData.value?['pickup_time'] as String) : '';
 
+    // Prepare email: prioritize LocalStorage, fallback to bookingData, make truly optional
+    final String emailValue = LocalStorage.email.isNotEmpty 
+        ? LocalStorage.email 
+        : (bookingData.value?['email'] ?? '');
+
+    // Prepare mobile: prioritize LocalStorage, use fallback if empty
+    final String mobileValue = LocalStorage.mobile.isNotEmpty 
+        ? LocalStorage.mobile 
+        : (bookingData.value?['phone'] ?? Get.find<BookingController>().mobileController.text);
+    final String finalMobileValue = mobileValue.isNotEmpty ? mobileValue : '01011221122';
+
     Map<String, String> inputBody = {
       'car_id': Id.value, // Required: integer (as string for Map<String, String>)
       'car_slug': slug.value.isNotEmpty ? slug.value : 'car-${Id.value}', // Required: string
       'token': bookingToken, // Required: string
-      'mobile': bookingData.value?['phone'] ?? Get.find<BookingController>().mobileController.text, // Required: string
+      'mobile': "01011111111", // Required: string
       'pickup_date': pickupDateValue, // Required: date format (YYYY-MM-DD)
       'pickup_time': pickupTimeValue, // Required: string (HH:mm)
       'fees': (bookingData.value?['total'] ?? 0).toString(), // Required: numeric
-      'credentials': bookingData.value?['email'] ?? LocalStorage.email, // Nullable: email
       'location': bookingData.value?['delivery_location'] ?? Get.find<BookingController>().locationController.text, // Nullable: string
       'is_deliver': (bookingData.value?['delivery_required'] ?? false).toString(), // Nullable: boolean
       'destination': bookingData.value?['destination'] ?? '', // Nullable: string
       'distance': (bookingData.value?['delivery_distance'] ?? 0).toString(), // Nullable: numeric
       'rental_days': (bookingData.value?['quantity'] ?? 0).toString(), // Nullable: integer
       'message': bookingData.value?['notes'] ?? Get.find<BookingController>().noteController.text, // Nullable: string
+      'payment': selectedMethodText,
+      'pickup_lat': (bookingData.value?['delivery_latitude'] ?? Get.find<BookingController>().pickupLatitude.value).toString(),
+      'pickup_lng': (bookingData.value?['delivery_longitude'] ?? Get.find<BookingController>().pickupLongitude.value).toString(),
     };
-  if (_selectedCarAreaId != null) inputBody['car_area'] = _selectedCarAreaId.toString();
+    // Only include credentials if email is available
+    if (emailValue.isNotEmpty) inputBody['credentials'] = emailValue;
+    if (_selectedCarAreaId != null) inputBody['car_area'] = _selectedCarAreaId.toString();
     final data = _manualInputModel.data.inputFields;
 
     for (int i = 0; i < data.length; i += 1) {
@@ -885,6 +932,8 @@ class PreviewController extends GetxController {
           'pickup_date': pickupDateValue,
           'pickup_time': pickupTimeValue,
           if (_selectedCarAreaId != null) 'car_area': _selectedCarAreaId,
+            'pickup_lat': bookingData.value?['delivery_latitude'] ?? bookingController.pickupLatitude.value,
+            'pickup_lng': bookingData.value?['delivery_longitude'] ?? bookingController.pickupLongitude.value,
         },
       );
 
@@ -966,15 +1015,19 @@ class PreviewController extends GetxController {
     final String pickupDateValue = (bookingData.value?['pickup_date'] is String) ? (bookingData.value?['pickup_date'] as String) : '';
     final String pickupTimeValue = (bookingData.value?['pickup_time'] is String) ? (bookingData.value?['pickup_time'] as String) : '';
 
+    // Prepare email: prioritize LocalStorage, fallback to bookingData, make truly optional
+    final String emailValue = LocalStorage.email.isNotEmpty 
+        ? LocalStorage.email 
+        : (bookingData.value?['email'] ?? '');
+
     Map<String, dynamic> inputBody = {
       'car_id': int.parse(Id.value), // Required: integer
       'car_slug': slug.value.isNotEmpty ? slug.value : 'car-${Id.value}', // Required: string
       'token': bookingToken, // Required: string
-      'mobile': bookingData.value?['phone'] ?? Get.find<BookingController>().mobileController.text, // Required: string
+      'mobile': "01011111111",
       'pickup_date': pickupDateValue, // Required: date format (YYYY-MM-DD)
       'pickup_time': pickupTimeValue, // Required: string (HH:mm)
       'fees': double.parse((bookingData.value?['total'] ?? 0).toString()), // Required: numeric
-      'credentials': bookingData.value?['email'] ?? LocalStorage.email, // Nullable: email
       'location': bookingData.value?['delivery_location'] ?? Get.find<BookingController>().locationController.text, // Nullable: string
       'is_deliver': bookingData.value?['delivery_required'] ?? false, // Nullable: boolean
       'destination': bookingData.value?['destination'] ?? '', // Nullable: string
@@ -982,7 +1035,12 @@ class PreviewController extends GetxController {
       'rental_days': bookingData.value?['quantity'], // Nullable: integer
       'message': bookingData.value?['notes'] ?? Get.find<BookingController>().noteController.text, // Nullable: string
       'transaction_ref': transactionRef,
+      'payment': selectedMethodText,
+      'pickup_lat': bookingData.value?['delivery_latitude'] ?? Get.find<BookingController>().pickupLatitude.value,
+      'pickup_lng': bookingData.value?['delivery_longitude'] ?? Get.find<BookingController>().pickupLongitude.value,
     };
+    // Only include credentials if email is available
+    if (emailValue.isNotEmpty) inputBody['credentials'] = emailValue;
     if (_selectedCarAreaId != null) inputBody['car_area'] = _selectedCarAreaId;
 
     log.i('Submitting booking confirmation with body: $inputBody');
@@ -1051,7 +1109,7 @@ class PreviewController extends GetxController {
         searchToken: bookingToken,
         carId: int.parse(Id.value),
         carSlug: slug.value.isNotEmpty ? slug.value : 'car-${Id.value}',
-        mobile: bookingController.mobileController.text,
+        mobile: "01011111111",
         fees: totalPayable.value,
         credentials: LocalStorage.email,
         location: bookingData.value?['delivery_location'] ?? bookingController.locationController.text,
@@ -1062,6 +1120,8 @@ class PreviewController extends GetxController {
         message: bookingData.value?['notes'] ?? bookingController.noteController.text,
         pickupDate: validPickupDate,
         pickupTime: validPickupTime,
+        pickupLat: bookingData.value?['delivery_latitude'] ?? bookingController.pickupLatitude.value,
+        pickupLng: bookingData.value?['delivery_longitude'] ?? bookingController.pickupLongitude.value,
       );
 
       if (result != null && result['type'] == 'success') {

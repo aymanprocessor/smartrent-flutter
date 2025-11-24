@@ -213,9 +213,41 @@ class Strings {
   static const String tax = "appLTax";
   static const String total = "appLTotal";
   static const String quantity = "appLQuantity";
+
+  // Location picker specific strings
+  static const String SnappedOutsideAllowed = "appLSnappedOutsideAllowed";
+  static const String SnappedShort = "appLSnappedShort";
+  static const String CurrentLocation = "appLCurrentLocation";
+  static const String Center = "appLCenter";
+  static const String LatLngFormat = "appLLatLngFormat";
+  static const String SelectedLocation = "appLSelectedLocation";
+  static const String DistanceLabel = "appLDistanceLabel";
+  static const String ConfirmLocation = "appLConfirmLocation";
+  static const String LocationPermissionDenied = "appLLocationPermissionDenied";
+  static const String OpenSettings = "appLOpenSettings";
   
   // Quantity input related strings
   static const String enterDays = "appLEnterDays";
   static const String enterDistance = "appLEnterDistance";
   static const String enterQuantity = "appLEnterQuantity";
+
+  // KYC Verification related strings
+  static const String kycRequired = "appLKycRequired";
+  static const String kycVerification = "appLKycVerification";
+  static const String completeKycToEnableBooking = "appLCompleteKycToEnableBooking";
+  static const String pleaseCompleteKycVerification = "appLPleaseCompleteKycVerification";
+  static const String kycPending = "appLKycPending";
+  static const String kycPendingReview = "appLKycPendingReview";
+  static const String kycPendingMessage = "appLKycPendingMessage";
+
+  // Profile Completion strings
+  static const String completeYourProfile = "appLCompleteYourProfile";
+  static const String pleaseCompleteYourProfile = "appLPleaseCompleteYourProfile";
+  static const String enterYourFirstName = "appLEnterYourFirstName";
+  static const String enterYourLastName = "appLEnterYourLastName";
+  static const String enterYourEmailAddress = "appLEnterYourEmailAddress";
+  static const String firstNameRequired = "appLFirstNameRequired";
+  static const String lastNameRequired = "appLLastNameRequired";
+  static const String emailRequired = "appLEmailRequired";
+  static const String invalidEmail = "appLInvalidEmail";
 }

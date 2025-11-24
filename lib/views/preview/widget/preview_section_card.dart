@@ -32,20 +32,21 @@ class PreviewSectionCard extends GetView<PreviewController> {
               if (bookController.isDeliver.value)
                 _cardSection(
                   Strings.PickUpLocation,
-                  bookController.locationController.text,
+                  // Prefer pickupLocation.address (set by map picker), fallback to text controller
+                  bookController.pickupLocation.value?.address ?? bookController.locationController.text,
                 ),
               if (bookController.isDeliver.value)
                 _cardSection(
                   Strings.PickUpdate,
-                  Get.find<DashboardController>().selectedDate.value,
+                  bookController.pickupDate.value,
                 ),
               if (bookController.isDeliver.value)
                 _cardSection(
                   Strings.PickUpTime,
-                  Get.find<DashboardController>().selectedTime.value,
+                  bookController.pickupTime.value,
                 ),
               _cardSection(
-                Strings.quantity,
+                Strings.rentalDays,
                 bookController.quantityController.text,
               ),
               if (bookController.isDeliver.value)
@@ -54,9 +55,9 @@ class PreviewSectionCard extends GetView<PreviewController> {
                   'Yes',
                 ),
               _cardSection(
-                bookController.pricingType.value == 'per_day' 
-                  ? Strings.pricePerDay
-                  : Strings.pricePerKm,
+                bookController.pricingType.value == 'per_day'
+                    ? Strings.pricePerDay
+                    : Strings.pricePerKm,
                 '${bookController.selectedPricing.value?.price ?? 0} ${bookController.selectedPricing.value?.currency ?? 'USD'}',
               ),
               _cardSection(
@@ -95,16 +96,31 @@ class PreviewSectionCard extends GetView<PreviewController> {
         horizontal: Dimensions.defaultHorizontalSize,
       ),
       child: Row(
-        mainAxisAlignment: mainSpaceBet,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          TextWidget(title, fontSize: Dimensions.titleSmall),
-          TextWidget(
-            maxLines: 1,
-            textOverflow: TextOverflow.ellipsis,
-            value,
-            fontWeight: FontWeight.w500,
-            color: CustomColor.primary,
-            fontSize: Dimensions.titleSmall,
+          Expanded(
+            child: TextWidget(
+              title,
+              fontSize: Dimensions.titleSmall,
+              maxLines: 2,
+              textOverflow: TextOverflow.ellipsis,
+            ),
+          ),
+          SizedBox(width: 12),
+          Flexible(
+            flex: 0,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: MediaQuery.of(Get.context!).size.width * 0.45),
+              child: TextWidget(
+                value,
+                fontWeight: FontWeight.w500,
+                color: CustomColor.primary,
+                fontSize: Dimensions.titleSmall,
+                maxLines: 2,
+                textOverflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.end,
+              ),
+            ),
           ),
         ],
       ),

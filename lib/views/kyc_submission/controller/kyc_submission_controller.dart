@@ -19,11 +19,11 @@ class KycSubmissionController extends GetxController {
   final Map<String, TextEditingController> textControllers = {};
 
   // Store selected values for dropdowns
-  final Map<String, String> selectedValues = {};
+  final RxMap<String, String> selectedValues = <String, String>{}.obs;
 
   // Store selected files
-  final Map<String, File> selectedFiles = {};
-  final Map<String, String> fileNames = {};
+  final RxMap<String, File> selectedFiles = <String, File>{}.obs;
+  final RxMap<String, String> fileNames = <String, String>{}.obs;
 
   final ImagePicker _imagePicker = ImagePicker();
 
@@ -82,6 +82,8 @@ class KycSubmissionController extends GetxController {
       if (result != null && result.files.single.path != null) {
         selectedFiles[fieldName] = File(result.files.single.path!);
         fileNames[fieldName] = result.files.single.name;
+        selectedFiles.refresh();
+        fileNames.refresh();
       }
     } catch (e) {
       CustomSnackBar.error('Failed to pick file');
@@ -91,7 +93,7 @@ class KycSubmissionController extends GetxController {
   Future<void> pickImage(String fieldName) async {
     try {
       final XFile? image = await _imagePicker.pickImage(
-        source: ImageSource.gallery,
+        source: ImageSource.camera,
         maxWidth: 1800,
         maxHeight: 1800,
       );
@@ -99,6 +101,8 @@ class KycSubmissionController extends GetxController {
       if (image != null) {
         selectedFiles[fieldName] = File(image.path);
         fileNames[fieldName] = image.name;
+        selectedFiles.refresh();
+        fileNames.refresh();
       }
     } catch (e) {
       CustomSnackBar.error('Failed to pick image');
@@ -108,6 +112,13 @@ class KycSubmissionController extends GetxController {
   void removeFile(String fieldName) {
     selectedFiles.remove(fieldName);
     fileNames.remove(fieldName);
+    selectedFiles.refresh();
+    fileNames.refresh();
+  }
+
+  void selectDropdownValue(String fieldName, String value) {
+    selectedValues[fieldName] = value;
+    selectedValues.refresh();
   }
 
   Future<void> submitKyc() async {

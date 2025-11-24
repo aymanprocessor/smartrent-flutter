@@ -23,6 +23,8 @@ class PreviewMobileScreen extends GetView<PreviewController> {
                     // Test Booking Button (for testing/QA)
                     PrimaryButton(
                       title: '🧪 Test Booking (No Payment)',
+                      // KYC gating removed: always enabled (respecting controller loading state)
+                      disable: false,
                       onPressed: () {
                         controller.testConfirmBooking();
                       },
@@ -33,6 +35,8 @@ class PreviewMobileScreen extends GetView<PreviewController> {
                       () => PrimaryButton(
                         isLoading: controller.isBookingLoading,
                         title: Strings.ConfirmBooking,
+                        // KYC gating removed: allow pressing; controller will handle payment flow
+                        disable: false,
                         onPressed: () {
                           controller.handlePaymentProcess();
                         },

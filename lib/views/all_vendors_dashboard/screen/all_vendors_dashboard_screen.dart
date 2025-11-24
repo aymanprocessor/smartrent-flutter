@@ -7,6 +7,7 @@ import '../../../base/localization/dynamic_language_shim.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../base/utils/basic_import.dart';
+import '../../../base/utils/local_storage.dart';
 import '../../../base/widgets/app_cached_image.dart';
 import '../../../base/services/location_service.dart';
 import '../controller/all_vendors_dashboard_controller.dart';

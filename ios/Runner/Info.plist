@@ -55,5 +55,8 @@
     <string>We need your location to check if car delivery is available in your area</string>
     <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
     <string>We need your location to check if car delivery is available in your area</string>
+    <!-- Google Maps iOS API key. Replace with your key or add to build settings. -->
+    <key>GMSApiKey</key>
+    <string>AIzaSyDBtOCLLOaWvNjc5WPOQjBbHkSGSy3Y-9k</string>
   </dict>
 </plist>

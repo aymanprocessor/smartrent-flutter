@@ -297,7 +297,7 @@ class AllVendorsCarListView extends GetView<AllVendorsDashboardController> {
           ),
           SizedBox(width: 6),
           Text(
-            'Delivery',
+            DynamicLanguage.key(Strings.deliveryCar),
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
@@ -602,7 +602,7 @@ class AllVendorsCarListView extends GetView<AllVendorsDashboardController> {
                               ),
                               SizedBox(width: 4),
                               Text(
-                                'Delivery',
+                                DynamicLanguage.key(Strings.deliveryCar),
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 11,
@@ -1037,6 +1037,26 @@ class AllVendorsCarListView extends GetView<AllVendorsDashboardController> {
   }
 
   void _onCarTap(VendorCar car) {
+    if (LocalStorage.kycStatus != 1 && LocalStorage.kycStatus != 2) {
+      Get.snackbar(
+        DynamicLanguage.key(Strings.kycRequired),
+        DynamicLanguage.key(Strings.pleaseCompleteKycVerification),
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.amber.shade700,
+        colorText: Colors.white,
+      );
+      return;
+    }else if(LocalStorage.kycStatus == 2){
+      Get.snackbar(
+        DynamicLanguage.key(Strings.kycPending),
+        DynamicLanguage.key(Strings.kycPendingMessage),
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.orange.shade700,
+        colorText: Colors.white,
+      );
+      return;
+    }
+
     // Store selected car info for booking
     controller.selectedCarId.value = car.id.toString();
     

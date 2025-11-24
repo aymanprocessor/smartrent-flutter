@@ -43,6 +43,17 @@ class HistoryController extends GetxController {
         _historyModel.data.history.forEach((element) {
           historyList.add(
             History(
+              id: element.id,
+              vendorId: element.vendorId,
+              branchId: element.branchId,
+              approvedBy: element.approvedBy,
+              approvedAt: element.approvedAt,
+              carId: element.carId,
+              userId: element.userId,
+              slug: element.slug,
+              phone: element.phone,
+              email: element.email,
+              tripId: element.tripId,
               message: element.message,
               distance: element.distance,
               createdAt: element.createdAt,
@@ -56,6 +67,10 @@ class HistoryController extends GetxController {
               pickupTime: element.pickupTime,
               roundPickupDate: element.roundPickupDate,
               roundPickupTime: element.roundPickupTime,
+              rentalDays: element.rentalDays,
+              charges: element.charges,
+              trxId: element.trxId,
+              isDeliver: element.isDeliver,
               cars: element.cars,
             ),
           );

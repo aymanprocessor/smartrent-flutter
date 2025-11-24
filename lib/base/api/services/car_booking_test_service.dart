@@ -43,6 +43,8 @@ class CarBookingTestService {
     String? message,
     String? pickupDate,
     String? pickupTime,
+    double? pickupLat,
+    double? pickupLng,
   }) async {
     try {
       final url = Uri.parse(
@@ -64,6 +66,8 @@ class CarBookingTestService {
         if (message != null) 'message': message,
         if (pickupDate != null) 'pickup_date': pickupDate,
         if (pickupTime != null) 'pickup_time': pickupTime,
+        if (pickupLat != null) 'pickup_lat': pickupLat,
+        if (pickupLng != null) 'pickup_lng': pickupLng,
       };
 
       log.i('Test Confirm Booking Request:');

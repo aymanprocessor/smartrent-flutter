@@ -3,6 +3,11 @@ part of '../screen/dashboard_screen.dart';
 class FindCarButton extends GetView<DashboardController> {
   const FindCarButton({Key? key}) : super(key: key);
 
+  bool _isKycVerified() {
+    final kycStatus = LocalStorage.kycStatus;
+    return kycStatus == 1; // 1 = Approved/Verified
+  }
+
   @override
   Widget build(BuildContext context) {
     return Obx(
@@ -14,9 +19,20 @@ class FindCarButton extends GetView<DashboardController> {
         child: PrimaryButton(
           isLoading: controller.isSearchingCar,
           title: Strings.findCar,
-          onPressed: () {
-            controller.searchAllCar();
-          },
+          disable: !_isKycVerified(),
+          onPressed: _isKycVerified()
+              ? () {
+                  controller.searchAllCar();
+                }
+              : () {
+                  Get.snackbar(
+                    DynamicLanguage.key(Strings.kycRequired),
+                    DynamicLanguage.key(Strings.pleaseCompleteKycVerification),
+                    snackPosition: SnackPosition.TOP,
+                    backgroundColor: Colors.amber.shade700,
+                    colorText: Colors.white,
+                  );
+                },
         ),
       ),
     );
