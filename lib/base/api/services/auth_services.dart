@@ -4,10 +4,12 @@ import 'package:flutter/foundation.dart';
 import '../../../debug/print_auth_token.dart';
 import '../../../routes/routes.dart';
 import '../../../views/auth/login/model/log_in_model.dart';
+import '../../../views/auth/otp_login/model/send_otp_response_model.dart';
 import '../../../views/auth/register/model/register_model.dart';
 import '../../../views/auth/reset_password/model/find_user_send_code_model.dart';
 import '../../../views/auth/reset_password/model/forgot_pass_and_verify_model.dart';
 import '../../utils/local_storage.dart';
+import '../../services/realtime_service.dart';
 import '../endpoint/api_endpoint.dart';
 import '../method/request_process.dart';
 import '../model/common_success_model.dart';
@@ -33,6 +35,28 @@ class AuthServices {
 
   CommonSuccessModel get commonSuccessModel => _commonSuccessModel;
 
+  /// Connect to Pusher realtime service after login
+  static Future<void> _connectRealtimeService(int userId) async {
+    try {
+      final realtime = RealtimeService();
+      await realtime.init();
+      await realtime.subscribeToUserChannel(userId);
+      debugPrint('[AuthServices] Realtime service connected for userId: $userId');
+    } catch (e) {
+      debugPrint('[AuthServices] Failed to connect realtime service: $e');
+    }
+  }
+
+  /// Disconnect from Pusher realtime service on logout
+  static Future<void> _disconnectRealtimeService() async {
+    try {
+      await RealtimeService().disconnect();
+      debugPrint('[AuthServices] Realtime service disconnected successfully.');
+    } catch (e) {
+      debugPrint('[AuthServices] Failed to disconnect realtime service: $e');
+    }
+  }
+
   // LOGIN SERVICE - - - - - - - - - - - - - - - - -
   static Future<LogInModel?> logInService({
     required String credentials,
@@ -50,9 +74,13 @@ class AuthServices {
       method: HttpMethod.POST,
       body: inputBody,
       isBasic: true,
+      onError: (errorMessage) {
+        log.e('[AuthServices] Login error: $errorMessage');
+      },
       onSuccess: (value) {
         _logInModel = value!;
         var data = _logInModel.data;
+        log.i('[AuthServices] User logged in: ${data.userInfo.id}');
         LocalStorage.save(
           token: data.token,
           temporaryToken: data.authorization.token,
@@ -60,7 +88,10 @@ class AuthServices {
           email: data.userInfo.email,
           number: data.userInfo.fullMobile, // Save the full phone number from API
           kycStatus: data.userInfo.kycVerified,
+          userId: data.userInfo.id,
         );
+        // Connect to realtime service for push notifications
+        _connectRealtimeService(data.userInfo.id);
         // In debug builds, print token presence to console for local development.
         if (kDebugMode) {
           // Fire-and-forget; do not block navigation.
@@ -92,6 +123,8 @@ class AuthServices {
       body: inputBody,
       onSuccess: (value) {
         _commonSuccessModel = value!;
+        // Disconnect from realtime service before clearing storage
+        _disconnectRealtimeService();
         Get.offAllNamed(Routes.otpLoginScreen);
         LocalStorage.clear();
       },
@@ -141,7 +174,10 @@ class AuthServices {
           isKycVerified: data.userInfo.kycVerified == 1,
           isEmailVerified: data.userInfo.emailVerified == 1,
           kycStatus: data.userInfo.kycVerified,
+          userId: data.userInfo.id,
         );
+        // Connect to realtime service for push notifications
+        _connectRealtimeService(data.userInfo.id);
         // OTP verification removed; always go to dashboard after registration
         Routes.dashboardScreen.toNamed;
         LocalStorage.save(isLoggedIn: true);
@@ -269,8 +305,12 @@ class AuthServices {
 
   // OTP LOGIN SERVICES (Uber-like system) - - - - - - - - - - - - - - - - -
   
+  static SendOtpResponseModel? _sendOtpResponseModel;
+  SendOtpResponseModel? get sendOtpResponseModel => _sendOtpResponseModel;
+
   // Send OTP to User's WhatsApp
-  static Future<CommonSuccessModel?> sendUserOtp({
+  // Returns SendOtpResponseModel with otp_disabled and expires_in_minutes fields
+  static Future<SendOtpResponseModel?> sendUserOtp({
     required String mobileCode,
     required String mobile,
     required RxBool isLoading,
@@ -279,15 +319,61 @@ class AuthServices {
       'mobile_code': mobileCode,
       'mobile': mobile,
     };
-    return RequestProcess().request<CommonSuccessModel>(
-      fromJson: CommonSuccessModel.fromJson,
+    return RequestProcess().request<SendOtpResponseModel>(
+      fromJson: SendOtpResponseModel.fromJson,
       apiEndpoint: ApiEndpoint.sendOtp,
       isLoading: isLoading,
       method: HttpMethod.POST,
       body: inputBody,
       isBasic: true,
       onSuccess: (value) {
-        _commonSuccessModel = value!;
+        _sendOtpResponseModel = value!;
+      },
+    );
+  }
+
+  // Login directly via mobile without OTP (when OTP is disabled)
+  // This calls the verify endpoint with only mobile_code and mobile (no otp_code)
+  // Server will find or create user and return auth token immediately
+  static Future<LogInModel?> loginViaMobileWithoutOtp({
+    required String mobileCode,
+    required String mobile,
+    required RxBool isLoading,
+  }) async {
+    Map<String, dynamic> inputBody = {
+      'mobile_code': mobileCode,
+      'mobile': mobile,
+      // otp_code is intentionally omitted - server treats this as OTP-disabled login
+    };
+
+    return RequestProcess().request<LogInModel>(
+      fromJson: LogInModel.fromJson,
+      apiEndpoint: ApiEndpoint.verifyOtp,
+      isLoading: isLoading,
+      method: HttpMethod.POST,
+      body: inputBody,
+      isBasic: true,
+      onSuccess: (value) {
+        _logInModel = value!;
+        var data = _logInModel.data;
+        LocalStorage.save(
+          token: data.token,
+          temporaryToken: data.authorization.token,
+          isEmailVerified: data.userInfo.emailVerified == 1,
+          email: data.userInfo.email,
+          number: mobileCode + mobile,
+          kycStatus: data.userInfo.kycVerified,
+          userId: data.userInfo.id,
+        );
+        // Connect to realtime service for push notifications
+        _connectRealtimeService(data.userInfo.id);
+        // In debug builds, print token presence to console for local development.
+        if (kDebugMode) {
+          printAuthTokenDebug(revealRaw: true);
+        }
+        // Navigate to dashboard after successful OTP-disabled login
+        Get.offAllNamed(Routes.dashboardScreen);
+        LocalStorage.save(isLoggedIn: true);
       },
     );
   }
@@ -322,7 +408,10 @@ class AuthServices {
           email: data.userInfo.email,
           number: mobileCode + mobile, // Save the full phone number with country code
           kycStatus: data.userInfo.kycVerified,
+          userId: data.userInfo.id,
         );
+        // Connect to realtime service for push notifications
+        _connectRealtimeService(data.userInfo.id);
         // Navigate to dashboard after successful OTP login
         if (data.userInfo.twoFactorStatus == 1 &&
             data.userInfo.twoFactorVerified == 0) {

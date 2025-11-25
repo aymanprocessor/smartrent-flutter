@@ -19,6 +19,7 @@ class LocalStorage {
   static const String isSmsVerifiedKey = 'isSmsVerified';
   static const String emailKey = 'email';
   static const String userNumberKey = 'number';
+  static const String userIdKey = 'userId';
 
   // FOR TEST -------------------------
   static const String exampleKey = 'example';
@@ -41,6 +42,7 @@ class LocalStorage {
     String? email,
     String? number,
     int? kycStatus,
+    int? userId,
   }) async {
     // FOR TEST  --------------------------------------
     if (example != null) await _storage.write(exampleKey, example);
@@ -65,6 +67,7 @@ class LocalStorage {
     if (number != null) await _storage.write(userNumberKey, number);
 
     if (kycStatus != null) await _storage.write(kycStatusKey, kycStatus);
+    if (userId != null) await _storage.write(userIdKey, userId);
   }
 
   // Read entire model
@@ -109,6 +112,8 @@ class LocalStorage {
   static String get email => _storage.read(emailKey) ?? '';
 
   static String get number => _storage.read(userNumberKey) ?? '';
+
+  static int get userId => _storage.read(userIdKey) ?? 0;
 
   /// Convenience alias for `number` to make intent clearer in calling code.
   static String get mobile => number;
