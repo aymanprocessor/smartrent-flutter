@@ -1,367 +1,361 @@
+import 'dart:convert';
 import 'dart:async';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
 import 'package:carbo/models/wallet_balance.dart';
 import 'package:carbo/models/wallet_transaction.dart';
-import 'package:carbo/views/wallet/service/wallet_service.dart';
-import 'package:flutter/widgets.dart';
-import 'package:get/get.dart';
-import 'package:logger/logger.dart';
+import 'package:carbo/config/env.dart';
+import 'package:carbo/base/utils/local_storage.dart';
 
-class WalletController extends GetxController with WidgetsBindingObserver {
-  final WalletService _walletService;
-  final Logger log = Logger();
-
-  WalletController({WalletService? walletService})
-      : _walletService = walletService ?? WalletService();
-
-  // Reactive state
+class WalletController extends GetxController with GetSingleTickerProviderStateMixin {
+  // Balance state
   final RxList<WalletBalance> balances = <WalletBalance>[].obs;
-  final RxList<WalletTransaction> transactions = <WalletTransaction>[].obs;
   final RxBool isLoadingBalance = false.obs;
-  final RxBool isLoadingTransactions = false.obs;
-  final RxBool isRefreshing = false.obs;
-  final RxString error = ''.obs;
-  final RxInt currentPage = 1.obs;
-  final RxInt totalPages = 1.obs;
-  final RxBool hasMore = true.obs;
-
-  // Optimistic state tracking
   final RxMap<String, double> optimisticBalanceChanges = <String, double>{}.obs;
-  Timer? _pollTimer;
+  final RxString selectedCurrency = 'SAR'.obs;
+
+  // Transaction state
+  final RxList<WalletTransaction> transactions = <WalletTransaction>[].obs;
+  final RxBool isLoadingTransactions = false.obs;
+  final RxBool hasMore = true.obs;
+  final RxString error = ''.obs;
+  final RxBool isRefreshing = false.obs;
+  int currentPage = 1;
+
+  // Animation controllers
+  late AnimationController shimmerController;
+  
+  // Invoice/Top-up state
+  final RxString topupStatus = ''.obs;
+  final RxBool isProcessingTopup = false.obs;
 
   @override
   void onInit() {
     super.onInit();
-    WidgetsBinding.instance.addObserver(this);
-    fetchBalance();
-    fetchTransactions();
+    shimmerController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    )..repeat();
+    refresh();
   }
 
   @override
   void onClose() {
-    WidgetsBinding.instance.removeObserver(this);
-    _pollTimer?.cancel();
-    _walletService.dispose();
+    shimmerController.dispose();
     super.onClose();
   }
 
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      log.i('App resumed, refreshing wallet data');
-      refresh();
-    }
+  Future<void> refresh() async {
+    isRefreshing.value = true;
+    await Future.wait([
+      fetchBalance(),
+      fetchTransactions(),
+    ]);
+    isRefreshing.value = false;
   }
 
-  /// Get total balance for a specific currency (including optimistic changes)
-  double getBalanceForCurrency(String currency) {
-    final balance = balances.firstWhereOrNull((b) => b.currency == currency);
-    final baseBalance = balance?.balanceAsDouble ?? 0.0;
-    final optimisticChange = optimisticBalanceChanges[currency] ?? 0.0;
-    return baseBalance + optimisticChange;
-  }
-
-  /// Fetch wallet balance from server
-  Future<void> fetchBalance({String? currency}) async {
+  Future<void> fetchBalance() async {
+    isLoadingBalance.value = true;
+    error.value = '';
     try {
-      isLoadingBalance.value = true;
-      error.value = '';
-
-      final fetchedBalances = await _walletService.getBalance(currency: currency);
-      balances.value = fetchedBalances;
-
-      log.i('Fetched ${fetchedBalances.length} balance(s)');
-    } catch (e) {
-      error.value = e.toString();
-      log.e('Error fetching balance: $e');
-      Get.snackbar(
-        'Error',
-        'Failed to fetch wallet balance',
-        snackPosition: SnackPosition.BOTTOM,
+      final response = await http.get(
+        Uri.parse('${Env.apiBaseUrl}/wallet/balance'),
+        headers: {
+          'Authorization': 'Bearer ${LocalStorage.token}',
+          'Accept': 'application/json',
+        },
       );
+
+      print('Balance API Status: ${response.statusCode}');
+      print('Balance API Response: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true && data['data'] != null) {
+          // Handle both direct array and nested balances array
+          final List balancesList;
+          if (data['data'] is List) {
+            // Direct array format: {"success": true, "data": [{...}]}
+            balancesList = data['data'] as List;
+          } else if (data['data']['balances'] != null) {
+            // Nested format: {"success": true, "data": {"balances": [{...}]}}
+            balancesList = data['data']['balances'] as List;
+          } else {
+            // Single balance object format
+            balancesList = [data['data']];
+          }
+          
+          balances.value = balancesList
+              .map((b) => WalletBalance.fromJson(b))
+              .toList();
+          
+          print('Parsed balances: ${balances.length} items');
+          for (var bal in balances) {
+            print('  - ${bal.currency}: ${bal.balanceAsString}');
+          }
+        } else {
+          error.value = 'Invalid response format';
+          print('Error: Invalid response - success=${data['success']}, data=${data['data']}');
+        }
+      } else {
+        error.value = 'Failed to fetch balance: HTTP ${response.statusCode}';
+        print('Error: HTTP ${response.statusCode} - ${response.body}');
+      }
+    } catch (e) {
+      error.value = 'Failed to fetch balance: $e';
+      print('Exception in fetchBalance: $e');
     } finally {
       isLoadingBalance.value = false;
     }
   }
 
-  /// Fetch wallet transactions with pagination
-  Future<void> fetchTransactions({
-    bool loadMore = false,
-    String? currency,
-    WalletTransactionType? type,
-  }) async {
+  Future<void> fetchTransactions({bool loadMore = false}) async {
+    if (loadMore) {
+      if (isLoadingTransactions.value || !hasMore.value) return;
+      currentPage++;
+    } else {
+      isLoadingTransactions.value = true;
+      currentPage = 1;
+    }
+    
     try {
-      if (loadMore) {
-        if (!hasMore.value) return;
-        currentPage.value++;
-      } else {
-        isLoadingTransactions.value = true;
-        currentPage.value = 1;
-        transactions.clear();
-      }
-
-      error.value = '';
-
-      final response = await _walletService.getTransactions(
-        page: currentPage.value,
-        perPage: 20,
-        currency: currency,
-        type: type,
+      final response = await http.get(
+        Uri.parse('${Env.apiBaseUrl}/wallet/transactions?per_page=20&page=$currentPage'),
+        headers: {
+          'Authorization': 'Bearer ${LocalStorage.token}',
+          'Accept': 'application/json',
+        },
       );
 
-      final fetchedTransactions = response['transactions'] as List<WalletTransaction>;
-      
-      if (loadMore) {
-        transactions.addAll(fetchedTransactions);
-      } else {
-        transactions.value = fetchedTransactions;
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true && data['data'] != null) {
+          final txList = (data['data']['data'] ?? []) as List;
+          final newTransactions = txList
+              .map((t) => WalletTransaction.fromJson(t))
+              .toList();
+          
+          if (loadMore) {
+            transactions.addAll(newTransactions);
+          } else {
+            transactions.value = newTransactions;
+          }
+          
+          hasMore.value = data['data']['current_page'] < data['data']['last_page'];
+        }
       }
-
-      totalPages.value = response['lastPage'] ?? 1;
-      hasMore.value = currentPage.value < totalPages.value;
-
-      log.i('Fetched ${fetchedTransactions.length} transactions (page ${currentPage.value})');
     } catch (e) {
-      error.value = e.toString();
-      log.e('Error fetching transactions: $e');
-      if (!loadMore) {
-        Get.snackbar(
-          'Error',
-          'Failed to fetch transactions',
-          snackPosition: SnackPosition.BOTTOM,
-        );
-      }
+      error.value = 'Failed to fetch transactions: $e';
     } finally {
       isLoadingTransactions.value = false;
     }
   }
 
-  /// Refresh all wallet data (pull-to-refresh)
-  Future<void> refresh() async {
-    try {
-      isRefreshing.value = true;
-      await Future.wait([
-        fetchBalance(),
-        fetchTransactions(),
-      ]);
-    } finally {
-      isRefreshing.value = false;
+  double getBalanceForCurrency(String currency) {
+    final balance = balances.firstWhere(
+      (b) => b.currency == currency,
+      orElse: () => WalletBalance(currency: currency, balance: 0.0),
+    );
+    
+    // Parse balance
+    double balanceAmount = 0.0;
+    if (balance.balance is String) {
+      balanceAmount = double.tryParse(balance.balance) ?? 0.0;
+    } else if (balance.balance is num) {
+      balanceAmount = (balance.balance as num).toDouble();
     }
+    
+    // Add optimistic change if any
+    final optimistic = optimisticBalanceChanges[currency] ?? 0.0;
+    return balanceAmount + optimistic;
   }
 
-  /// Initiate wallet top-up via PayTabs
-  Future<Map<String, dynamic>?> initiateTopUp({
-    required String amount,
+  /// Check if user has sufficient balance for a booking
+  bool hasSufficientBalance(double requiredAmount, String currency) {
+    final currentBalance = getBalanceForCurrency(currency);
+    return currentBalance >= requiredAmount;
+  }
+
+  /// Modern Moyasar Invoice Top-up (Recommended)
+  Future<Map<String, dynamic>?> createTopUpInvoice({
+    required double amount,
     required String currency,
-    String? description,
   }) async {
     try {
-      error.value = '';
+      isProcessingTopup.value = true;
+      topupStatus.value = 'Creating invoice...';
       
-      final result = await _walletService.topUp(
-        amount: amount,
-        currency: currency,
-        description: description,
-      );
-
-      log.i('Top-up initiated: ${result['wallet_transaction_id']}');
+      print('📤 Creating top-up invoice:');
+      print('  Amount: $amount $currency');
       
-      return result;
-    } catch (e) {
-      error.value = e.toString();
-      log.e('Error initiating top-up: $e');
-      Get.snackbar(
-        'Error',
-        'Failed to initiate top-up: ${e.toString()}',
-        snackPosition: SnackPosition.BOTTOM,
-      );
-      return null;
-    }
-  }
-
-  /// Initiate test-only top-up (QA / development)
-  /// Immediately credits the wallet without payment gateway.
-  Future<Map<String, dynamic>?> initiateTopUpTest({
-    required String amount,
-    required String currency,
-    String? description,
-  }) async {
-    try {
-      error.value = '';
-
-      final result = await _walletService.topUpTest(
-        amount: amount,
-        currency: currency,
-        description: description,
+      final response = await http.post(
+        Uri.parse('${Env.apiBaseUrl}/wallet/topup/invoice'),
+        headers: {
+          'Authorization': 'Bearer ${LocalStorage.token}',
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'amount': amount,
+          'currency': currency,
+        }),
       );
 
-      log.i('Test top-up completed: ${result['transaction_id']}');
+      print('📥 Invoice API Response:');
+      print('  Status: ${response.statusCode}');
+      print('  Body: ${response.body}');
 
-      // Refresh balances and transactions to reflect immediate credit
-      await fetchBalance();
-      await fetchTransactions();
-
-      Get.snackbar(
-        'Success',
-        'Test top-up completed',
-        snackPosition: SnackPosition.BOTTOM,
-      );
-
-      return result;
-    } catch (e) {
-      error.value = e.toString();
-      log.e('Error initiating test top-up: $e');
-      Get.snackbar(
-        'Error',
-        'Failed to perform test top-up: ${e.toString()}',
-        snackPosition: SnackPosition.BOTTOM,
-      );
-      return null;
-    }
-  }
-
-  /// Start polling transaction status after PayTabs redirect
-  void startPollingTransaction(int transactionId) {
-    log.i('Starting to poll transaction $transactionId');
-    
-    _pollTimer?.cancel();
-    
-    var attempts = 0;
-    const maxAttempts = 10;
-    var delay = 2;
-
-    _pollTimer = Timer.periodic(Duration(seconds: delay), (timer) async {
-      attempts++;
-      log.i('Polling attempt $attempts/$maxAttempts for transaction $transactionId');
-
-      final transaction = await _walletService.getTransactionById(transactionId);
-      
-      if (transaction != null) {
-        if (transaction.isCompleted) {
-          timer.cancel();
-          log.i('Transaction $transactionId completed');
-          Get.snackbar(
-            'Success',
-            'Wallet top-up successful!',
-            snackPosition: SnackPosition.BOTTOM,
-          );
-          await refresh(); // Refresh balance and transactions
-          return;
-        } else if (transaction.isFailed) {
-          timer.cancel();
-          log.e('Transaction $transactionId failed');
-          Get.snackbar(
-            'Failed',
-            'Wallet top-up failed',
-            snackPosition: SnackPosition.BOTTOM,
-          );
-          await fetchTransactions(); // Refresh to show failed transaction
-          return;
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true) {
+          topupStatus.value = 'Invoice created successfully';
+          print('✅ Invoice created: ${data['data']}');
+          return data['data'] as Map<String, dynamic>;
         }
       }
-
-      if (attempts >= maxAttempts) {
-        timer.cancel();
-        log.w('Max polling attempts reached for transaction $transactionId');
-        Get.snackbar(
-          'Info',
-          'Payment processing - please check transactions later',
-          snackPosition: SnackPosition.BOTTOM,
-        );
-      }
-    });
+      
+      topupStatus.value = 'Failed to create invoice';
+      error.value = 'Failed to create top-up invoice';
+      print('❌ Invoice creation failed');
+      return null;
+    } catch (e) {
+      error.value = 'Top-up invoice error: $e';
+      topupStatus.value = 'Error: $e';
+      print('❌ Exception creating invoice: $e');
+      return null;
+    } finally {
+      isProcessingTopup.value = false;
+    }
   }
 
-  /// Charge wallet for booking with optimistic update
-  Future<bool> chargeWalletForBooking({
+  Future<Map?> initiateTopUp({
     required String amount,
     required String currency,
-    required String bookingReference,
+    String? token,
   }) async {
-    final amountDouble = double.tryParse(amount) ?? 0.0;
-    final currentBalance = getBalanceForCurrency(currency);
-
-    // Check sufficient balance
-    if (currentBalance < amountDouble) {
-      error.value = 'Insufficient wallet balance';
-      Get.snackbar(
-        'Insufficient Balance',
-        'Your wallet has insufficient funds. Please top up.',
-        snackPosition: SnackPosition.BOTTOM,
+    try {
+      final amountInCents = (double.parse(amount) * 100).toInt();
+      
+      final response = await http.post(
+        Uri.parse('${Env.apiBaseUrl}/wallet/top-up'),
+        headers: {
+          'Authorization': 'Bearer ${LocalStorage.token}',
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'amount': amountInCents,
+          'currency': currency,
+          if (token != null) 'token': token,
+        }),
       );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true) {
+          // If payment URL is returned, open WebView for 3DS
+          if (data['data']?['payment_url'] != null) {
+            // Navigate to payment WebView and verify after
+            final paymentId = data['data']['payment_id'];
+            await _handlePaymentWebView(
+              data['data']['payment_url'],
+              paymentId.toString(),
+            );
+          }
+          await refresh(); // Refresh balance and transactions
+          return data['data'];
+        }
+      }
+      return null;
+    } catch (e) {
+      error.value = 'Failed to initiate top-up: $e';
+      return null;
+    }
+  }
+
+  Future<void> _handlePaymentWebView(String url, String paymentId) async {
+    // Open WebView for 3DS authentication
+    final result = await Get.toNamed('/payment-webview', arguments: {
+      'url': url,
+      'payment_id': paymentId,
+    });
+    
+    if (result == 'callback_detected') {
+      // Verify payment status via backend
+      await verifyPayment(int.parse(paymentId));
+    }
+  }
+
+  Future<bool> verifyPayment(int paymentId) async {
+    try {
+      final response = await http.post(
+        Uri.parse('${Env.apiBaseUrl}/api/payments/$paymentId/verify'),
+        headers: {
+          'Authorization': 'Bearer ${LocalStorage.token}',
+          'Accept': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true && data['data']?['status'] == 'paid') {
+          await refresh(); // Refresh wallet after successful payment
+          return true;
+        }
+      }
+      return false;
+    } catch (e) {
+      error.value = 'Payment verification failed: $e';
       return false;
     }
+  }
 
-    // Optimistic update: immediately decrement balance
-    _applyOptimisticChange(currency, -amountDouble);
-
+  Future<Map?> initiateTopUpTest({required String amount, required String currency}) async {
     try {
-      error.value = '';
-      
-      await _walletService.chargeWalletForBooking(
-        amount: amount,
-        currency: currency,
-        bookingReference: bookingReference,
+      final response = await http.post(
+        Uri.parse('${Env.apiBaseUrl}/api/v1/wallet/topup/test'),
+        headers: {
+          'Authorization': 'Bearer ${LocalStorage.token}',
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'amount': amount,
+          'currency': currency,
+        }),
       );
 
-      log.i('Wallet charged successfully for booking $bookingReference');
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true) {
+          await refresh();
+          return data['data'];
+        }
+      }
+      return null;
+    } catch (e) {
+      error.value = 'Test top-up failed: $e';
+      return null;
+    }
+  }
+
+  void startPollingTransaction(int transactionId) {
+    // Poll transaction status every 2 seconds for up to 30 seconds
+    int attempts = 0;
+    const maxAttempts = 15;
+    
+    Future.doWhile(() async {
+      await Future.delayed(const Duration(seconds: 2));
+      attempts++;
       
-      // Clear optimistic change and fetch actual balance
-      _clearOptimisticChange(currency);
-      await fetchBalance(currency: currency);
       await fetchTransactions();
       
-      return true;
-    } catch (e) {
-      error.value = e.toString();
-      log.e('Error charging wallet: $e');
-      
-      // Revert optimistic change
-      _revertOptimisticChange(currency, amountDouble);
-      
-      Get.snackbar(
-        'Error',
-        'Failed to charge wallet: ${e.toString()}',
-        snackPosition: SnackPosition.BOTTOM,
+      final tx = transactions.firstWhereOrNull(
+        (t) => t.id == transactionId && t.status == WalletTransactionStatus.completed,
       );
-      return false;
-    }
-  }
-
-  /// Apply optimistic balance change
-  void _applyOptimisticChange(String currency, double change) {
-    final current = optimisticBalanceChanges[currency] ?? 0.0;
-    optimisticBalanceChanges[currency] = current + change;
-    log.i('Applied optimistic change: $change to $currency');
-  }
-
-  /// Revert optimistic change (on error)
-  void _revertOptimisticChange(String currency, double amount) {
-    final current = optimisticBalanceChanges[currency] ?? 0.0;
-    optimisticBalanceChanges[currency] = current + amount; // Add back
-    log.i('Reverted optimistic change: $amount for $currency');
-    
-    // Show visual feedback
-    balances.refresh();
-  }
-
-  /// Clear optimistic changes for a currency
-  void _clearOptimisticChange(String currency) {
-    optimisticBalanceChanges.remove(currency);
-  }
-
-  /// Check if wallet can cover amount
-  bool canCoverAmount(String currency, double amount) {
-    return getBalanceForCurrency(currency) >= amount;
-  }
-
-  /// Get primary currency balance (first in list or specified)
-  WalletBalance? getPrimaryCurrencyBalance([String? preferredCurrency]) {
-    if (balances.isEmpty) return null;
-    
-    if (preferredCurrency != null) {
-      return balances.firstWhereOrNull((b) => b.currency == preferredCurrency);
-    }
-    
-    return balances.first;
+      
+      return tx == null && attempts < maxAttempts;
+    });
   }
 }

@@ -12,6 +12,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get appLPleaseFillOutTheField => 'يرجى ملء الحقل';
 
   @override
+  String get appLAll => 'الكل';
+
+  @override
   String get appLFrom => 'من';
 
   @override
@@ -46,6 +49,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get appLSuccess => 'نجاح';
+
+  @override
+  String get appLBack => 'رجوع';
 
   @override
   String get appLBackToHome => 'العودة إلى الرئيسية';
@@ -329,6 +335,24 @@ class AppLocalizationsAr extends AppLocalizations {
   String get appLEditProfile => 'تعديل الملف الشخصي';
 
   @override
+  String get appLPersonalInformation => 'المعلومات الشخصية';
+
+  @override
+  String get appLContactInformation => 'معلومات الاتصال';
+
+  @override
+  String get appLAddressInformation => 'معلومات العنوان';
+
+  @override
+  String get appLDocumentUploads => 'رفع المستندات';
+
+  @override
+  String get appLNationalId => 'الهوية الوطنية';
+
+  @override
+  String get appLDrivingLicense => 'رخصة القيادة';
+
+  @override
   String get appLDelete => 'حذف';
 
   @override
@@ -571,16 +595,16 @@ class AppLocalizationsAr extends AppLocalizations {
   String get appLFilterBy => 'تصفية حسب';
 
   @override
-  String get appLRentalDays => 'أيام الإيجار';
+  String get appLRentalDays => 'عدد ايام الايجار';
 
   @override
   String get appLDay => 'يوم';
 
   @override
-  String get appLPricePerDay => 'السعر لليوم';
+  String get appLPricePerDay => 'السعر اليومي';
 
   @override
-  String get appLPricePerKm => 'السعر للكيلومتر';
+  String get appLPricePerKm => 'السعر اليومي';
 
   @override
   String get appLDeliveryCharge => 'رسوم التوصيل';
@@ -711,7 +735,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get appLDebit => 'دفع';
 
   @override
-  String get appLRefund => 'استرجاع';
+  String get appLRefund => 'استرداد';
 
   @override
   String get appLRefundToWallet => 'استرجاع للمحفظة';
@@ -817,4 +841,217 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get appLContinue => 'متابعة';
+
+  @override
+  String get appLBookingDetails => 'تفاصيل الحجز';
+
+  @override
+  String get appLBookingInformation => 'معلومات الحجز';
+
+  @override
+  String get appLCarDetails => 'تفاصيل السيارة';
+
+  @override
+  String get appLTripDetails => 'تفاصيل الرحلة';
+
+  @override
+  String get appLContactDetails => 'بيانات التواصل';
+
+  @override
+  String get appLMessage => 'رسالة';
+
+  @override
+  String get appLDraft => 'مسودة';
+
+  @override
+  String get appLApproved => 'مقبول';
+
+  @override
+  String get appLCancelBooking => 'إلغاء الحجز';
+
+  @override
+  String get appLCancelBookingConfirm =>
+      'هل أنت متأكد أنك تريد إلغاء هذا الحجز؟ لا يمكن التراجع عن هذا الإجراء.';
+
+  @override
+  String get appLExtendBooking => 'تمديد الحجز';
+
+  @override
+  String get appLExtensionPending => 'التمديد قيد المراجعة';
+
+  @override
+  String get appLPay => 'ادفع';
+
+  @override
+  String get appLInfo => 'معلومات';
+
+  @override
+  String get appLLedger => 'الحساب';
+
+  @override
+  String get appLExtensions => 'التمديدات';
+
+  @override
+  String get appLTotalCharges => 'إجمالي الرسوم';
+
+  @override
+  String get appLTotalCredits => 'إجمالي المدفوعات';
+
+  @override
+  String get appLBalanceDue => 'المبلغ المستحق';
+
+  @override
+  String get appLNoTransactionsYet => 'لا توجد معاملات بعد';
+
+  @override
+  String get appLBaseRental => 'إيجار أساسي';
+
+  @override
+  String get appLDelivery => 'توصيل';
+
+  @override
+  String get appLExtensionCharge => 'تمديد';
+
+  @override
+  String get appLPenalty => 'غرامة';
+
+  @override
+  String get appLPaid => 'مدفوع';
+
+  @override
+  String get appLCash => 'نقدي';
+
+  @override
+  String get appLCard => 'بطاقة';
+
+  @override
+  String get appLWallet => 'محفظة';
+
+  @override
+  String get appLBankTransfer => 'تحويل بنكي';
+
+  @override
+  String get appLNoExtensionsRequested => 'لم يتم طلب أي تمديد';
+
+  @override
+  String get appLAdditionalDays => 'أيام إضافية';
+
+  @override
+  String get appLDailyRate => 'السعر اليومي';
+
+  @override
+  String get appLExtraAmount => 'المبلغ الإضافي';
+
+  @override
+  String get appLCurrentReturn => 'تاريخ الإرجاع الحالي';
+
+  @override
+  String get appLNewReturn => 'تاريخ الإرجاع الجديد';
+
+  @override
+  String get appLNotes => 'ملاحظات';
+
+  @override
+  String get appLRequestExtension => 'طلب تمديد';
+
+  @override
+  String get appLPreviewExtension => 'معاينة التمديد';
+
+  @override
+  String get appLExtensionApproved => 'تم قبول التمديد';
+
+  @override
+  String get appLExtensionRejected => 'تم رفض التمديد';
+
+  @override
+  String get appLRejectionReason => 'سبب الرفض';
+
+  @override
+  String get appLRequiredAmount => 'المبلغ المطلوب';
+
+  @override
+  String get appLShortage => 'المتبقي';
+
+  @override
+  String get appLDeliveryMode => 'توصيل';
+
+  @override
+  String get appLPickupMode => 'استلام';
+
+  @override
+  String get appLInvoiceRental => 'الإيجار';
+
+  @override
+  String get appLInvoiceDelivery => 'التوصيل';
+
+  @override
+  String get appLInvoiceTax => 'الضريبة';
+
+  @override
+  String get appLInvoiceDiscount => 'الخصم';
+
+  @override
+  String get appLInvoiceTotal => 'الإجمالي';
+
+  @override
+  String get appLPriceBreakdown => 'تفاصيل السعر';
+
+  @override
+  String get appLRentalSchedule => 'جدول الإيجار';
+
+  @override
+  String get appLPickUp => 'الاستلام';
+
+  @override
+  String get appLReturnLabel => 'الإرجاع';
+
+  @override
+  String get appLLocationNotSpecified => 'لم يتم تحديد الموقع';
+
+  @override
+  String get appLBookingId => 'رقم الحجز';
+
+  @override
+  String get appLReference => 'المرجع';
+
+  @override
+  String get appLPaymentMethod => 'طريقة الدفع';
+
+  @override
+  String get appLVendor => 'المؤجر';
+
+  @override
+  String get appLReceipt => 'الفاتورة';
+
+  @override
+  String get appLBookingNotFound => 'الحجز غير موجود';
+
+  @override
+  String get appLNo => 'لا';
+
+  @override
+  String get appLYesCancel => 'نعم، إلغاء';
+
+  @override
+  String get appLDeliveryFee => 'رسوم التوصيل';
+
+  @override
+  String get appLDailyPrice => 'السعر اليومي';
+
+  @override
+  String get appLYes => 'نعم';
+
+  @override
+  String get appLBrowseVendorCars => 'تصفح السيارات';
+
+  @override
+  String get appLEnterMobileForOtp =>
+      'أدخل رقم هاتفك لتلقي رمز التحقق عبر الرسائل القصيرة';
+
+  @override
+  String get appLEnterOtpCode => 'أدخل رمز OTP';
+
+  @override
+  String get appLOtpSentToPhone =>
+      'تم إرسال رمز مكون من 6 أرقام إلى هاتفك عبر الرسائل القصيرة';
 }

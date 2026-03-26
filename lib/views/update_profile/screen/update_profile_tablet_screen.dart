@@ -5,13 +5,7 @@ class UpdateProfileTabletScreen extends GetView<UpdateProfileController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: const CustomAppBar('UpdateProfile Tablet Screen'),
-      body: _bodyWidget(context),
-    );
-  }
-
-  _bodyWidget(BuildContext context) {
-    return const SafeArea(child: Column(children: []));
+    // Reuse the mobile screen — it adapts well via padding & flexible layout
+    return const UpdateProfileMobileScreen();
   }
 }

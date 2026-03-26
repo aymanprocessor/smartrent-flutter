@@ -45,11 +45,25 @@ class ApiServices {
           tostTitle,
         );
       } else {
-        log.e('🐞🐞🐞 err from ApiService ==> $apiEndpoint 🐞🐞🐞');
+        log.e(
+          '❌ API Service Error: Null response from endpoint\n'
+          'Endpoint: $apiEndpoint\n'
+          'Method: $method\n'
+          'Status Code: $statusCode',
+        );
       }
-    } catch (e) {
-      log.e('🐞🐞🐞 err from ApiService ==> $e 🐞🐞🐞');
-      CustomSnackBar.error('Something went wrong!');
+    } catch (e, stackTrace) {
+      log.e(
+        '❌ API Service Exception\n'
+        'Endpoint: $apiEndpoint\n'
+        'Method: $method\n'
+        'Error: $e\n'
+        'Type: ${e.runtimeType}\n'
+        'Stack Trace: $stackTrace',
+      );
+      if (showErrorMessage) {
+        CustomSnackBar.error('Error: ${e.toString()}');
+      }
     }
     return null;
   }
@@ -82,10 +96,25 @@ class ApiServices {
           showSuccessMessage,
           tostTitle,
         );
+      } else {
+        log.e(
+          '❌ Multipart Service Error: Null response from endpoint\n'
+          'Endpoint: $apiEndpoint\n'
+          'Fields: $fieldList\n'
+          'Files: $pathList',
+        );
       }
-    } catch (e) {
-      log.e('🐞🐞🐞 err from multipartApiService ==> $e 🐞🐞🐞');
-      CustomSnackBar.error('Something went wrong!');
+    } catch (e, stackTrace) {
+      log.e(
+        '❌ Multipart Service Exception\n'
+        'Endpoint: $apiEndpoint\n'
+        'Error: $e\n'
+        'Type: ${e.runtimeType}\n'
+        'Fields: $fieldList\n'
+        'Files: $pathList\n'
+        'Stack Trace: $stackTrace',
+      );
+      CustomSnackBar.error('Upload failed: ${e.toString()}');
     }
     return null;
   }
@@ -97,16 +126,27 @@ class ApiServices {
     bool showSuccessMessage,
     String tostTitle,
   ) {
-    T result = fromJson(mapResponse);
+    try {
+      T result = fromJson(mapResponse);
 
-    if (showSuccessMessage) {
-      var messages = CommonSuccessModel.fromJson(mapResponse);
-      CustomSnackBar.success(
-        title: tostTitle,
-        message: messages.message.success.first.toString(),
+      if (showSuccessMessage) {
+        var messages = CommonSuccessModel.fromJson(mapResponse);
+        CustomSnackBar.success(
+          title: tostTitle,
+          message: messages.message.success.first.toString(),
+        );
+      }
+
+      return result;
+    } catch (e, stackTrace) {
+      log.e(
+        '❌ Response Parsing Error\n'
+        'Error: $e\n'
+        'Type: ${e.runtimeType}\n'
+        'Response: $mapResponse\n'
+        'Stack Trace: $stackTrace',
       );
+      return null;
     }
-
-    return result;
   }
 }

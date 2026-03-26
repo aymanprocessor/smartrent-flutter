@@ -34,7 +34,9 @@ class DashboardController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    getDashboardInfo();
+    if (LocalStorage.isLoggedIn) {
+      getDashboardInfo();
+    }
   }
 
   void clearData() {

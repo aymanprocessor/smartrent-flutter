@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 \"D:\\\\Ayman\\\\smart-rent\\\\source-code\\\\carbo-app\\\\carbo-user\\\\.claude\\\\skills\\\\ui-ux-pro-max\\\\scripts\\\\search.py\" \"mobile app bottom navigation bar car rental dashboard\" --design-system -p \"Smart Rent\")",
+      "Bash(python \"D:\\\\Ayman\\\\smart-rent\\\\source-code\\\\carbo-app\\\\carbo-user\\\\.claude\\\\skills\\\\ui-ux-pro-max\\\\scripts\\\\search.py\" \"mobile app bottom navigation bar car rental dashboard\" --design-system -p \"Smart Rent\")",
+      "Bash(python3 D:Aymansmart-rentsource-codecarbo-appcarbo-user.claudeskillsui-ux-pro-maxscriptssearch.py 'bottom navigation bar tab bar mobile' --stack flutter)",
+      "Bash(flutter analyze:*)",
+      "Bash(python .claude/skills/ui-ux-pro-max/scripts/search.py \"car rental mobile app dashboard header appbar\" --design-system -p \"SmartRent\")",
+      "Bash(python .claude/skills/ui-ux-pro-max/scripts/search.py \"mobile appbar header flutter\" --stack flutter)",
+      "Bash(flutter gen-l10n:*)"
+    ]
+  }
+}

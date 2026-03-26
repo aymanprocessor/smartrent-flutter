@@ -3,11 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 import 'base/api/endpoint/api_endpoint.dart';
 import 'base/maintenance/maintenance_dialog.dart';
 import 'base/utils/basic_import.dart';
 import 'base/services/location_service.dart';
 import 'base/services/delivery_service.dart';
+import 'base/services/realtime_service.dart';
 import 'base/localization/dynamic_language_shim.dart';
 import 'generated/l10n/app_localizations.dart';
 import 'initializer.dart';
@@ -16,8 +19,24 @@ import 'views/all_vendors_dashboard/utils/custom_image_loader.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize Firebase (with error handling)
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    
+    // Note: PusherBeamsService.initialize() is called AFTER user login
+    // in the splash controller or login screen, not here at startup
+  } catch (e) {
+    debugPrint('Firebase initialization error: $e');
+    // Continue app execution even if Firebase fails
+  }
+  
   await AppInitializer.init();
+  
   // Debug: print presence of auth token(s) at startup (redacted by default)
+  
   configureHttpClient();
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
@@ -30,8 +49,33 @@ void main() async {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.detached) {
+      // App is closing, disconnect Pusher
+      RealtimeService().disconnect();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

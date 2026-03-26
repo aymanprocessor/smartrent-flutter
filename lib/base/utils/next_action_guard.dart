@@ -16,6 +16,17 @@ class NextActionGuard {
       kycStatus: authData.kycStatus,
     );
 
+    // Check if there is a pending resume route from guest booking flow
+    final args = Get.arguments;
+    if (args != null && args is Map) {
+      final resumeRoute = args['resumeRoute'] as String?;
+      final resumeArgs = args['resumeArgs'];
+      if (resumeRoute != null && resumeRoute.isNotEmpty) {
+        Get.offAllNamed(resumeRoute, arguments: resumeArgs);
+        return;
+      }
+    }
+
     // Route based on next_action
     _routeByNextAction(authData.nextAction);
   }
@@ -52,7 +63,8 @@ class NextActionGuard {
         break;
 
       case NextAction.submitKyc:
-        Get.offAllNamed(Routes.kycSubmissionScreen);
+        // KYC is optional - route to dashboard instead of forcing KYC submission
+        Get.offAllNamed(Routes.dashboardScreen);
         break;
 
       case NextAction.none:

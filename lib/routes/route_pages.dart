@@ -44,11 +44,6 @@ class RoutePageList {
       page: () => BookingScreen(),
       binding: BookingBinding(),
     ),
-    GetPage(name: Routes.paymentManualField, page: () => PaymentManualField()),
-    GetPage(
-      name: Routes.RePaymentManualField,
-      page: () => RePaymentManualField(),
-    ),
     GetPage(
       name: Routes.new_passwordScreen,
       page: () => const NewPasswordScreen(),
@@ -110,8 +105,34 @@ class RoutePageList {
       binding: HistoryBinding(),
     ),
     GetPage(
+      name: Routes.historyDetailScreen,
+      page: () => const HistoryDetailScreen(),
+      binding: BookingDetailBinding(),
+    ),
+    GetPage(
       name: Routes.walletScreen,
       page: () => const WalletScreen(),
+      binding: WalletBinding(),
+    ),
+    // Vendor Cars Screen
+    GetPage(
+      name: Routes.vendorCarsScreen,
+      page: () => const VendorCarsScreen(),
+      binding: VendorCarsBinding(),
+    ),
+      GetPage(
+      name: Routes.notificationScreentest,
+      page: () => const NotificationScreenTest(),
+    ),
+    GetPage(
+      name: Routes.bookingPaymentScreen,
+      page: () {
+        final args = Get.arguments as Map<String, dynamic>;
+        return BookingPaymentScreen(
+          bookingId: args['bookingId'],
+          amount: args['amount'],
+        );
+      },
     ),
   ];
 }

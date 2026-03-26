@@ -12,6 +12,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appLPleaseFillOutTheField => 'Please fill out the field';
 
   @override
+  String get appLAll => 'All';
+
+  @override
   String get appLFrom => 'From';
 
   @override
@@ -46,6 +49,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get appLSuccess => 'Success';
+
+  @override
+  String get appLBack => 'Back';
 
   @override
   String get appLBackToHome => 'Back to Home';
@@ -329,6 +335,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appLEditProfile => 'Edit Profile';
 
   @override
+  String get appLPersonalInformation => 'Personal Information';
+
+  @override
+  String get appLContactInformation => 'Contact Information';
+
+  @override
+  String get appLAddressInformation => 'Address Information';
+
+  @override
+  String get appLDocumentUploads => 'Document Uploads';
+
+  @override
+  String get appLNationalId => 'National ID';
+
+  @override
+  String get appLDrivingLicense => 'Driving License';
+
+  @override
   String get appLDelete => 'Delete';
 
   @override
@@ -575,10 +599,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appLDay => 'Day';
 
   @override
-  String get appLPricePerDay => 'Price Per Day';
+  String get appLPricePerDay => 'Daily Price';
 
   @override
-  String get appLPricePerKm => 'Price Per KM';
+  String get appLPricePerKm => 'Daily Price';
 
   @override
   String get appLDeliveryCharge => 'Delivery Charge';
@@ -815,4 +839,217 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get appLContinue => 'Continue';
+
+  @override
+  String get appLBookingDetails => 'Booking Details';
+
+  @override
+  String get appLBookingInformation => 'Booking Information';
+
+  @override
+  String get appLCarDetails => 'Car Details';
+
+  @override
+  String get appLTripDetails => 'Trip Details';
+
+  @override
+  String get appLContactDetails => 'Contact Details';
+
+  @override
+  String get appLMessage => 'Message';
+
+  @override
+  String get appLDraft => 'Draft';
+
+  @override
+  String get appLApproved => 'Approved';
+
+  @override
+  String get appLCancelBooking => 'Cancel Booking';
+
+  @override
+  String get appLCancelBookingConfirm =>
+      'Are you sure you want to cancel this booking? This action cannot be undone.';
+
+  @override
+  String get appLExtendBooking => 'Extend Booking';
+
+  @override
+  String get appLExtensionPending => 'Extension Pending';
+
+  @override
+  String get appLPay => 'Pay';
+
+  @override
+  String get appLInfo => 'Info';
+
+  @override
+  String get appLLedger => 'Ledger';
+
+  @override
+  String get appLExtensions => 'Extensions';
+
+  @override
+  String get appLTotalCharges => 'Total Charges';
+
+  @override
+  String get appLTotalCredits => 'Total Credits';
+
+  @override
+  String get appLBalanceDue => 'Balance Due';
+
+  @override
+  String get appLNoTransactionsYet => 'No transactions yet';
+
+  @override
+  String get appLBaseRental => 'Base Rental';
+
+  @override
+  String get appLDelivery => 'Delivery';
+
+  @override
+  String get appLExtensionCharge => 'Extension';
+
+  @override
+  String get appLPenalty => 'Penalty';
+
+  @override
+  String get appLPaid => 'Paid';
+
+  @override
+  String get appLCash => 'Cash';
+
+  @override
+  String get appLCard => 'Card';
+
+  @override
+  String get appLWallet => 'Wallet';
+
+  @override
+  String get appLBankTransfer => 'Bank Transfer';
+
+  @override
+  String get appLNoExtensionsRequested => 'No extensions requested';
+
+  @override
+  String get appLAdditionalDays => 'Additional Days';
+
+  @override
+  String get appLDailyRate => 'Daily Rate';
+
+  @override
+  String get appLExtraAmount => 'Extra Amount';
+
+  @override
+  String get appLCurrentReturn => 'Current Return';
+
+  @override
+  String get appLNewReturn => 'New Return';
+
+  @override
+  String get appLNotes => 'Notes';
+
+  @override
+  String get appLRequestExtension => 'Request Extension';
+
+  @override
+  String get appLPreviewExtension => 'Preview Extension';
+
+  @override
+  String get appLExtensionApproved => 'Extension Approved';
+
+  @override
+  String get appLExtensionRejected => 'Extension Rejected';
+
+  @override
+  String get appLRejectionReason => 'Rejection Reason';
+
+  @override
+  String get appLRequiredAmount => 'Required Amount';
+
+  @override
+  String get appLShortage => 'Shortage';
+
+  @override
+  String get appLDeliveryMode => 'Delivery';
+
+  @override
+  String get appLPickupMode => 'Pickup';
+
+  @override
+  String get appLInvoiceRental => 'Rental';
+
+  @override
+  String get appLInvoiceDelivery => 'Delivery';
+
+  @override
+  String get appLInvoiceTax => 'Tax';
+
+  @override
+  String get appLInvoiceDiscount => 'Discount';
+
+  @override
+  String get appLInvoiceTotal => 'Total';
+
+  @override
+  String get appLPriceBreakdown => 'Price Breakdown';
+
+  @override
+  String get appLRentalSchedule => 'Rental Schedule';
+
+  @override
+  String get appLPickUp => 'PICK-UP';
+
+  @override
+  String get appLReturnLabel => 'RETURN';
+
+  @override
+  String get appLLocationNotSpecified => 'Location not specified';
+
+  @override
+  String get appLBookingId => 'BOOKING ID';
+
+  @override
+  String get appLReference => 'REFERENCE';
+
+  @override
+  String get appLPaymentMethod => 'Payment Method';
+
+  @override
+  String get appLVendor => 'Vendor';
+
+  @override
+  String get appLReceipt => 'Receipt';
+
+  @override
+  String get appLBookingNotFound => 'Booking not found';
+
+  @override
+  String get appLNo => 'No';
+
+  @override
+  String get appLYesCancel => 'Yes, Cancel';
+
+  @override
+  String get appLDeliveryFee => 'Delivery Fee';
+
+  @override
+  String get appLDailyPrice => 'Daily Price';
+
+  @override
+  String get appLYes => 'Yes';
+
+  @override
+  String get appLBrowseVendorCars => 'Browse Cars';
+
+  @override
+  String get appLEnterMobileForOtp =>
+      'Enter your mobile number to receive a verification code via SMS';
+
+  @override
+  String get appLEnterOtpCode => 'Enter OTP Code';
+
+  @override
+  String get appLOtpSentToPhone =>
+      'A 6-digit code was sent to your phone via SMS';
 }

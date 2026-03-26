@@ -1,11 +1,13 @@
 import 'package:carbo/views/update_profile/controller/update_profile_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../../../base/widgets/country_drop_down.dart';
 import '../../../base/utils/local_storage.dart';
 import '../../../base/utils/size.dart';
 import '../../../base/widgets/primary_input_widget.dart';
 import '../../../languages/strings.dart';
+import 'document_image_picker_widget.dart';
 
 class ProfileInputWidget extends GetView<UpdateProfileController> {
   ProfileInputWidget({Key? key}) : super(key: key);
@@ -107,8 +109,66 @@ class ProfileInputWidget extends GetView<UpdateProfileController> {
               ),
             ],
           ),
+          // Document Uploads Section
+          Sizes.height.betweenInputBox,
+          _buildDocumentUploadsSection(),
         ],
       ),
     );
   }
+
+  Widget _buildDocumentUploadsSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: Text(
+            'Document Uploads',
+            style: Get.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+        Text(
+          'Upload your documents for faster verification',
+          style: Get.textTheme.bodySmall?.copyWith(
+            color: Colors.grey.shade600,
+          ),
+        ),
+        Sizes.height.betweenInputBox,
+        
+        // National ID Image Picker
+        Obx(() => DocumentImagePicker(
+          title: 'National ID',
+          imageUrl: controller.nationalIdImageUrl.value.isNotEmpty 
+              ? controller.nationalIdImageUrl.value 
+              : null,
+          imagePath: controller.nationalIdPath.value.isNotEmpty 
+              ? controller.nationalIdPath.value 
+              : null,
+          onPickFromCamera: () => controller.pickNationalIdImage(ImageSource.camera),
+          onPickFromGallery: () => controller.pickNationalIdImage(ImageSource.gallery),
+          onRemove: controller.removeNationalId,
+          isRequired: false,
+        )),
+        
+        // Driving License Image Picker
+        Obx(() => DocumentImagePicker(
+          title: 'Driving License',
+          imageUrl: controller.drivingLicenseImageUrl.value.isNotEmpty 
+              ? controller.drivingLicenseImageUrl.value 
+              : null,
+          imagePath: controller.drivingLicensePath.value.isNotEmpty 
+              ? controller.drivingLicensePath.value 
+              : null,
+          onPickFromCamera: () => controller.pickDrivingLicenseImage(ImageSource.camera),
+          onPickFromGallery: () => controller.pickDrivingLicenseImage(ImageSource.gallery),
+          onRemove: controller.removeDrivingLicense,
+          isRequired: false,
+        )),
+      ],
+    );
+  }
+
 }

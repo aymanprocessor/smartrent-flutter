@@ -1,10 +1,15 @@
+import 'dart:async';
 import 'package:carbo/base/utils/local_storage.dart';
 import 'package:carbo/views/all_vendors_dashboard/model/vendor_cars_model.dart';
 import 'package:carbo/views/all_vendors_dashboard/controller/all_vendors_dashboard_controller.dart';
+import 'package:carbo/views/vendor_cars/controller/vendor_cars_controller.dart';
 import 'package:carbo/views/dashboard/controller/dashboard_controller.dart';
 import 'package:carbo/languages/strings.dart';
 import '../../../base/localization/dynamic_language_shim.dart';
 import 'package:carbo/views/booking/model/pickup_location_model.dart';
+import 'package:carbo/views/booking/model/price_estimate_model.dart';
+import 'package:carbo/base/api/endpoint/api_endpoint.dart';
+import 'package:carbo/base/api/method/request_process.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -38,6 +43,11 @@ class BookingController extends GetxController {
   RxDouble subtotal = 0.0.obs;
   RxDouble taxAmount = 0.0.obs;
   RxDouble total = 0.0.obs;
+  RxDouble effectivePrice = 0.0.obs;
+  RxBool isPriceLoading = false.obs;
+  RxString pricingTier = ''.obs;
+
+  Timer? _debounceTimer;
 
   @override
   void onInit() {
@@ -67,7 +77,7 @@ class BookingController extends GetxController {
     emailController.addListener(_updateFormValidity);
     quantityController.addListener(() {
       _updateFormValidity();
-      _calculateCharges();
+      _scheduleDebounce();
     });
     mobileController.addListener(_updateFormValidity);
     locationController.addListener(_updateFormValidity);
@@ -82,7 +92,7 @@ class BookingController extends GetxController {
     // Recalculate when delivery toggle changes
     ever(isDeliver, (_) {
       _updateFormValidity();
-      _calculateCharges();
+      _scheduleDebounce();
     });
     // Debug: print validity changes to help trace why Continue is disabled
     ever(isFormValid, (val) {
@@ -101,9 +111,25 @@ class BookingController extends GetxController {
   void initializeWithCar(VendorCar car) {
     selectedCar.value = car;
     selectedPricing.value = car.pricing;
-    pricingType.value = car.pricing.type;
+    // Normalize API type values: 'daily' → 'per_day', 'km' → 'per_km'
+    pricingType.value = _normalizePricingType(car.pricing.type);
     pricingUnit.value = car.pricing.unit;
     _updateFormValidity();
+  }
+
+  /// Maps API pricing type values to internal constants.
+  /// API may return 'daily' or 'per_day'; internally we use 'per_day'.
+  String _normalizePricingType(String apiType) {
+    switch (apiType) {
+      case 'daily':
+      case 'per_day':
+        return 'per_day';
+      case 'km':
+      case 'per_km':
+        return 'per_km';
+      default:
+        return apiType;
+    }
   }
 
   void _updateFormValidity() {
@@ -111,36 +137,84 @@ class BookingController extends GetxController {
         quantityController.text.isNotEmpty &&
         pickupDate.value.isNotEmpty &&
         pickupTime.value.isNotEmpty &&
+        _isPickupDateTimeValid() &&
         // pickup location is required only when isDeliver is true
       (isDeliver.value ? pickupLocation.value != null : true);
   }
 
-  void _calculateCharges() {
-    if (selectedPricing.value == null || selectedCar.value == null) return;
+  /// Validates that the selected pickup date and time is in the future
+  bool _isPickupDateTimeValid() {
+    if (pickupDate.value.isEmpty || pickupTime.value.isEmpty) {
+      return false;
+    }
 
-    double quantity = double.tryParse(quantityController.text) ?? 0;
-    double price = selectedPricing.value!.price;
-    
-    // Calculate subtotal based on quantity and price
-    subtotal.value = quantity * price;
-    
-    // Add delivery charge if enabled (use car's delivery price)
-    if (isDeliver.value && selectedCar.value!.deliveryPrice != null) {
-      deliveryCharge.value = selectedCar.value!.deliveryPrice!;
-    } else {
+    try {
+      // Parse date (format: YYYY-MM-DD)
+      final dateParts = pickupDate.value.split('-');
+      if (dateParts.length != 3) return false;
+      
+      final year = int.parse(dateParts[0]);
+      final month = int.parse(dateParts[1]);
+      final day = int.parse(dateParts[2]);
+
+      // Parse time (format: HH:mm)
+      final timeParts = pickupTime.value.split(':');
+      if (timeParts.length != 2) return false;
+      
+      final hour = int.parse(timeParts[0]);
+      final minute = int.parse(timeParts[1]);
+
+      // Create DateTime from selected date and time
+      final selectedDateTime = DateTime(year, month, day, hour, minute);
+      final now = DateTime.now();
+
+      // Check if selected datetime is in the future
+      return selectedDateTime.isAfter(now);
+    } catch (e) {
+      debugPrint('Error validating pickup datetime: $e');
+      return false;
+    }
+  }
+
+  void _scheduleDebounce() {
+    _debounceTimer?.cancel();
+    _debounceTimer = Timer(const Duration(milliseconds: 600), _fetchPriceEstimate);
+  }
+
+  Future<void> _fetchPriceEstimate() async {
+    if (selectedCar.value == null) return;
+    final int? days = int.tryParse(quantityController.text);
+    if (days == null || days <= 0) {
+      subtotal.value = 0;
       deliveryCharge.value = 0;
-    }
-    
-    // Calculate tax if enabled
-    if (selectedCar.value!.taxEnabled) {
-      taxAmount.value = (subtotal.value + deliveryCharge.value) * 
-                        (selectedCar.value!.taxPercentage / 100);
-    } else {
       taxAmount.value = 0;
+      total.value = 0;
+      effectivePrice.value = 0;
+      pricingTier.value = '';
+      return;
     }
-    
-    // Total = subtotal + delivery + tax
-    total.value = subtotal.value + deliveryCharge.value + taxAmount.value;
+
+    await RequestProcess().request<PriceEstimateModel>(
+      fromJson: PriceEstimateModel.fromJson,
+      apiEndpoint: ApiEndpoint.priceEstimate,
+      isLoading: isPriceLoading,
+      method: HttpMethod.POST,
+      showErrorMessage: false,
+      body: {
+        'car_id': selectedCar.value!.id,
+        'rental_days': days,
+        'with_delivery': isDeliver.value,
+      },
+      onSuccess: (estimate) {
+        if (isClosed || estimate == null) return;
+        subtotal.value = estimate.subtotal;
+        deliveryCharge.value = estimate.deliveryFee;
+        taxAmount.value = estimate.taxAmount;
+        total.value = estimate.total;
+        effectivePrice.value = estimate.rateUsed;
+        pricingTier.value = estimate.pricingTier;
+      },
+    );
   }
 
   /// Get label for quantity input based on pricing type
@@ -151,7 +225,7 @@ class BookingController extends GetxController {
       case 'per_km':
         return DynamicLanguage.key(Strings.distance); // Localized label
       default:
-        return DynamicLanguage.key(Strings.quantity); // Localized label
+        return DynamicLanguage.key(Strings.rentalDays); // Localized label
     }
   }
 
@@ -163,7 +237,7 @@ class BookingController extends GetxController {
       case 'per_km':
         return DynamicLanguage.key(Strings.enterDistance);
       default:
-        return DynamicLanguage.key(Strings.enterQuantity);
+        return DynamicLanguage.key(Strings.enterDays);
     }
   }
 
@@ -190,6 +264,7 @@ class BookingController extends GetxController {
     noteController.dispose();
     mobileController.dispose();
     quantityController.dispose();
+    _debounceTimer?.cancel();
     super.onClose();
   }
 
@@ -280,6 +355,22 @@ class BookingController extends GetxController {
     return false;
   }
 
+  /// Look up the zone-based delivery fee from the dashboard controller.
+  /// Returns the fee for [branchId] or null when not available.
+  double? _lookupZoneDeliveryFee(int? branchId) {
+    if (branchId == null) return null;
+    try {
+      final ctrl = Get.find<AllVendorsDashboardController>();
+      return ctrl.deliveryFeeMap[branchId];
+    } catch (_) {}
+    // Try vendor cars controller as fallback
+    try {
+      final ctrl = Get.find<VendorCarsController>();
+      return ctrl.deliveryFeeMap[branchId];
+    } catch (_) {}
+    return null;
+  }
+
   /// Return a list of human-readable field names that are missing/invalid
   List<String> getMissingFields() {
     final missing = <String>[];
@@ -287,6 +378,9 @@ class BookingController extends GetxController {
     if (quantityController.text.isEmpty) missing.add(DynamicLanguage.key(Strings.quantity));
     if (pickupDate.value.isEmpty) missing.add(DynamicLanguage.key(Strings.PickUpdate));
     if (pickupTime.value.isEmpty) missing.add(DynamicLanguage.key(Strings.PickUpTime));
+    if (pickupDate.value.isNotEmpty && pickupTime.value.isNotEmpty && !_isPickupDateTimeValid()) {
+      missing.add('Pickup date and time must be in the future');
+    }
     if (isDeliver.value && pickupLocation.value == null) missing.add(DynamicLanguage.key(Strings.PickUpLocation));
     return missing;
   }

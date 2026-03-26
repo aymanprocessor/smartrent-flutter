@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carbo/routes/routes.dart';
+import 'package:iconsax/iconsax.dart';
 import 'package:carbo/views/booking/controller/booking_controller.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:shimmer/shimmer.dart';
@@ -10,6 +11,7 @@ import '../../../base/utils/basic_import.dart';
 import '../../../base/utils/local_storage.dart';
 import '../../../base/widgets/app_cached_image.dart';
 import '../../../base/services/location_service.dart';
+import '../../../base/api/services/basic_services.dart';
 import '../controller/all_vendors_dashboard_controller.dart';
 import '../../dashboard/controller/dashboard_controller.dart';
 import '../model/vendor_cars_model.dart';
@@ -21,6 +23,7 @@ part '../widget/all_vendors_car_carousel.dart';
 part '../widget/all_vendors_car_list_view.dart';
 part '../widget/all_vendors_search_button.dart';
 part '../widget/all_vendors_app_bar.dart';
+part '../widget/all_vendors_brand_filter.dart';
 
 class AllVendorsDashboardScreen extends GetView<AllVendorsDashboardController> {
   const AllVendorsDashboardScreen({Key? key}) : super(key: key);

@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 import 'package:phone_numbers_parser/phone_numbers_parser.dart';
 import '../../../../base/api/services/auth_services.dart';
 import '../../../../base/api/services/profile_kyc_service.dart';
+import '../../../../base/services/realtime_service.dart';
+import '../../../../base/utils/local_storage.dart';
 import '../../../../base/utils/next_action_guard.dart';
 import '../../../../base/widgets/custom_snackbar.dart';
 import '../../../../base/widgets/logger.dart';
@@ -204,6 +206,32 @@ class OtpLoginController extends GetxController {
     _isLoading.value = false;
 
     if (response != null && response.success && response.data != null) {
+      final data = response.data!;
+      
+      // Save userId to LocalStorage
+      await LocalStorage.save(
+        userId: data.userInfo?.id ?? 0,
+        token: data.token,
+        kycStatus: data.kycStatus,
+        isLoggedIn: true,
+      );
+      
+      log.i('[OtpLoginController] User logged in via OTP: ${data.userInfo!.id}');
+      
+      // Connect to realtime service for push notifications
+      try {
+        final realtime = RealtimeService();
+        await realtime.init();
+        await realtime.subscribeToChannel('all-users');
+        if (data.userInfo != null && data.userInfo!.id > 0) {
+          await realtime.subscribeToChannel('user-notification-${data.userInfo!.id}');
+          log.i('[OtpLoginController] Connected to realtime service for user ${data.userInfo!.id}');
+        }
+        await realtime.connect();
+      } catch (e) {
+        log.e('[OtpLoginController] Failed to connect realtime service: $e');
+      }
+      
       // Clear form
       mobileController.clear();
       otpController.clear();
@@ -211,7 +239,7 @@ class OtpLoginController extends GetxController {
       isOtpSent.value = false;
 
       // Use NextActionGuard to handle routing based on next_action
-      await NextActionGuard.handlePostAuth(response.data!);
+      await NextActionGuard.handlePostAuth(data);
     } else {
       CustomSnackBar.error(
         response?.message ?? 'Failed to verify OTP. Please try again.',

@@ -1,3 +1,12 @@
+import 'dart:convert';
+import '../../preview/model/manual_input_model.dart';
+
+RePaymentInputFields rePaymentInputFieldsFromJson(String str) =>
+    RePaymentInputFields.fromJson(json.decode(str));
+
+String rePaymentInputFieldsToJson(RePaymentInputFields data) =>
+    json.encode(data.toJson());
+
 class RePaymentInputFields {
   Message message;
   Data data;
@@ -17,51 +26,29 @@ class RePaymentInputFields {
       );
 
   Map<String, dynamic> toJson() => {
-    "message": message.toJson(),
-    "data": data.toJson(),
-    "type": type,
-  };
+        "message": message.toJson(),
+        "data": data.toJson(),
+        "type": type,
+      };
 }
 
 class Data {
-  String rejectReason;
   Gateway gateway;
   List<InputField> inputFields;
-  Currency currency;
 
-  Data({
-    required this.rejectReason,
-    required this.gateway,
-    required this.inputFields,
-    required this.currency,
-  });
+  Data({required this.gateway, required this.inputFields});
 
   factory Data.fromJson(Map<String, dynamic> json) => Data(
-    rejectReason: json["reject-reason"],
-    gateway: Gateway.fromJson(json["gateway"]),
-    inputFields: List<InputField>.from(
-      json["input_fields"].map((x) => InputField.fromJson(x)),
-    ),
-    currency: Currency.fromJson(json["currency"]),
-  );
+        gateway: Gateway.fromJson(json["gateway"]),
+        inputFields: List<InputField>.from(
+          json["input_fields"].map((x) => InputField.fromJson(x)),
+        ),
+      );
 
   Map<String, dynamic> toJson() => {
-    "reject-reason": rejectReason,
-    "gateway": gateway.toJson(),
-    "input_fields": List<dynamic>.from(inputFields.map((x) => x.toJson())),
-    "currency": currency.toJson(),
-  };
-}
-
-class Currency {
-  String alias;
-
-  Currency({required this.alias});
-
-  factory Currency.fromJson(Map<String, dynamic> json) =>
-      Currency(alias: json["alias"]);
-
-  Map<String, dynamic> toJson() => {"alias": alias};
+        "gateway": gateway.toJson(),
+        "input_fields": List<dynamic>.from(inputFields.map((x) => x.toJson())),
+      };
 }
 
 class Gateway {
@@ -75,79 +62,16 @@ class Gateway {
   Map<String, dynamic> toJson() => {"desc": desc};
 }
 
-class InputField {
-  String type;
-  String label;
-  String name;
-  bool required;
-  Validation validation;
-
-  InputField({
-    required this.type,
-    required this.label,
-    required this.name,
-    required this.required,
-    required this.validation,
-  });
-
-  factory InputField.fromJson(Map<String, dynamic> json) => InputField(
-    type: json["type"],
-    label: json["label"],
-    name: json["name"],
-    required: json["required"],
-    validation: Validation.fromJson(json["validation"]),
-  );
-
-  Map<String, dynamic> toJson() => {
-    "type": type,
-    "label": label,
-    "name": name,
-    "required": required,
-    "validation": validation.toJson(),
-  };
-}
-
-class Validation {
-  String max;
-  List<String> mimes;
-  dynamic min;
-  List<dynamic> options;
-  bool required;
-
-  Validation({
-    required this.max,
-    required this.mimes,
-    required this.min,
-    required this.options,
-    required this.required,
-  });
-
-  factory Validation.fromJson(Map<String, dynamic> json) => Validation(
-    max: json["max"],
-    mimes: List<String>.from(json["mimes"].map((x) => x)),
-    min: json["min"],
-    options: List<dynamic>.from(json["options"].map((x) => x)),
-    required: json["required"],
-  );
-
-  Map<String, dynamic> toJson() => {
-    "max": max,
-    "mimes": List<dynamic>.from(mimes.map((x) => x)),
-    "min": min,
-    "options": List<dynamic>.from(options.map((x) => x)),
-    "required": required,
-  };
-}
-
 class Message {
   List<String> success;
 
   Message({required this.success});
 
-  factory Message.fromJson(Map<String, dynamic> json) =>
-      Message(success: List<String>.from(json["success"].map((x) => x)));
+  factory Message.fromJson(Map<String, dynamic> json) => Message(
+        success: List<String>.from(json["success"].map((x) => x)),
+      );
 
   Map<String, dynamic> toJson() => {
-    "success": List<dynamic>.from(success.map((x) => x)),
-  };
+        "success": List<dynamic>.from(success.map((x) => x)),
+      };
 }

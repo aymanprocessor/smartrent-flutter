@@ -63,13 +63,17 @@ class ExpandedCardInfo extends GetView<HistoryController> {
             ),
           _previewHistoryCard(
             Strings.status,
-            info.status == 1
+            info.bookingStatus == BookingStatus.pending
                 ? Strings.pending
-                : info.status == 2
+                : info.bookingStatus == BookingStatus.approved
+                ? Strings.approved
+                : info.bookingStatus == BookingStatus.ongoing
                 ? Strings.ongoing
-                : info.status == 3
+                : info.bookingStatus == BookingStatus.completed
                 ? Strings.complete
-                : Strings.reject,
+                : info.bookingStatus == BookingStatus.cancelled
+                ? Strings.reject
+                : Strings.draft,
           ),
         ],
       ),

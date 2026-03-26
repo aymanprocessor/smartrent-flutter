@@ -5,35 +5,45 @@ class LoginButtonWidget extends GetView<OtpLoginController> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(bottom: Dimensions.verticalSize * 0.5),
-      child: Obx(() {
-        // If OTP is sent, show verify button
-        if (controller.isOtpSent.value) {
-          return PrimaryButton(
-            isLoading: controller.isLoading,
-            title: Strings.verifyAndLogin,
-            disable: !controller.isOtpValid.value,
-            onPressed: () {
-              if (controller.isOtpValid.value) {
-                controller.onVerifyOtp;
-              }
-            },
-          );
-        }
-        
-        // Otherwise show send OTP button
-        return PrimaryButton(
+    return Obx(() {
+      final isOtp     = controller.isOtpSent.value;
+      final isEnabled = isOtp ? controller.isOtpValid.value : controller.isMobileValid.value;
+
+      return AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(Dimensions.radius * 1.2),
+          gradient: isEnabled
+              ? LinearGradient(
+                  colors: [CustomColor.primary, _C.heroBottom],
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                )
+              : null,
+          boxShadow: isEnabled
+              ? [
+                  BoxShadow(
+                    color: CustomColor.primary.withOpacity(0.32),
+                    blurRadius: 16,
+                    offset: const Offset(0, 6),
+                  ),
+                ]
+              : null,
+        ),
+        child: PrimaryButton(
           isLoading: controller.isLoading,
-          title: Strings.sendOtp,
-          disable: !controller.isMobileValid.value,
+          title: isOtp ? Strings.verifyAndLogin : Strings.sendOtp,
+          disable: !isEnabled,
+          buttonColor: Colors.transparent,
           onPressed: () {
-            if (controller.isMobileValid.value) {
+            if (isOtp && controller.isOtpValid.value) {
+              controller.onVerifyOtp;
+            } else if (!isOtp && controller.isMobileValid.value) {
               controller.onSendOtp;
             }
           },
-        );
-      }),
-    );
+        ),
+      );
+    });
   }
 }

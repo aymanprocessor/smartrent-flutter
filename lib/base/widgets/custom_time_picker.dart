@@ -43,9 +43,11 @@ class _CustomTimePickerState extends State<CustomTimePicker>
   bool isTimePickerOpened = false;
 
   Future<void> _selectTime() async {
+    // Get current time as initial time to prevent past bookings
+    final TimeOfDay now = TimeOfDay.now();
     final TimeOfDay? pickedTime = await showTimePicker(
       context: context,
-      initialTime: TimeOfDay.now(),
+      initialTime: now,
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(

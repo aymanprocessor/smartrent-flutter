@@ -1,0 +1,21 @@
+{
+  "servers": {
+    "smart-rent-admin": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["C:\\DATA\\Smart Rent\\Source Code\\carbo-web\\mcp-server\\index.js"],
+      "env": {
+        "MCP_API_URL": "http://localhost:8000/api/mcp",
+        "MCP_API_TOKEN": "${input:mcpApiToken}"
+      }
+    }
+  },
+  "inputs": [
+    {
+      "id": "mcpApiToken",
+      "type": "promptString",
+      "description": "Smart Rent Admin API token — generate one at POST /mcp/token from the admin panel",
+      "password": true
+    }
+  ]
+}

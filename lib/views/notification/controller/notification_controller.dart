@@ -20,24 +20,34 @@ class NotificationController extends GetxController {
 
   RxString trxId = ''.obs;
   final _isLoading = false.obs;
+  final _hasError = false.obs;
 
   bool get isLoading => _isLoading.value;
+  bool get hasError => _hasError.value;
 
-  late NotificationModel _notificationModel;
+  NotificationModel? _notificationModel;
 
-  NotificationModel get notificationModel => _notificationModel;
+  NotificationModel? get notificationModel => _notificationModel;
+  bool get hasNotifications => _notificationModel?.data.notification.isNotEmpty ?? false;
 
   Future<NotificationModel?> getNotificationInfo() async {
+    _hasError.value = false;
     return RequestProcess().request<NotificationModel>(
       fromJson: NotificationModel.fromJson,
       apiEndpoint: ApiEndpoint.notification,
       isLoading: _isLoading,
       onSuccess: (value) {
-        _notificationModel = value!;
-        // Use null-aware operators and check for null values
-        trxId.value =
-            _notificationModel.data.notification.first.message.trxId ??
-            'default_value';
+        if (value != null) {
+          _notificationModel = value;
+          // Only set trxId if notifications list is not empty
+          if (_notificationModel!.data.notification.isNotEmpty) {
+            trxId.value = _notificationModel!.data.notification.first.message.trxId ?? '';
+          }
+        }
+      },
+      onError: (error) {
+        _hasError.value = true;
+        _notificationModel = null;
       },
     );
   }
@@ -54,11 +64,21 @@ class NotificationController extends GetxController {
 
   bool get isRepaymentLoading => _isRepaymentLoading.value;
 
-  late RePaymentInputFields _rePaymentInputFields;
+  RePaymentInputFields? _rePaymentInputFields;
 
-  RePaymentInputFields get rePaymentInputFields => _rePaymentInputFields;
+  RePaymentInputFields? get rePaymentInputFields => _rePaymentInputFields;
 
   Future<RePaymentInputFields?> rePaymentManualInsert() async {
+    // Validate trxId before proceeding
+    if (trxId.value.isEmpty) {
+      Get.snackbar(
+        'Error',
+        'Transaction ID is missing. Cannot process repayment.',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return null;
+    }
+
     return RequestProcess().request<RePaymentInputFields>(
       fromJson: RePaymentInputFields.fromJson,
       apiEndpoint: ApiEndpoint.rePayment,
@@ -67,16 +87,25 @@ class NotificationController extends GetxController {
       showResult: true,
       queryParams: {'trx_id': trxId.value},
       onSuccess: (value) {
-        _rePaymentInputFields = value!;
-        getManualReDynamicInputField(
-          data: _rePaymentInputFields.data.inputFields,
-          inputFieldControllers: inputFieldControllers,
-          inputFields: inputFields,
-          inputFileFields: inputFileFields,
-          hasFile: hasFile,
-          selectType: selectType,
+        if (value != null) {
+          _rePaymentInputFields = value;
+          getManualReDynamicInputField(
+            data: _rePaymentInputFields!.data.inputFields,
+            inputFieldControllers: inputFieldControllers,
+            inputFields: inputFields,
+            inputFileFields: inputFileFields,
+            hasFile: hasFile,
+            selectType: selectType,
+          );
+          Get.toNamed(Routes.RePaymentManualField);
+        }
+      },
+      onError: (error) {
+        Get.snackbar(
+          'Repayment Error',
+          'Failed to load repayment form. Please try again.',
+          snackPosition: SnackPosition.BOTTOM,
         );
-        Get.toNamed(Routes.RePaymentManualField);
       },
     );
   }
@@ -86,8 +115,18 @@ class NotificationController extends GetxController {
   CommonSuccessModel get commonSuccessModel => _commonSuccessModel;
 
   Future<CommonSuccessModel?> rePaymentProcess() async {
+    // Validate that input fields are loaded before processing
+    if (_rePaymentInputFields == null) {
+      Get.snackbar(
+        'Error',
+        'Repayment form not loaded. Please try again.',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return null;
+    }
+
     Map<String, String> inputBody = {'trx_id': trxId.value};
-    final data = _rePaymentInputFields.data.inputFields;
+    final data = _rePaymentInputFields!.data.inputFields;
 
     for (int i = 0; i < data.length; i += 1) {
       if (data[i].type != 'file') {

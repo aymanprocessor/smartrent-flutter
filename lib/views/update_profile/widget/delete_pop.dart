@@ -6,66 +6,73 @@ class DeletePop extends GetView<UpdateProfileController> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).scaffoldBackgroundColor,
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(Dimensions.radius * 1.5),
-        ),
+      decoration: const BoxDecoration(
+        color: _C.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(_R.lg)),
       ),
-      padding: EdgeInsets.symmetric(
-        horizontal: Dimensions.horizontalSize,
-        vertical: Dimensions.verticalSize * 0.5,
-      ),
+      padding: const EdgeInsets.fromLTRB(_S.x3, _S.x2, _S.x3, _S.x4),
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Align(
-            alignment: Alignment.center,
-            child: Container(
-              width: Dimensions.widthSize * 4.2,
-              height: Dimensions.heightSize * 0.6,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(Dimensions.radius),
-                color: Colors.black,
-              ),
+          // Drag handle
+          Container(
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: _C.border,
+              borderRadius: BorderRadius.circular(_R.full),
             ),
           ),
-          Sizes.height.v20,
-          TextWidget(
-            Strings.delete,
-            typographyStyle: TypographyStyle.titleSmall,
-            fontWeight: FontWeight.bold,
-            padding: EdgeInsets.only(bottom: Dimensions.verticalSize * 0.15),
+          const SizedBox(height: _S.x3),
+          // Warning icon
+          Container(
+            padding: const EdgeInsets.all(_S.x2),
+            decoration: BoxDecoration(
+              color: _C.errorLight,
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.warning_amber_rounded,
+                size: 32, color: _C.error),
           ),
-          TextWidget(
-            Strings.areYouSureDelete,
-            typographyStyle: TypographyStyle.bodyMedium,
+          const SizedBox(height: _S.x2),
+          Text(
+            DynamicLanguage.key(Strings.delete),
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+              color: _C.textPrimary,
+            ),
           ),
-          Sizes.height.betweenInputBox,
+          const SizedBox(height: _S.x1),
+          Text(
+            DynamicLanguage.key(Strings.areYouSureDelete),
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 14,
+              color: _C.textSecondary,
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: _S.x3),
           PrimaryButton(
             title: Strings.cancel,
             onPressed: () {
-              Get.close(1);
+              Navigator.pop(context);
             },
-            buttonColor: Colors.white,
-            borderColor: Colors.white,
-            buttonTextColor: Colors.black,
+            buttonColor: _C.surfaceMuted,
+            borderColor: _C.surfaceMuted,
+            buttonTextColor: _C.textPrimary,
           ),
-          Padding(
-            padding: EdgeInsets.symmetric(
-              vertical: Dimensions.verticalSize * 0.6,
-            ),
-            child: Obx(
-              () => PrimaryButton(
-                title: Strings.delete,
-                isLoading: Get.put(LoginController()).isLoading,
-                onPressed: () {
-                  Get.put(LoginController()).deleteAccountProcess();
-                },
-                buttonColor: Colors.red,
-                borderColor: Colors.red,
-              ),
+          const SizedBox(height: _S.x1h),
+          Obx(
+            () => PrimaryButton(
+              title: Strings.delete,
+              isLoading: Get.put(LoginController()).isLoading,
+              onPressed: () {
+                Get.put(LoginController()).deleteAccountProcess();
+              },
+              buttonColor: _C.error,
+              borderColor: _C.error,
             ),
           ),
         ],

@@ -3,6 +3,28 @@ part of '../screen/preview_screen.dart';
 class PreviewSectionCard extends GetView<PreviewController> {
   PreviewSectionCard({super.key});
 
+  /// Format price: 200 when whole, 200.50 when fractional
+  static String _smartPrice(num v) {
+    return v == v.truncate() ? v.truncate().toString() : v.toStringAsFixed(2);
+  }
+
+  /// Map ISO currency code to display symbol
+  static String _cur(String? code) {
+    switch (code?.toUpperCase()) {
+      case 'SAR': return 'ر.س';
+      case 'AED': return 'د.إ';
+      case 'KWD': return 'د.ك';
+      case 'BHD': return 'د.ب';
+      case 'QAR': return 'ر.ق';
+      case 'OMR': return 'ر.ع';
+      case 'EGP': return 'ج.م';
+      case 'USD': return '\$';
+      case 'EUR': return '€';
+      case 'GBP': return '£';
+      default:    return code ?? 'ر.س';
+    }
+  }
+
   final bookController = Get.put(BookingController());
 
   @override
@@ -27,62 +49,62 @@ class PreviewSectionCard extends GetView<PreviewController> {
             color: CustomColor.whiteColor,
             borderRadius: BorderRadius.circular(Dimensions.radius * 0.5),
           ),
-          child: Column(
-            children: [
-              if (bookController.isDeliver.value)
+          child: Obx(
+            () => Column(
+              children: [
+                if (bookController.isDeliver.value)
+                  _cardSection(
+                    Strings.PickUpLocation,
+                    // Prefer pickupLocation.address (set by map picker), fallback to text controller
+                    bookController.pickupLocation.value?.address ?? bookController.locationController.text,
+                  ),
+                if (bookController.isDeliver.value)
+                  _cardSection(
+                    Strings.PickUpdate,
+                    bookController.pickupDate.value,
+                  ),
+                if (bookController.isDeliver.value)
+                  _cardSection(
+                    Strings.PickUpTime,
+                    bookController.pickupTime.value,
+                  ),
                 _cardSection(
-                  Strings.PickUpLocation,
-                  // Prefer pickupLocation.address (set by map picker), fallback to text controller
-                  bookController.pickupLocation.value?.address ?? bookController.locationController.text,
+                  Strings.rentalDays,
+                  bookController.quantityController.text,
                 ),
-              if (bookController.isDeliver.value)
+                if (bookController.isDeliver.value)
+                  _cardSection(
+                    Strings.deliveryCar,
+                    DynamicLanguage.key(Strings.yes),
+                  ),
                 _cardSection(
-                  Strings.PickUpdate,
-                  bookController.pickupDate.value,
+                  bookController.pricingType.value == 'per_day'
+                      ? Strings.pricePerDay
+                      : Strings.pricePerKm,
+                  '${_smartPrice(bookController.effectivePrice.value > 0 ? bookController.effectivePrice.value : (bookController.selectedPricing.value?.price ?? 0))} ${_cur(bookController.selectedPricing.value?.currency)}',
                 ),
-              if (bookController.isDeliver.value)
                 _cardSection(
-                  Strings.PickUpTime,
-                  bookController.pickupTime.value,
+                  Strings.totalRent,
+                  '${_smartPrice(bookController.subtotal.value)} ${_cur(bookController.selectedPricing.value?.currency)}',
                 ),
-              _cardSection(
-                Strings.rentalDays,
-                bookController.quantityController.text,
-              ),
-              if (bookController.isDeliver.value)
+                if (bookController.isDeliver.value && bookController.deliveryCharge.value > 0)
+                  _cardSection(
+                    Strings.deliveryCharge,
+                    '${_smartPrice(bookController.deliveryCharge.value)} ${_cur(bookController.selectedPricing.value?.currency)}',
+                  ),
+                if (bookController.selectedCar.value != null &&
+                    bookController.selectedCar.value!.taxEnabled &&
+                    bookController.taxAmount.value > 0)
+                  _cardSection(
+                    Strings.tax,
+                    '${_smartPrice(bookController.taxAmount.value)} ${_cur(bookController.selectedPricing.value?.currency)}',
+                  ),
                 _cardSection(
-                  Strings.deliveryCar,
-                  'Yes',
-                ),
-              _cardSection(
-                bookController.pricingType.value == 'per_day'
-                    ? Strings.pricePerDay
-                    : Strings.pricePerKm,
-                '${bookController.selectedPricing.value?.price ?? 0} ${bookController.selectedPricing.value?.currency ?? 'USD'}',
-              ),
-              _cardSection(
-                Strings.totalRent,
-                '${bookController.subtotal.value.toStringAsFixed(BasicServices.precision.value)} ${bookController.selectedPricing.value?.currency ?? 'USD'}',
-              ),
-              if (bookController.isDeliver.value)
-                _cardSection(
-                  Strings.deliveryCharge,
-                  '${bookController.deliveryCharge.value.toStringAsFixed(BasicServices.precision.value)} ${bookController.selectedPricing.value?.currency ?? 'USD'}',
-                ),
-              if (bookController.selectedCar.value != null &&
-                  bookController.selectedCar.value!.taxEnabled &&
-                  bookController.taxAmount.value > 0)
-                _cardSection(
-                  Strings.tax,
-                  '${bookController.taxAmount.value.toStringAsFixed(BasicServices.precision.value)} ${bookController.selectedPricing.value?.currency ?? 'USD'}',
-                ),
-              Obx(
-                () => _cardSection(
                   Strings.totalPayable,
-                  '${bookController.total.value.toStringAsFixed(BasicServices.precision.value)} ${bookController.selectedPricing.value?.currency ?? 'USD'}',
+                  '${_smartPrice(bookController.total.value)} ${_cur(bookController.selectedPricing.value?.currency)}',
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ],

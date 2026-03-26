@@ -55,8 +55,12 @@ class AllVendorsDashboardController extends GetxController {
   // Quick filters
   RxString quickFilter = 'all'.obs; // all, available, deliveryAvailable
 
+  // Brand filter
+  RxString selectedBrand = 'all'.obs;
+
   // Delivery tracking
   final deliveryAvailabilityMap = <int, bool>{}.obs; // branchId -> isAvailable
+  final deliveryFeeMap = <int, double>{}.obs; // branchId -> deliveryFee
   RxBool isCheckingDelivery = false.obs;
   RxBool locationPermissionDenied = false.obs;
 
@@ -229,10 +233,14 @@ class AllVendorsDashboardController extends GetxController {
           userLng: position.longitude,
         );
 
-        // Update delivery availability map
+        // Update delivery availability & fee maps
         deliveryAvailabilityMap.clear();
+        deliveryFeeMap.clear();
         results.forEach((branchId, response) {
           deliveryAvailabilityMap[branchId] = response.isAvailable;
+          if (response.isAvailable && response.deliveryFee != null && response.deliveryFee! > 0) {
+            deliveryFeeMap[branchId] = response.deliveryFee!;
+          }
         });
 
         log.i('Delivery check complete: ${deliveryAvailabilityMap.length} branches checked');
@@ -293,10 +301,40 @@ class AllVendorsDashboardController extends GetxController {
     _applySortAndFilter();
   }
 
+  // Change brand filter
+  void changeBrandFilter(String brand) {
+    selectedBrand.value = brand;
+    log.i('Brand filter changed to: $brand');
+    _applySortAndFilter();
+  }
+
+  /// Unique sorted list of brands from all loaded cars
+  List<String> get availableBrands {
+    final brands = allVendorCars
+        .map((c) => c.make.trim())
+        .where((m) => m.isNotEmpty)
+        .toSet()
+        .toList();
+    brands.sort();
+    return brands;
+  }
+
+  /// Count of cars matching a brand ('all' returns total)
+  int brandCarCount(String brand) {
+    if (brand == 'all') return allVendorCars.length;
+    return allVendorCars.where((c) => c.make.trim() == brand).length;
+  }
+
   // Apply sorting and filtering
   void _applySortAndFilter() {
-    // Start from the master unfiltered list so toggling filters restores all items
     var filteredCars = List<VendorCar>.from(allVendorCars);
+
+    // Apply brand filter
+    if (selectedBrand.value != 'all') {
+      filteredCars = filteredCars
+          .where((car) => car.make.trim() == selectedBrand.value)
+          .toList();
+    }
 
     // Apply filter
     if (quickFilter.value == 'available') {

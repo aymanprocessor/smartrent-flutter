@@ -4,7 +4,7 @@ import '../../../base/utils/dimensions.dart';
 import '../../../base/widgets/dynamic_image_widget.dart';
 import '../../../base/widgets/primary_input_widget.dart';
 import '../../../base/widgets/text_widget.dart';
-import '../model/re_payment_input_fields_model.dart';
+import '../../preview/model/manual_input_model.dart';
 
 void getManualReDynamicInputField({
   required List<InputField> data,

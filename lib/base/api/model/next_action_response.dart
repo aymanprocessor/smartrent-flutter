@@ -47,12 +47,14 @@ class OtpVerifyData {
   final NextAction nextAction;
   final bool profileComplete;
   final int kycStatus;
+  final UserInfo? userInfo;
 
   OtpVerifyData({
     required this.token,
     required this.nextAction,
     required this.profileComplete,
     required this.kycStatus,
+    this.userInfo,
   });
 
   factory OtpVerifyData.fromJson(Map<String, dynamic> json) {
@@ -61,6 +63,60 @@ class OtpVerifyData {
       nextAction: NextAction.fromString(json['next_action']?.toString() ?? 'none'),
       profileComplete: json['profile_complete'] == true,
       kycStatus: int.tryParse(json['kyc_status']?.toString() ?? '0') ?? 0,
+      userInfo: json['user_info'] != null ? UserInfo.fromJson(json['user_info']) : null,
+    );
+  }
+}
+
+class UserInfo {
+  final int id;
+  final String firstname;
+  final String lastname;
+  final String username;
+  final String email;
+  final String mobileCode;
+  final String mobile;
+  final String fullMobile;
+  final int status;
+  final bool smsVerified;
+  final bool emailVerified;
+  final bool kycVerified;
+  final bool twoFactorVerified;
+  final bool twoFactorStatus;
+
+  UserInfo({
+    required this.id,
+    required this.firstname,
+    required this.lastname,
+    required this.username,
+    required this.email,
+    required this.mobileCode,
+    required this.mobile,
+    required this.fullMobile,
+    required this.status,
+    required this.smsVerified,
+    required this.emailVerified,
+    required this.kycVerified,
+    required this.twoFactorVerified,
+    required this.twoFactorStatus,
+  });
+
+  factory UserInfo.fromJson(Map<String, dynamic> json) {
+    return UserInfo(
+      id: int.tryParse(json['id']?.toString() ?? '0') ?? 0,
+      firstname: json['firstname']?.toString() ?? '',
+      lastname: json['lastname']?.toString() ?? '',
+      username: json['username']?.toString() ?? '',
+      email: json['email']?.toString() ?? '',
+      mobileCode: json['mobile_code']?.toString() ?? '',
+      mobile: json['mobile']?.toString() ?? '',
+      fullMobile: json['full_mobile']?.toString() ?? '',
+      status: int.tryParse(json['status']?.toString() ?? '0') ?? 0,
+      smsVerified: json['sms_verified'] == true || json['sms_verified'] == 1,
+      emailVerified: json['email_verified'] == true || json['email_verified'] == 1,
+      kycVerified: json['kyc_verified'] == true || json['kyc_verified'] == 1,
+      twoFactorVerified: json['two_factor_verified'] == true || json['two_factor_verified'] == 1,
+      twoFactorStatus: json['two_factor_status'] == true || json['two_factor_status'] == 1,
     );
   }
 }

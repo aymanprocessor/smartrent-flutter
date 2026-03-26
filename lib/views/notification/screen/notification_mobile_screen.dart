@@ -16,20 +16,46 @@ class NotificationMobileScreen extends GetView<NotificationController> {
   }
 
   _bodyWidget(BuildContext context) {
+    // Handle error state
+    if (controller.hasError) {
+      return SafeArea(
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.error_outline, size: 64, color: Colors.grey),
+              SizedBox(height: 16),
+              Text('Failed to load notifications'),
+              SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () => controller.getNotificationInfo(),
+                child: Text('Retry'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // Handle null or empty data
+    if (controller.notificationModel == null || !controller.hasNotifications) {
+      return SafeArea(
+        child: EmptyDataWidget(massage: Strings.noNotification),
+      );
+    }
+
     return SafeArea(
-      child: controller.notificationModel.data.notification.isNotEmpty
-          ? ListView(
-              padding: EdgeInsets.only(
-                left: Dimensions.defaultHorizontalSize * 0.8,
-                right: Dimensions.defaultHorizontalSize * 0.8,
-                top: Dimensions.verticalSize * 0.5,
-              ),
-              children: List.generate(
-                controller.notificationModel.data.notification.length,
-                (index) => LogoWidget(index),
-              ),
-            )
-          : EmptyDataWidget(massage: Strings.noNotification),
+      child: ListView(
+        padding: EdgeInsets.only(
+          left: Dimensions.defaultHorizontalSize * 0.8,
+          right: Dimensions.defaultHorizontalSize * 0.8,
+          top: Dimensions.verticalSize * 0.5,
+        ),
+        children: List.generate(
+          controller.notificationModel!.data.notification.length,
+          (index) => LogoWidget(index),
+        ),
+      ),
     );
   }
 }

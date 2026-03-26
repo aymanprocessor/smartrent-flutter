@@ -5,40 +5,31 @@ class DeleteButton extends GetView<UpdateProfileController> {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      splashColor: Colors.transparent,
-      highlightColor: Colors.transparent,
-      onTap: () {
-        showModalBottomSheet(
-          context: context,
+    return Padding(
+      padding: const EdgeInsets.only(right: _S.x1),
+      child: IconButton(
+        tooltip: DynamicLanguage.key(Strings.delete),
+        style: IconButton.styleFrom(
+          backgroundColor: _C.white.withValues(alpha: 0.15),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.vertical(
-              top: Radius.circular(Dimensions.radius * 1.5),
-            ),
+            borderRadius: BorderRadius.circular(_R.xs),
           ),
-          builder: (BuildContext context) {
-            return DeletePop();
-          },
-        );
-      },
-      child: Container(
-        margin: EdgeInsets.symmetric(
-          horizontal: Dimensions.defaultHorizontalSize,
         ),
-        padding: EdgeInsets.symmetric(
-          horizontal: Dimensions.defaultHorizontalSize * 0.8,
-          vertical: Dimensions.verticalSize * 0.2,
-        ),
-        child: TextWidget(
-          Strings.delete,
-          fontSize: Dimensions.titleSmall * 0.9,
-          fontWeight: FontWeight.w500,
-          color: CustomColor.whiteColor,
-        ),
-        decoration: BoxDecoration(
-          color: Colors.red,
-          borderRadius: BorderRadius.circular(Dimensions.radius * 0.8),
-        ),
+        icon: const Icon(Icons.delete_outline_rounded,
+            color: _C.white, size: 20),
+        onPressed: () {
+          showModalBottomSheet(
+            context: context,
+            backgroundColor: Colors.transparent,
+            shape: const RoundedRectangleBorder(
+              borderRadius:
+                  BorderRadius.vertical(top: Radius.circular(_R.lg)),
+            ),
+            builder: (BuildContext ctx) {
+              return const DeletePop();
+            },
+          );
+        },
       ),
     );
   }

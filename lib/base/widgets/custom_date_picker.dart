@@ -45,10 +45,12 @@ class _CustomDatePickerState extends State<CustomDatePicker>
   bool isDatePickerOpened = false;
 
   Future<void> _selectDate() async {
+    final DateTime now = DateTime.now();
+    final DateTime today = DateTime(now.year, now.month, now.day);
     final DateTime? pickedDate = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(1900),
+      initialDate: today,
+      firstDate: today,
       lastDate: DateTime(2100),
       builder: (context, child) {
         return Theme(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../api/services/language_service.dart';
 import 'i18n_service.dart';
 
 export 'i18n_service.dart' show LanguageModel;
@@ -36,6 +37,8 @@ class DynamicLanguageController extends GetxController {
     await _i18n.init(url: url);
     try {
       selectedLanguage.value = _i18n.currentLocale.languageCode;
+      // Fetch user's saved language from backend
+      await fetchUserLanguage();
     } catch (e) {
       // ignore
     }
@@ -46,11 +49,39 @@ class DynamicLanguageController extends GetxController {
     return _i18n.key(translationKey);
   }
   
+  /// Fetch user's language preference from backend
+  Future<void> fetchUserLanguage() async {
+    try {
+      final userLanguage = await LanguageService.getUserLanguage();
+      if (userLanguage != null && userLanguage.isNotEmpty) {
+        // Update language if different from current
+        if (_i18n.currentLocale.languageCode != userLanguage) {
+          await _i18n.changeLanguage(userLanguage);
+          selectedLanguage.value = userLanguage;
+        }
+      }
+    } catch (e) {
+      debugPrint('Error fetching user language: $e');
+    }
+  }
+  
+  /// Sync language preference to backend
+  Future<bool> syncLanguageToBackend(String languageCode) async {
+    try {
+      return await LanguageService.updateUserLanguage(languageCode);
+    } catch (e) {
+      debugPrint('Error syncing language to backend: $e');
+      return false;
+    }
+  }
+  
   /// Change the current language
   Future<void> changeLanguage(String languageCode) async {
     await _i18n.changeLanguage(languageCode);
     try {
       selectedLanguage.value = languageCode;
+      // Sync to backend (fire and forget - don't block UI)
+      syncLanguageToBackend(languageCode);
     } catch (_) {}
   }
 }

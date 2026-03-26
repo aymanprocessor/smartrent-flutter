@@ -1,6 +1,7 @@
 class ApiConfig {
-  // static const String mainDomain = "https://smartrent.nextoneplus.com";
-  static const String mainDomain = "http://192.168.1.211:8000";
+  // static const String mainDomain = "https://smartrent.sa";
+  // static const String mainDomain = "http://192.168.1.211:8000";
+  static const String mainDomain = "http://192.168.1.11:8000";
   static const String baseUrl = "$mainDomain/api/v1";
   static const String languageUrl = "$baseUrl/settings/languages";
 }
@@ -61,8 +62,10 @@ enum ApiEndpoint {
   // Booking confirm
   bookingConfirm('/user/car-booking/confirm'),
   getBookingPreview('/user/car-booking/preview'),
+  priceEstimate('/user/car-booking/price-estimate'),
 
   // Payment
+  moyasarPayment('/payments'),
   manualRePayment('/user/car-booking/repayment/submit'),
   getManualPaymentField('/user/car-booking/manual/input-fields'),
   rePayment('/user/car-booking/re-manual/input-fields'),
@@ -94,7 +97,23 @@ enum ApiEndpoint {
   walletRefundToWallet('/wallet/refund-to-wallet'),
   walletRefundToCard('/wallet/refund-to-card'),
   walletPayTabsWebhook('/wallet/paytabs/webhook'),
-  walletPayTabsReturn('/wallet/paytabs/return');
+  walletPayTabsReturn('/wallet/paytabs/return'),
+  
+  // User Language Endpoints
+  getUserLanguage('/user/language'),
+  updateUserLanguage('/user/language'),
+  
+  // Booking Detail Endpoints
+  bookingTransactions('/user/car-booking/{id}/transactions'),
+  bookingLedgerSummary('/user/car-booking/{id}/ledger-summary'),
+  bookingExtensions('/user/car-booking/{id}/extensions'),
+  bookingExtendPreview('/user/car-booking/{id}/extend/preview'),
+  bookingExtendRequest('/user/car-booking/{id}/extend/request'),
+  bookingCancel('/user/car-booking/{id}/cancel'),
+
+  // Pusher Beams Authentication (NOTE: This endpoint is NOT under /api/v1)
+  // It will be constructed separately as a full URL
+  pusherBeamsAuth('/user/pusher/beams-auth');
 
   final String path;
 
@@ -110,6 +129,22 @@ enum ApiEndpoint {
     return fullUrl;
   }
 
+  /// Get the Pusher Beams auth endpoint URL (not under /api/v1)
+  static String getPusherBeamsAuthUrl() {
+    return "${ApiConfig.mainDomain}/user/pusher/beams-auth";
+  }
+
   /// Convenience method to append query parameters
   String withParams(Map<String, String> params) => url(params: params);
+
+  /// Returns the full URL with `{id}` replaced by the given [id].
+  String withId(int id, {Map<String, String>? params}) {
+    final resolved = path.replaceAll('{id}', id.toString());
+    var fullUrl = "${ApiConfig.baseUrl}$resolved";
+    if (params != null && params.isNotEmpty) {
+      fullUrl +=
+          '?${params.entries.map((e) => '${e.key}=${e.value}').join('&')}';
+    }
+    return fullUrl;
+  }
 }

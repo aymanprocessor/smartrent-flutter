@@ -10,9 +10,14 @@ import '../../../views/auth/reset_password/model/find_user_send_code_model.dart'
 import '../../../views/auth/reset_password/model/forgot_pass_and_verify_model.dart';
 import '../../utils/local_storage.dart';
 import '../../services/realtime_service.dart';
+import '../../services/pusher_beams_service.dart';
+import '../../widgets/logger.dart';
 import '../endpoint/api_endpoint.dart';
 import '../method/request_process.dart';
 import '../model/common_success_model.dart';
+
+// logger instance
+final log = logger(AuthServices);
 
 class AuthServices {
   static late LogInModel _logInModel;
@@ -40,20 +45,49 @@ class AuthServices {
     try {
       final realtime = RealtimeService();
       await realtime.init();
-      await realtime.subscribeToUserChannel(userId);
-      debugPrint('[AuthServices] Realtime service connected for userId: $userId');
+
+      await realtime.subscribeToChannel('all-users');
+
+      log.i('[AuthServices]  Subscribed to all-users channel');
+
+      if (userId > 0) {
+        await realtime.subscribeToChannel('user-notification-$userId');
+
+        log.i('[AuthServices]  Reconnected realtime for userId: $userId');
+      } else {
+        log.w('[AuthServices]  Invalid userId: $userId');
+      }
+      await realtime.connect();
+      
     } catch (e) {
-      debugPrint('[AuthServices] Failed to connect realtime service: $e');
+      log.i('[AuthServices] Failed to connect realtime service: $e');
     }
   }
 
   /// Disconnect from Pusher realtime service on logout
   static Future<void> _disconnectRealtimeService() async {
     try {
-      await RealtimeService().disconnect();
-      debugPrint('[AuthServices] Realtime service disconnected successfully.');
+      // await RealtimeService().disconnect();
+      log.i('[AuthServices] Realtime service disconnected successfully.');
     } catch (e) {
-      debugPrint('[AuthServices] Failed to disconnect realtime service: $e');
+      log.i('[AuthServices] Failed to disconnect realtime service: $e');
+    }
+  }
+
+  /// Initialize Pusher Beams for push notifications after login
+  static Future<void> _initializePusherBeams(int userId) async {
+    try {
+      log.i('[AuthServices] 🚀 Initializing Pusher Beams for userId: $userId');
+      await PusherBeamsService.instance.initialize(userId: userId.toString());
+      log.i('[AuthServices] ✅ Pusher Beams initialized with authenticated user');
+      
+      // Also set device interests for backward compatibility
+      log.i('[AuthServices] 📍 Setting device interests...');
+      await PusherBeamsService.instance.setDeviceInterests(['debug-hello', 'user-$userId']);
+      log.i('[AuthServices] ✅ Device interests set successfully');
+    } catch (e, st) {
+      log.e('[AuthServices] ❌ Failed to initialize Pusher Beams: $e');
+      log.e('[AuthServices] StackTrace: $st');
     }
   }
 
@@ -86,12 +120,17 @@ class AuthServices {
           temporaryToken: data.authorization.token,
           isEmailVerified: data.userInfo.emailVerified == 1,
           email: data.userInfo.email,
-          number: data.userInfo.fullMobile, // Save the full phone number from API
+          number:
+              data.userInfo.fullMobile, // Save the full phone number from API
           kycStatus: data.userInfo.kycVerified,
           userId: data.userInfo.id,
         );
         // Connect to realtime service for push notifications
         _connectRealtimeService(data.userInfo.id);
+        
+        // Initialize Pusher Beams for push notifications (now that token is available)
+        _initializePusherBeams(data.userInfo.id);
+        
         // In debug builds, print token presence to console for local development.
         if (kDebugMode) {
           // Fire-and-forget; do not block navigation.
@@ -304,7 +343,7 @@ class AuthServices {
   }
 
   // OTP LOGIN SERVICES (Uber-like system) - - - - - - - - - - - - - - - - -
-  
+
   static SendOtpResponseModel? _sendOtpResponseModel;
   SendOtpResponseModel? get sendOtpResponseModel => _sendOtpResponseModel;
 
@@ -406,10 +445,13 @@ class AuthServices {
           temporaryToken: data.authorization.token,
           isEmailVerified: data.userInfo.emailVerified == 1,
           email: data.userInfo.email,
-          number: mobileCode + mobile, // Save the full phone number with country code
+          number:
+              mobileCode +
+              mobile, // Save the full phone number with country code
           kycStatus: data.userInfo.kycVerified,
           userId: data.userInfo.id,
         );
+        log.i('[AuthServices] User logged in via OTP: ${data.userInfo.id}');
         // Connect to realtime service for push notifications
         _connectRealtimeService(data.userInfo.id);
         // Navigate to dashboard after successful OTP login

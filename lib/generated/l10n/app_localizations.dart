@@ -104,6 +104,12 @@ abstract class AppLocalizations {
   /// **'Please fill out the field'**
   String get appLPleaseFillOutTheField;
 
+  /// No description provided for @appLAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get appLAll;
+
   /// No description provided for @appLFrom.
   ///
   /// In en, this message translates to:
@@ -175,6 +181,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Success'**
   String get appLSuccess;
+
+  /// No description provided for @appLBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get appLBack;
 
   /// No description provided for @appLBackToHome.
   ///
@@ -734,6 +746,42 @@ abstract class AppLocalizations {
   /// **'Edit Profile'**
   String get appLEditProfile;
 
+  /// No description provided for @appLPersonalInformation.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal Information'**
+  String get appLPersonalInformation;
+
+  /// No description provided for @appLContactInformation.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact Information'**
+  String get appLContactInformation;
+
+  /// No description provided for @appLAddressInformation.
+  ///
+  /// In en, this message translates to:
+  /// **'Address Information'**
+  String get appLAddressInformation;
+
+  /// No description provided for @appLDocumentUploads.
+  ///
+  /// In en, this message translates to:
+  /// **'Document Uploads'**
+  String get appLDocumentUploads;
+
+  /// No description provided for @appLNationalId.
+  ///
+  /// In en, this message translates to:
+  /// **'National ID'**
+  String get appLNationalId;
+
+  /// No description provided for @appLDrivingLicense.
+  ///
+  /// In en, this message translates to:
+  /// **'Driving License'**
+  String get appLDrivingLicense;
+
   /// No description provided for @appLDelete.
   ///
   /// In en, this message translates to:
@@ -1229,13 +1277,13 @@ abstract class AppLocalizations {
   /// No description provided for @appLPricePerDay.
   ///
   /// In en, this message translates to:
-  /// **'Price Per Day'**
+  /// **'Daily Price'**
   String get appLPricePerDay;
 
   /// No description provided for @appLPricePerKm.
   ///
   /// In en, this message translates to:
-  /// **'Price Per KM'**
+  /// **'Daily Price'**
   String get appLPricePerKm;
 
   /// No description provided for @appLDeliveryCharge.
@@ -1679,6 +1727,426 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Continue'**
   String get appLContinue;
+
+  /// No description provided for @appLBookingDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking Details'**
+  String get appLBookingDetails;
+
+  /// No description provided for @appLBookingInformation.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking Information'**
+  String get appLBookingInformation;
+
+  /// No description provided for @appLCarDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Car Details'**
+  String get appLCarDetails;
+
+  /// No description provided for @appLTripDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Trip Details'**
+  String get appLTripDetails;
+
+  /// No description provided for @appLContactDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact Details'**
+  String get appLContactDetails;
+
+  /// No description provided for @appLMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Message'**
+  String get appLMessage;
+
+  /// No description provided for @appLDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft'**
+  String get appLDraft;
+
+  /// No description provided for @appLApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved'**
+  String get appLApproved;
+
+  /// No description provided for @appLCancelBooking.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel Booking'**
+  String get appLCancelBooking;
+
+  /// No description provided for @appLCancelBookingConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to cancel this booking? This action cannot be undone.'**
+  String get appLCancelBookingConfirm;
+
+  /// No description provided for @appLExtendBooking.
+  ///
+  /// In en, this message translates to:
+  /// **'Extend Booking'**
+  String get appLExtendBooking;
+
+  /// No description provided for @appLExtensionPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Extension Pending'**
+  String get appLExtensionPending;
+
+  /// No description provided for @appLPay.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay'**
+  String get appLPay;
+
+  /// No description provided for @appLInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Info'**
+  String get appLInfo;
+
+  /// No description provided for @appLLedger.
+  ///
+  /// In en, this message translates to:
+  /// **'Ledger'**
+  String get appLLedger;
+
+  /// No description provided for @appLExtensions.
+  ///
+  /// In en, this message translates to:
+  /// **'Extensions'**
+  String get appLExtensions;
+
+  /// No description provided for @appLTotalCharges.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Charges'**
+  String get appLTotalCharges;
+
+  /// No description provided for @appLTotalCredits.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Credits'**
+  String get appLTotalCredits;
+
+  /// No description provided for @appLBalanceDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Balance Due'**
+  String get appLBalanceDue;
+
+  /// No description provided for @appLNoTransactionsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No transactions yet'**
+  String get appLNoTransactionsYet;
+
+  /// No description provided for @appLBaseRental.
+  ///
+  /// In en, this message translates to:
+  /// **'Base Rental'**
+  String get appLBaseRental;
+
+  /// No description provided for @appLDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery'**
+  String get appLDelivery;
+
+  /// No description provided for @appLExtensionCharge.
+  ///
+  /// In en, this message translates to:
+  /// **'Extension'**
+  String get appLExtensionCharge;
+
+  /// No description provided for @appLPenalty.
+  ///
+  /// In en, this message translates to:
+  /// **'Penalty'**
+  String get appLPenalty;
+
+  /// No description provided for @appLPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid'**
+  String get appLPaid;
+
+  /// No description provided for @appLCash.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash'**
+  String get appLCash;
+
+  /// No description provided for @appLCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Card'**
+  String get appLCard;
+
+  /// No description provided for @appLWallet.
+  ///
+  /// In en, this message translates to:
+  /// **'Wallet'**
+  String get appLWallet;
+
+  /// No description provided for @appLBankTransfer.
+  ///
+  /// In en, this message translates to:
+  /// **'Bank Transfer'**
+  String get appLBankTransfer;
+
+  /// No description provided for @appLNoExtensionsRequested.
+  ///
+  /// In en, this message translates to:
+  /// **'No extensions requested'**
+  String get appLNoExtensionsRequested;
+
+  /// No description provided for @appLAdditionalDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Additional Days'**
+  String get appLAdditionalDays;
+
+  /// No description provided for @appLDailyRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily Rate'**
+  String get appLDailyRate;
+
+  /// No description provided for @appLExtraAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Extra Amount'**
+  String get appLExtraAmount;
+
+  /// No description provided for @appLCurrentReturn.
+  ///
+  /// In en, this message translates to:
+  /// **'Current Return'**
+  String get appLCurrentReturn;
+
+  /// No description provided for @appLNewReturn.
+  ///
+  /// In en, this message translates to:
+  /// **'New Return'**
+  String get appLNewReturn;
+
+  /// No description provided for @appLNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes'**
+  String get appLNotes;
+
+  /// No description provided for @appLRequestExtension.
+  ///
+  /// In en, this message translates to:
+  /// **'Request Extension'**
+  String get appLRequestExtension;
+
+  /// No description provided for @appLPreviewExtension.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview Extension'**
+  String get appLPreviewExtension;
+
+  /// No description provided for @appLExtensionApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Extension Approved'**
+  String get appLExtensionApproved;
+
+  /// No description provided for @appLExtensionRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Extension Rejected'**
+  String get appLExtensionRejected;
+
+  /// No description provided for @appLRejectionReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejection Reason'**
+  String get appLRejectionReason;
+
+  /// No description provided for @appLRequiredAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Required Amount'**
+  String get appLRequiredAmount;
+
+  /// No description provided for @appLShortage.
+  ///
+  /// In en, this message translates to:
+  /// **'Shortage'**
+  String get appLShortage;
+
+  /// No description provided for @appLDeliveryMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery'**
+  String get appLDeliveryMode;
+
+  /// No description provided for @appLPickupMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Pickup'**
+  String get appLPickupMode;
+
+  /// No description provided for @appLInvoiceRental.
+  ///
+  /// In en, this message translates to:
+  /// **'Rental'**
+  String get appLInvoiceRental;
+
+  /// No description provided for @appLInvoiceDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery'**
+  String get appLInvoiceDelivery;
+
+  /// No description provided for @appLInvoiceTax.
+  ///
+  /// In en, this message translates to:
+  /// **'Tax'**
+  String get appLInvoiceTax;
+
+  /// No description provided for @appLInvoiceDiscount.
+  ///
+  /// In en, this message translates to:
+  /// **'Discount'**
+  String get appLInvoiceDiscount;
+
+  /// No description provided for @appLInvoiceTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get appLInvoiceTotal;
+
+  /// No description provided for @appLPriceBreakdown.
+  ///
+  /// In en, this message translates to:
+  /// **'Price Breakdown'**
+  String get appLPriceBreakdown;
+
+  /// No description provided for @appLRentalSchedule.
+  ///
+  /// In en, this message translates to:
+  /// **'Rental Schedule'**
+  String get appLRentalSchedule;
+
+  /// No description provided for @appLPickUp.
+  ///
+  /// In en, this message translates to:
+  /// **'PICK-UP'**
+  String get appLPickUp;
+
+  /// No description provided for @appLReturnLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'RETURN'**
+  String get appLReturnLabel;
+
+  /// No description provided for @appLLocationNotSpecified.
+  ///
+  /// In en, this message translates to:
+  /// **'Location not specified'**
+  String get appLLocationNotSpecified;
+
+  /// No description provided for @appLBookingId.
+  ///
+  /// In en, this message translates to:
+  /// **'BOOKING ID'**
+  String get appLBookingId;
+
+  /// No description provided for @appLReference.
+  ///
+  /// In en, this message translates to:
+  /// **'REFERENCE'**
+  String get appLReference;
+
+  /// No description provided for @appLPaymentMethod.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment Method'**
+  String get appLPaymentMethod;
+
+  /// No description provided for @appLVendor.
+  ///
+  /// In en, this message translates to:
+  /// **'Vendor'**
+  String get appLVendor;
+
+  /// No description provided for @appLReceipt.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt'**
+  String get appLReceipt;
+
+  /// No description provided for @appLBookingNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking not found'**
+  String get appLBookingNotFound;
+
+  /// No description provided for @appLNo.
+  ///
+  /// In en, this message translates to:
+  /// **'No'**
+  String get appLNo;
+
+  /// No description provided for @appLYesCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, Cancel'**
+  String get appLYesCancel;
+
+  /// No description provided for @appLDeliveryFee.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery Fee'**
+  String get appLDeliveryFee;
+
+  /// No description provided for @appLDailyPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily Price'**
+  String get appLDailyPrice;
+
+  /// No description provided for @appLYes.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes'**
+  String get appLYes;
+
+  /// No description provided for @appLBrowseVendorCars.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse Cars'**
+  String get appLBrowseVendorCars;
+
+  /// No description provided for @appLEnterMobileForOtp.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your mobile number to receive a verification code via SMS'**
+  String get appLEnterMobileForOtp;
+
+  /// No description provided for @appLEnterOtpCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter OTP Code'**
+  String get appLEnterOtpCode;
+
+  /// No description provided for @appLOtpSentToPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'A 6-digit code was sent to your phone via SMS'**
+  String get appLOtpSentToPhone;
 }
 
 class _AppLocalizationsDelegate

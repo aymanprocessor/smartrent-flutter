@@ -2,6 +2,7 @@ plugins {
     id "com.android.application"
     id "kotlin-android"
     id "dev.flutter.flutter-gradle-plugin"
+    id "com.google.gms.google-services"
 }
 
 android {
@@ -35,8 +36,13 @@ android {
 
     buildTypes {
         release {
-    
             signingConfig = signingConfigs.debug
+            // Enable code shrinking and use the app-level ProGuard rules.
+            // `minifyEnabled` is required to run R8; if it's already enabled
+            // by another config, this keeps the behavior consistent and ensures
+            // our `proguard-rules.pro` is applied.
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
     aaptOptions {
@@ -44,6 +50,18 @@ android {
     }
 }
 dependencies {
+    // Import the Firebase BoM
+    implementation platform("com.google.firebase:firebase-bom:34.7.0")
+
+    // Firebase Analytics
+    implementation "com.google.firebase:firebase-analytics"
+
+    // Firebase Messaging (handles instance ID internally)
+    implementation "com.google.firebase:firebase-messaging"
+    
+    // Pusher Beams will use the pusher_beams Flutter plugin
+    // Removed: implementation 'com.pusher:push-notifications-android:1.9.0'
+
     // Add language package you need to use
     implementation 'com.google.mlkit:text-recognition-chinese:16.0.0'
     implementation 'com.google.mlkit:text-recognition-devanagari:16.0.0'

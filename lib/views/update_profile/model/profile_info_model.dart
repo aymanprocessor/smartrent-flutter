@@ -3,25 +3,37 @@ import '../../../base/widgets/country_drop_down.dart';
 class ProfileInfoModel {
   Message message;
   Data data;
-  String type;
 
   ProfileInfoModel({
     required this.message,
     required this.data,
-    required this.type,
   });
 
   factory ProfileInfoModel.fromJson(Map<String, dynamic> json) =>
       ProfileInfoModel(
         message: Message.fromJson(json["message"]),
         data: Data.fromJson(json["data"]),
-        type: json["type"],
       );
 
   Map<String, dynamic> toJson() => {
     "message": message.toJson(),
     "data": data.toJson(),
-    "type": type,
+  };
+}
+
+class Message {
+  List<String> success;
+
+  Message({required this.success});
+
+  factory Message.fromJson(Map<String, dynamic> json) => Message(
+    success: json["success"] is List 
+        ? List<String>.from(json["success"].map((x) => x.toString()))
+        : [json["success"].toString()],
+  );
+
+  Map<String, dynamic> toJson() => {
+    "success": success,
   };
 }
 
@@ -29,29 +41,29 @@ class Data {
   Instructions instructions;
   UserInfo userInfo;
   ImagePaths imagePaths;
-  List<Country> countries;
+  List<Country>? countries;
 
   Data({
     required this.instructions,
     required this.userInfo,
     required this.imagePaths,
-    required this.countries,
+    this.countries,
   });
 
   factory Data.fromJson(Map<String, dynamic> json) => Data(
     instructions: Instructions.fromJson(json["instructions"]),
     userInfo: UserInfo.fromJson(json["user_info"]),
     imagePaths: ImagePaths.fromJson(json["image_paths"]),
-    countries: List<Country>.from(
-      json["countries"].map((x) => Country.fromJson(x)),
-    ),
+    countries: json["countries"] != null
+        ? List<Country>.from(json["countries"].map((x) => Country.fromJson(x)))
+        : null,
   );
 
   Map<String, dynamic> toJson() => {
     "instructions": instructions.toJson(),
     "user_info": userInfo.toJson(),
     "image_paths": imagePaths.toJson(),
-    "countries": List<dynamic>.from(countries.map((x) => x.toJson())),
+    if (countries != null) "countries": List<dynamic>.from(countries!.map((x) => x.toJson())),
   };
 }
 
@@ -124,7 +136,9 @@ class Instructions {
   Instructions({required this.kycVerified});
 
   factory Instructions.fromJson(Map<String, dynamic> json) =>
-      Instructions(kycVerified: json["kyc_verified"]);
+      Instructions(
+        kycVerified: json["kyc_verified"]?.toString() ?? 'Status not available',
+      );
 
   Map<String, dynamic> toJson() => {"kyc_verified": kycVerified};
 }
@@ -135,9 +149,13 @@ class UserInfo {
   String lastname;
   String username;
   String email;
-  dynamic mobileCode;
-  dynamic mobile;
-  dynamic image;
+  String? mobileCode;
+  String? mobile;
+  String? image;
+  String? nationalIdImage;
+  String? drivingLicenseImage;
+  String? nationalIdImageUrl;
+  String? drivingLicenseImageUrl;
   int kycVerified;
   String country;
   String city;
@@ -152,9 +170,13 @@ class UserInfo {
     required this.lastname,
     required this.username,
     required this.email,
-    required this.mobileCode,
-    required this.mobile,
-    required this.image,
+    this.mobileCode,
+    this.mobile,
+    this.image,
+    this.nationalIdImage,
+    this.drivingLicenseImage,
+    this.nationalIdImageUrl,
+    this.drivingLicenseImageUrl,
     required this.kycVerified,
     required this.country,
     required this.city,
@@ -165,21 +187,25 @@ class UserInfo {
   });
 
   factory UserInfo.fromJson(Map<String, dynamic> json) => UserInfo(
-    id: json["id"],
-    firstname: json["firstname"],
-    lastname: json["lastname"],
-    username: json["username"],
-    email: json["email"],
+    id: json["id"] ?? 0,
+    firstname: json["firstname"] ?? '',
+    lastname: json["lastname"] ?? '',
+    username: json["username"] ?? '',
+    email: json["email"] ?? '',
     mobileCode: json["mobile_code"],
     mobile: json["mobile"],
     image: json["image"],
-    kycVerified: json["kyc_verified"],
-    country: json["country"],
-    city: json["city"],
-    state: json["state"],
-    postalCode: json["postal_code"],
-    address: json["address"],
-    kyc: Kyc.fromJson(json["kyc"]),
+    nationalIdImage: json["national_id_image"],
+    drivingLicenseImage: json["driving_license_image"],
+    nationalIdImageUrl: json["nationalIdImageUrl"],
+    drivingLicenseImageUrl: json["drivingLicenseImageUrl"],
+    kycVerified: json["kyc_verified"] ?? 0,
+    country: json["country"] ?? '',
+    city: json["city"] ?? '',
+    state: json["state"] ?? '',
+    postalCode: json["postal_code"] ?? '',
+    address: json["address"] ?? '',
+    kyc: json["kyc"] != null ? Kyc.fromJson(json["kyc"]) : Kyc(data: {}, rejectReason: ''),
   );
 
   Map<String, dynamic> toJson() => {
@@ -191,6 +217,10 @@ class UserInfo {
     "mobile_code": mobileCode,
     "mobile": mobile,
     "image": image,
+    "national_id_image": nationalIdImage,
+    "driving_license_image": drivingLicenseImage,
+    "nationalIdImageUrl": nationalIdImageUrl,
+    "drivingLicenseImageUrl": drivingLicenseImageUrl,
     "kyc_verified": kycVerified,
     "country": country,
     "city": city,
@@ -202,31 +232,18 @@ class UserInfo {
 }
 
 class Kyc {
-  List<dynamic> data;
+  Map<String, dynamic> data;
   String rejectReason;
 
   Kyc({required this.data, required this.rejectReason});
 
   factory Kyc.fromJson(Map<String, dynamic> json) => Kyc(
-    data: List<dynamic>.from(json["data"].map((x) => x)),
-    rejectReason: json["reject_reason"],
+    data: json["data"] is Map ? Map<String, dynamic>.from(json["data"]) : {},
+    rejectReason: json["reject_reason"] ?? '',
   );
 
   Map<String, dynamic> toJson() => {
-    "data": List<dynamic>.from(data.map((x) => x)),
+    "data": data,
     "reject_reason": rejectReason,
-  };
-}
-
-class Message {
-  List<String> success;
-
-  Message({required this.success});
-
-  factory Message.fromJson(Map<String, dynamic> json) =>
-      Message(success: List<String>.from(json["success"].map((x) => x)));
-
-  Map<String, dynamic> toJson() => {
-    "success": List<dynamic>.from(success.map((x) => x)),
   };
 }

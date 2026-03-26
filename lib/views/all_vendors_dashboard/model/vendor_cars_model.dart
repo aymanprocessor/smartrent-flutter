@@ -277,6 +277,9 @@ class Pricing {
   String type;
   String currency;
   double price;
+  double dailyPrice;
+  double weeklyPrice;
+  double monthlyPrice;
   String unit;
   String displayName;
 
@@ -284,6 +287,9 @@ class Pricing {
     required this.type,
     required this.currency,
     required this.price,
+    required this.dailyPrice,
+    required this.weeklyPrice,
+    required this.monthlyPrice,
     required this.unit,
     required this.displayName,
   });
@@ -292,6 +298,9 @@ class Pricing {
     type: json["type"] ?? 'per_day',
     currency: json["currency"] ?? 'USD',
     price: (json["price"] ?? 0).toDouble(),
+    dailyPrice: (json["daily_price"] ?? 0).toDouble(),
+    weeklyPrice: (json["weekly_price"] ?? 0).toDouble(),
+    monthlyPrice: (json["monthly_price"] ?? 0).toDouble(),
     unit: json["unit"] ?? 'day',
     displayName: json["display_name"] ?? 'Price per day',
   );
@@ -300,6 +309,9 @@ class Pricing {
     type: 'per_day',
     currency: 'USD',
     price: 0,
+    dailyPrice: 0,
+    weeklyPrice: 0,
+    monthlyPrice: 0,
     unit: 'day',
     displayName: 'Price per day',
   );
@@ -308,6 +320,9 @@ class Pricing {
     "type": type,
     "currency": currency,
     "price": price,
+    "daily_price": dailyPrice,
+    "weekly_price": weeklyPrice,
+    "monthly_price": monthlyPrice,
     "unit": unit,
     "display_name": displayName,
   };

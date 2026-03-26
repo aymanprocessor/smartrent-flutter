@@ -14,7 +14,10 @@ class LogoWidget extends GetView<NotificationController> {
 
   @override
   Widget build(BuildContext context) {
-    final notification = controller.notificationModel.data.notification[index];
+    if (controller.notificationModel == null) {
+      return const SizedBox.shrink();
+    }
+    final notification = controller.notificationModel!.data.notification[index];
     return Card(
       elevation: 0,
       child: Padding(

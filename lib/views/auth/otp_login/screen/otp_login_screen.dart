@@ -12,6 +12,7 @@ import '../../../../base/utils/size.dart';
 import '../../../../base/widgets/primary_button.dart';
 import '../../../../base/widgets/primary_input_widget.dart';
 import '../../../../base/widgets/text_widget.dart';
+import '../../../../base/localization/dynamic_language_shim.dart';
 import '../../../../languages/strings.dart';
 import '../../../../routes/routes.dart';
 import '../controller/otp_login_controller.dart';

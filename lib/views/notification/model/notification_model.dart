@@ -92,11 +92,11 @@ class NotificationMessage {
 
   factory NotificationMessage.fromJson(Map<String, dynamic> json) =>
       NotificationMessage(
-        title: json["title"],
-        message: json["message"],
-        time: json["time"],
-        image: json["image"],
-        trxId: json["trx_id"],
+        title: json["title"] as String? ?? 'Notification',
+        message: json["message"] as String? ?? '',
+        time: json["time"] as String? ?? '',
+        image: json["image"] as String? ?? '',
+        trxId: json["trx_id"] as String?,
       );
 
   Map<String, dynamic> toJson() => {
