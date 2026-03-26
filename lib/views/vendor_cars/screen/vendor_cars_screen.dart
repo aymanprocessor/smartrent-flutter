@@ -36,39 +36,85 @@ class VendorCarsScreen extends GetView<VendorCarsController> {
   }
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {
-    return AppBar(
-      backgroundColor: CustomColor.whiteColor,
-      elevation: 0,
-      leading: Builder(
-        builder: (context) => IconButton(
-          onPressed: () => Scaffold.of(context).openDrawer(),
-          icon: Icon(
-            Icons.menu_rounded,
-            color: CustomColor.typography,
-            size: 24,
+    return PreferredSize(
+      preferredSize: const Size.fromHeight(64),
+      child: Container(
+        decoration: BoxDecoration(
+          color: CustomColor.whiteColor,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.06),
+              blurRadius: 12,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+            child: Row(
+              children: [
+                // Menu button
+                Builder(
+                  builder: (ctx) => _AppBarIconButton(
+                    icon: Icons.menu_rounded,
+                    onTap: () => Scaffold.of(ctx).openDrawer(),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                // Vendor name + subtitle
+                Expanded(
+                  child: Obx(() => Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        controller.vendorName.value.isNotEmpty
+                            ? controller.vendorName.value
+                            : DynamicLanguage.key(Strings.availableCars),
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: CustomColor.typography,
+                          letterSpacing: -0.3,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Obx(() => Text(
+                        '${controller.pagination.value?.total ?? controller.vendorCars.length} ${DynamicLanguage.key(Strings.carsAvailable)}',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w400,
+                          color: CustomColor.typography.withOpacity(0.5),
+                        ),
+                      )),
+                    ],
+                  )),
+                ),
+                // Refresh button
+                Obx(() => controller.isRefreshing
+                    ? Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: CustomColor.primary,
+                          ),
+                        ),
+                      )
+                    : _AppBarIconButton(
+                        icon: Icons.refresh_rounded,
+                        onTap: controller.refreshCars,
+                        color: CustomColor.primary,
+                      )),
+              ],
+            ),
           ),
         ),
       ),
-      title: null,
-      centerTitle: false,
-      actions: [
-        // Refresh button
-        IconButton(
-          onPressed: () => controller.refreshCars(),
-          icon: Obx(
-            () => controller.isRefreshing
-                ? SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: CustomColor.primary,
-                    ),
-                  )
-                : Icon(Icons.refresh_rounded, color: CustomColor.primary),
-          ),
-        ),
-      ],
     );
   }
 
@@ -327,6 +373,42 @@ class VendorCarsScreen extends GetView<VendorCarsController> {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _AppBarIconButton extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onTap;
+  final Color? color;
+
+  const _AppBarIconButton({
+    required this.icon,
+    required this.onTap,
+    this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: const Color(0xFFF4F6F8),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(
+            icon,
+            size: 20,
+            color: color ?? CustomColor.typography,
+          ),
+        ),
+      ),
     );
   }
 }

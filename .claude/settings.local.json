@@ -10,7 +10,9 @@
       "Bash(flutter gen-l10n:*)",
       "Bash(python skills/ui-ux-pro-max/scripts/search.py \"car rental mobile app premium modern minimal\" --design-system -p \"SmartRent\")",
       "Bash(python \".claude/skills/ui-ux-pro-max/scripts/search.py\" \"car rental mobile app premium modern minimal\" --design-system -p \"SmartRent\")",
-      "Bash(python \".claude/skills/ui-ux-pro-max/scripts/search.py\" \"appbar navigation mobile\" --stack flutter)"
+      "Bash(python \".claude/skills/ui-ux-pro-max/scripts/search.py\" \"appbar navigation mobile\" --stack flutter)",
+      "Bash(python3 .claude/skills/ui-ux-pro-max/scripts/search.py \"mobile app premium minimal clean appbar navigation\" --design-system -f markdown)",
+      "Bash(python3 .claude/skills/ui-ux-pro-max/scripts/search.py \"appbar navigation header mobile\" --stack flutter)"
     ]
   }
 }

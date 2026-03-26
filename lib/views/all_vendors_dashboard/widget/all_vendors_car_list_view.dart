@@ -177,26 +177,7 @@ class AllVendorsCarListView extends GetView<AllVendorsDashboardController> {
                             ),
                           ),
 
-                          // Logo — centered
-                          Expanded(
-                            child: Center(
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 10,
-                                  vertical: 5,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(_R.sm),
-                                ),
-                                child: Image.asset(
-                                  'assets/logo/logo.png',
-                                  height: 22,
-                                  fit: BoxFit.contain,
-                                ),
-                              ),
-                            ),
-                          ),
+                          const Spacer(),
 
                           // Profile avatar or Login button
                           if (isLoggedIn)
