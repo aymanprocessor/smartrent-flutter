@@ -732,6 +732,10 @@ class AllVendorsCarListView extends GetView<AllVendorsDashboardController> {
 
   // ─────────────────────────── Helpers ──────────────────────
   void _onCarTap(VendorCar car) {
+    if (!LocalStorage.isLoggedIn) {
+      Get.toNamed(Routes.otpLoginScreen);
+      return;
+    }
     controller.selectedCarId.value = car.id.toString();
     try {
       final bookingController = Get.find<BookingController>();

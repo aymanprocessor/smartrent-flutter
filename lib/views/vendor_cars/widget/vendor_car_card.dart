@@ -344,14 +344,13 @@ class VendorCarCard extends GetView<VendorCarsController> {
           ),
         ),
         const SizedBox(width: 12),
-        // Book button with auth state awareness
-        Obx(() => _buildBookButton(context)),
+        _buildBookButton(context),
       ],
     );
   }
 
   Widget _buildBookButton(BuildContext context) {
-    final isLoggedIn = controller.isAuthenticated;
+    final isLoggedIn = LocalStorage.isLoggedIn;
 
     return ElevatedButton(
       onPressed: onBookNow ?? () => controller.onBookNowTap(car),

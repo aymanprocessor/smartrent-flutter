@@ -114,7 +114,7 @@ class VendorCarsController extends GetxController {
     
     // Extract arguments
     _extractArguments();
-    
+
     // Load cars
     fetchVendorCars().then((_) => resumeBookingIfPending());
   }
@@ -430,19 +430,12 @@ class VendorCarsController extends GetxController {
   // AUTH & BOOKING
   // ═══════════════════════════════════════════════════════════════════════════
 
-  /// Check if user is authenticated
-  bool get isAuthenticated => LocalStorage.isLoggedIn;
-
   /// Handle book now tap with auth guard
   void onBookNowTap(VendorCar car) {
-    // Check authentication only - KYC is optional
-    if (!isAuthenticated) {
-      // Redirect to login with resume data
+    if (!LocalStorage.isLoggedIn) {
       _redirectToLogin(car);
       return;
     }
-
-    // Proceed to booking
     _proceedToBooking(car);
   }
 
@@ -481,7 +474,7 @@ class VendorCarsController extends GetxController {
     if (args != null && args is Map && args['pendingCarId'] != null) {
       final pendingCarId = args['pendingCarId'] as int;
       final car = vendorCars.firstWhereOrNull((c) => c.id == pendingCarId);
-      if (car != null && isAuthenticated) {
+      if (car != null && LocalStorage.isLoggedIn) {
         // Small delay to ensure UI is ready
         Future.delayed(const Duration(milliseconds: 500), () {
           onBookNowTap(car);

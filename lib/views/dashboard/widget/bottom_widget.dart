@@ -22,6 +22,10 @@ class BottomWidget extends GetView<DashboardController> {
         child: PrimaryButton(
           title: Strings.bookNow,
           onPressed: () {
+            if (!LocalStorage.isLoggedIn) {
+              Get.toNamed(Routes.otpLoginScreen);
+              return;
+            }
             controller.selectedCarId.value = car.id.toString();
             Get.toNamed(Routes.bookingScreen);
           },

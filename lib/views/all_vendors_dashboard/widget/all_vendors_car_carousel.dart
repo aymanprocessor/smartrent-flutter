@@ -55,6 +55,10 @@ class AllVendorsCarCarousel extends GetView<AllVendorsDashboardController> {
                           // BookingController not yet initialized
                         }
                         
+                        if (!LocalStorage.isLoggedIn) {
+                          Get.toNamed(Routes.otpLoginScreen);
+                          return;
+                        }
                         Get.toNamed(Routes.bookingScreen, arguments: {'car': car});
                       },
                       child: Container(
@@ -227,6 +231,10 @@ class AllVendorsCarCarousel extends GetView<AllVendorsDashboardController> {
                           // BookingController not yet initialized
                         }
                         
+                        if (!LocalStorage.isLoggedIn) {
+                          Get.toNamed(Routes.otpLoginScreen);
+                          return;
+                        }
                         Get.toNamed(Routes.bookingScreen, arguments: {'car': car});
                       }
                     },

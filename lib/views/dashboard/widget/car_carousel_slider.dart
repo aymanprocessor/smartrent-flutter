@@ -14,6 +14,10 @@ class CarCarouselSlider extends GetView<DashboardController> {
                   splashColor: Colors.transparent,
                   highlightColor: Colors.transparent,
                   onTap: () {
+                    if (!LocalStorage.isLoggedIn) {
+                      Get.toNamed(Routes.otpLoginScreen);
+                      return;
+                    }
                     controller.selectedCarId.value = car.id.toString();
                     Get.toNamed(Routes.bookingScreen);
                   },

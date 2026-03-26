@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:imageview360/imageview360.dart';
 import '../../../base/utils/basic_import.dart';
+import '../../../base/utils/local_storage.dart';
+import '../../../routes/routes.dart';
 import '../controller/product_details_controller.dart';
 part 'product_details_tablet_screen.dart';
 part 'product_details_mobile_screen.dart';

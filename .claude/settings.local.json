@@ -7,7 +7,10 @@
       "Bash(flutter analyze:*)",
       "Bash(python .claude/skills/ui-ux-pro-max/scripts/search.py \"car rental mobile app dashboard header appbar\" --design-system -p \"SmartRent\")",
       "Bash(python .claude/skills/ui-ux-pro-max/scripts/search.py \"mobile appbar header flutter\" --stack flutter)",
-      "Bash(flutter gen-l10n:*)"
+      "Bash(flutter gen-l10n:*)",
+      "Bash(python skills/ui-ux-pro-max/scripts/search.py \"car rental mobile app premium modern minimal\" --design-system -p \"SmartRent\")",
+      "Bash(python \".claude/skills/ui-ux-pro-max/scripts/search.py\" \"car rental mobile app premium modern minimal\" --design-system -p \"SmartRent\")",
+      "Bash(python \".claude/skills/ui-ux-pro-max/scripts/search.py\" \"appbar navigation mobile\" --stack flutter)"
     ]
   }
 }
