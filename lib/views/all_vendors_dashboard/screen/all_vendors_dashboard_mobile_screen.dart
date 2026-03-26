@@ -24,7 +24,6 @@ class AllVendorsDashboardMobileScreen
       ),
       child: Scaffold(
         backgroundColor: CustomColor.background,
-        appBar: AllVendorsAppBar(),
         body: Obx(() => controller.isLoad ? Loader() : AllVendorsCarListView()),
         bottomNavigationBar: _BottomNavBar(),
       ),

@@ -156,7 +156,6 @@ class AllVendorsCarListView extends GetView<AllVendorsDashboardController> {
             child: SafeArea(
               bottom: false,
               child: Column(
-                mainAxisSize: MainAxisSize.min,
                 children: [
                   // ── Pinned top bar ──────────────────────────────
                   SizedBox(
@@ -189,83 +188,96 @@ class AllVendorsCarListView extends GetView<AllVendorsDashboardController> {
                     ),
                   ),
 
-                  // ── Greeting — only for logged-in, fades on scroll ──
-                  if (isLoggedIn && t > 0)
-                    Opacity(
-                      opacity: t,
-                      child: Transform.translate(
-                        offset: Offset(0, 10 * (1 - t)),
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(
-                              _S.base, 0, _S.base, _S.base),
-                          child: Obx(() {
-                            final name = dashCtrl.userFullName.value;
-                            final greeting = _getGreeting();
-                            return Row(
-                              children: [
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    mainAxisSize: MainAxisSize.min,
+                  // ── Greeting — fills remaining expanded space, fades on scroll ──
+                  if (isLoggedIn)
+                    Expanded(
+                      child: ClipRect(
+                        child: Opacity(
+                          opacity: t,
+                          child: Transform.translate(
+                            offset: Offset(0, 10 * (1 - t)),
+                            child: OverflowBox(
+                              maxHeight: double.infinity,
+                              alignment: AlignmentDirectional.bottomStart,
+                              child: Padding(
+                                padding: const EdgeInsets.fromLTRB(
+                                    _S.base, 0, _S.base, _S.base),
+                                child: Obx(() {
+                                  final name = dashCtrl.userFullName.value;
+                                  final greeting = _getGreeting();
+                                  return Row(
                                     children: [
-                                      Text(
-                                        greeting,
-                                        style: TextStyle(
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w400,
-                                          color:
-                                              Colors.white.withOpacity(0.75),
-                                          letterSpacing: 0.3,
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text(
+                                              greeting,
+                                              style: TextStyle(
+                                                fontSize: 13,
+                                                fontWeight: FontWeight.w400,
+                                                color: Colors.white
+                                                    .withOpacity(0.75),
+                                                letterSpacing: 0.3,
+                                              ),
+                                            ),
+                                            if (name.isNotEmpty) ...[
+                                              const SizedBox(height: 2),
+                                              Text(
+                                                name,
+                                                style: const TextStyle(
+                                                  fontSize: 20,
+                                                  fontWeight: FontWeight.w700,
+                                                  color: Colors.white,
+                                                  letterSpacing: -0.2,
+                                                  height: 1.2,
+                                                ),
+                                                maxLines: 1,
+                                                overflow:
+                                                    TextOverflow.ellipsis,
+                                              ),
+                                            ],
+                                          ],
                                         ),
                                       ),
-                                      if (name.isNotEmpty) ...[
-                                        const SizedBox(height: 2),
-                                        Text(
-                                          name,
-                                          style: const TextStyle(
-                                            fontSize: 20,
-                                            fontWeight: FontWeight.w700,
-                                            color: Colors.white,
-                                            letterSpacing: -0.2,
-                                            height: 1.2,
+                                      // Car count badge
+                                      Obx(() {
+                                        final count =
+                                            controller.vendorCars.length;
+                                        if (count == 0) {
+                                          return const SizedBox.shrink();
+                                        }
+                                        return Container(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 10, vertical: 4),
+                                          decoration: BoxDecoration(
+                                            color:
+                                                Colors.white.withOpacity(0.18),
+                                            borderRadius:
+                                                BorderRadius.circular(_R.xl),
+                                            border: Border.all(
+                                              color:
+                                                  Colors.white.withOpacity(0.25),
+                                            ),
                                           ),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ],
+                                          child: Text(
+                                            '$count ${DynamicLanguage.key(Strings.carsAvailable)}',
+                                            style: const TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w600,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                        );
+                                      }),
                                     ],
-                                  ),
-                                ),
-                                // Subtle car count badge
-                                Obx(() {
-                                  final count =
-                                      controller.vendorCars.length;
-                                  if (count == 0) return const SizedBox.shrink();
-                                  return Container(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 10, vertical: 4),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white.withOpacity(0.18),
-                                      borderRadius:
-                                          BorderRadius.circular(_R.xl),
-                                      border: Border.all(
-                                        color: Colors.white.withOpacity(0.25),
-                                      ),
-                                    ),
-                                    child: Text(
-                                      '$count ${DynamicLanguage.key(Strings.carsAvailable)}',
-                                      style: const TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w600,
-                                        color: Colors.white,
-                                      ),
-                                    ),
                                   );
                                 }),
-                              ],
-                            );
-                          }),
+                              ),
+                            ),
+                          ),
                         ),
                       ),
                     ),

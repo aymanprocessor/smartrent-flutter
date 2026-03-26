@@ -29,88 +29,86 @@ class VendorCarsScreen extends GetView<VendorCarsController> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: CustomColor.background,
-      appBar: _buildAppBar(context),
       drawer: const VendorCarsGuestDrawer(),
       body: _buildBody(context),
     );
   }
 
-  PreferredSizeWidget _buildAppBar(BuildContext context) {
-    return PreferredSize(
-      preferredSize: const Size.fromHeight(64),
-      child: Container(
-        decoration: BoxDecoration(
-          color: CustomColor.whiteColor,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.06),
-              blurRadius: 12,
-              offset: const Offset(0, 2),
-            ),
-          ],
+  Widget _buildSliverAppBar(BuildContext context) {
+    return SliverAppBar(
+      pinned: true,
+      floating: true,
+      snap: true,
+      expandedHeight: 120,
+      backgroundColor: CustomColor.whiteColor,
+      surfaceTintColor: Colors.transparent,
+      shadowColor: Colors.black.withOpacity(0.08),
+      elevation: 2,
+      leading: Builder(
+        builder: (ctx) => _AppBarIconButton(
+          icon: Icons.menu_rounded,
+          onTap: () => Scaffold.of(ctx).openDrawer(),
         ),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-            child: Row(
-              children: [
-                // Menu button
-                Builder(
-                  builder: (ctx) => _AppBarIconButton(
-                    icon: Icons.menu_rounded,
-                    onTap: () => Scaffold.of(ctx).openDrawer(),
+      ),
+      actions: [
+        Obx(() => controller.isRefreshing
+            ? Padding(
+                padding: const EdgeInsets.all(12),
+                child: SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: CustomColor.primary,
                   ),
                 ),
-                const SizedBox(width: 8),
-                // Vendor name + subtitle
-                Expanded(
-                  child: Obx(() => Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        controller.vendorName.value.isNotEmpty
-                            ? controller.vendorName.value
-                            : DynamicLanguage.key(Strings.availableCars),
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: CustomColor.typography,
-                          letterSpacing: -0.3,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      Obx(() => Text(
-                        '${controller.pagination.value?.total ?? controller.vendorCars.length} ${DynamicLanguage.key(Strings.carsAvailable)}',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w400,
-                          color: CustomColor.typography.withOpacity(0.5),
-                        ),
-                      )),
-                    ],
-                  )),
+              )
+            : _AppBarIconButton(
+                icon: Icons.refresh_rounded,
+                onTap: controller.refreshCars,
+                color: CustomColor.primary,
+              )),
+        const SizedBox(width: 8),
+      ],
+      flexibleSpace: FlexibleSpaceBar(
+        titlePadding: const EdgeInsetsDirectional.only(
+          start: 56,
+          bottom: 14,
+          end: 60,
+        ),
+        centerTitle: false,
+        expandedTitleScale: 1.4,
+        title: Obx(() => Text(
+          controller.vendorName.value.isNotEmpty
+              ? controller.vendorName.value
+              : DynamicLanguage.key(Strings.availableCars),
+          style: TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w700,
+            color: CustomColor.typography,
+            letterSpacing: -0.3,
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        )),
+        background: Container(
+          color: CustomColor.whiteColor,
+          child: Align(
+            alignment: AlignmentDirectional.bottomStart,
+            child: Padding(
+              padding: const EdgeInsetsDirectional.only(
+                start: 56,
+                bottom: 14,
+              ),
+              child: Obx(() => Text(
+                '${controller.pagination.value?.total ?? controller.vendorCars.length}'
+                ' ${DynamicLanguage.key(Strings.carsAvailable)}',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w400,
+                  color: CustomColor.typography.withOpacity(0.5),
                 ),
-                // Refresh button
-                Obx(() => controller.isRefreshing
-                    ? Padding(
-                        padding: const EdgeInsets.all(12),
-                        child: SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: CustomColor.primary,
-                          ),
-                        ),
-                      )
-                    : _AppBarIconButton(
-                        icon: Icons.refresh_rounded,
-                        onTap: controller.refreshCars,
-                        color: CustomColor.primary,
-                      )),
-              ],
+              )),
             ),
           ),
         ),
@@ -122,14 +120,28 @@ class VendorCarsScreen extends GetView<VendorCarsController> {
     return Obx(() {
       // Loading state
       if (controller.isLoading && controller.vendorCars.isEmpty) {
-        return const VendorCarsSkeletonLoader();
+        return CustomScrollView(
+          physics: const NeverScrollableScrollPhysics(),
+          slivers: [
+            _buildSliverAppBar(context),
+            const SliverFillRemaining(child: VendorCarsSkeletonLoader()),
+          ],
+        );
       }
 
       // Error state
       if (controller.hasError && controller.vendorCars.isEmpty) {
-        return VendorCarsErrorState(
-          message: controller.errorMessage.value,
-          onRetry: () => controller.fetchVendorCars(),
+        return CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          slivers: [
+            _buildSliverAppBar(context),
+            SliverFillRemaining(
+              child: VendorCarsErrorState(
+                message: controller.errorMessage.value,
+                onRetry: () => controller.fetchVendorCars(),
+              ),
+            ),
+          ],
         );
       }
 
@@ -138,9 +150,12 @@ class VendorCarsScreen extends GetView<VendorCarsController> {
         return RefreshIndicator(
           onRefresh: controller.refreshCars,
           color: CustomColor.primary,
-          child: const SingleChildScrollView(
-            physics: AlwaysScrollableScrollPhysics(),
-            child: VendorCarsEmptyState(),
+          child: CustomScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            slivers: [
+              _buildSliverAppBar(context),
+              const SliverFillRemaining(child: VendorCarsEmptyState()),
+            ],
           ),
         );
       }
@@ -152,7 +167,8 @@ class VendorCarsScreen extends GetView<VendorCarsController> {
         child: CustomScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
-            // Spacing
+            _buildSliverAppBar(context),
+
             SliverToBoxAdapter(
               child: SizedBox(height: Dimensions.verticalSize),
             ),
@@ -192,11 +208,9 @@ class VendorCarsScreen extends GetView<VendorCarsController> {
             SliverList(
               delegate: SliverChildBuilderDelegate(
                 (context, index) {
-                  // Load more indicator at the end
                   if (index == controller.vendorCars.length) {
                     return _buildLoadMoreButton();
                   }
-
                   final car = controller.vendorCars[index];
                   return Obx(
                     () => _buildShimmerWrapper(

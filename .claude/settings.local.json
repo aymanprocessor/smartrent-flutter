@@ -12,7 +12,28 @@
       "Bash(python \".claude/skills/ui-ux-pro-max/scripts/search.py\" \"car rental mobile app premium modern minimal\" --design-system -p \"SmartRent\")",
       "Bash(python \".claude/skills/ui-ux-pro-max/scripts/search.py\" \"appbar navigation mobile\" --stack flutter)",
       "Bash(python3 .claude/skills/ui-ux-pro-max/scripts/search.py \"mobile app premium minimal clean appbar navigation\" --design-system -f markdown)",
-      "Bash(python3 .claude/skills/ui-ux-pro-max/scripts/search.py \"appbar navigation header mobile\" --stack flutter)"
+      "Bash(python3 .claude/skills/ui-ux-pro-max/scripts/search.py \"appbar navigation header mobile\" --stack flutter)",
+      "Bash(dart pub:*)",
+      "Bash(curl -s \"https://pub.dev/api/packages/mcp_toolkit\")",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(d[''''latest''''][''''pubspec''''][''''version'''']\\)\")",
+      "Bash(curl -s https://pub.dev/api/packages/mcp_toolkit)",
+      "Bash(git clone:*)",
+      "Bash(make install:*)",
+      "Bash(flutter pub:*)",
+      "Bash(mkdir -p build)",
+      "Bash(dart compile:*)",
+      "Bash(claude mcp:*)",
+      "Bash(flutter run:*)",
+      "Bash(flutter devices:*)",
+      "Bash(netstat -ano)",
+      "Bash(tasklist)",
+      "Bash(taskkill /F /PID 20700 /PID 20736)",
+      "Bash(curl -s \"http://127.0.0.1:9200/\")",
+      "Bash(curl -s --max-time 5 \"http://127.0.0.1:9200/ws\")",
+      "Bash(python3 -c \":*)",
+      "Bash(pip install:*)",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(d.get\\(''''mcpServers'''', d.get\\(''''projects'''',{}\\)\\), indent=2\\)\\)\")",
+      "mcp__ide__getDiagnostics"
     ]
   }
 }

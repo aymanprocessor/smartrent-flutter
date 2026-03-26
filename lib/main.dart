@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:carbo/views/dashboard/controller/dashboard_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:mcp_toolkit/mcp_toolkit.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -17,36 +20,47 @@ import 'initializer.dart';
 import 'routes/routes.dart';
 import 'views/all_vendors_dashboard/utils/custom_image_loader.dart';
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  
-  // Initialize Firebase (with error handling)
-  try {
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
-    
-    // Note: PusherBeamsService.initialize() is called AFTER user login
-    // in the splash controller or login screen, not here at startup
-  } catch (e) {
-    debugPrint('Firebase initialization error: $e');
-    // Continue app execution even if Firebase fails
-  }
-  
-  await AppInitializer.init();
-  
-  // Debug: print presence of auth token(s) at startup (redacted by default)
-  
-  configureHttpClient();
-  SystemChrome.setSystemUIOverlayStyle(
-    const SystemUiOverlayStyle(
-      systemNavigationBarIconBrightness: Brightness.dark,
-      statusBarColor: Colors.transparent,
-      statusBarIconBrightness: Brightness.dark,
-      statusBarBrightness: Brightness.light,
-    ),
+void main() {
+  runZonedGuarded(
+    () async {
+      WidgetsFlutterBinding.ensureInitialized();
+
+      MCPToolkitBinding.instance
+        ..initialize()
+        ..initializeFlutterToolkit();
+
+      // Initialize Firebase (with error handling)
+      try {
+        await Firebase.initializeApp(
+          options: DefaultFirebaseOptions.currentPlatform,
+        );
+
+        // Note: PusherBeamsService.initialize() is called AFTER user login
+        // in the splash controller or login screen, not here at startup
+      } catch (e) {
+        debugPrint('Firebase initialization error: $e');
+        // Continue app execution even if Firebase fails
+      }
+
+      await AppInitializer.init();
+
+      // Debug: print presence of auth token(s) at startup (redacted by default)
+
+      configureHttpClient();
+      SystemChrome.setSystemUIOverlayStyle(
+        const SystemUiOverlayStyle(
+          systemNavigationBarIconBrightness: Brightness.dark,
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.dark,
+          statusBarBrightness: Brightness.light,
+        ),
+      );
+      runApp(const MyApp());
+    },
+    (error, stack) {
+      MCPToolkitBinding.instance.handleZoneError(error, stack);
+    },
   );
-  runApp(const MyApp());
 }
 
 class MyApp extends StatefulWidget {

@@ -66,6 +66,9 @@ dependencies:
   # Local notifications
   awesome_notifications: ^0.10.1
 
+  # Flutter DevTools / MCP widget inspection
+  mcp_toolkit: ^0.4.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
