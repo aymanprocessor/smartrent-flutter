@@ -249,6 +249,10 @@ class AllVendorsDashboardController extends GetxController {
       log.e('Error checking delivery: $e');
     } finally {
       isCheckingDelivery.value = false;
+      // Re-apply filter now that delivery map is populated
+      if (quickFilter.value == 'deliveryAvailable') {
+        _applySortAndFilter();
+      }
     }
   }
 

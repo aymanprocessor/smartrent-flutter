@@ -8,12 +8,14 @@ import '../../../base/utils/currency_formatter.dart';
 import '../../../base/enums/enums.dart';
 import '../../history/model/history_model.dart';
 import '../controller/booking_detail_controller.dart';
+import '../model/car_branch_model.dart';
 import '../../all_vendors_dashboard/controller/all_vendors_dashboard_controller.dart';
 import '../widget/delivery_badge.dart';
 import '../widget/extension_banner.dart';
 import '../widget/extension_preview_sheet.dart';
 import '../controller/extension_controller.dart';
 import '../../../base/widgets/app_cached_image.dart';
+import '../../../base/widgets/custom_snackbar.dart';
 
 import '../../../base/localization/dynamic_language_shim.dart';
 
@@ -880,75 +882,28 @@ class _PaymentSummarySection extends StatelessWidget {
   }
 }
 
-// ─── Payment Method Card ────────────────────────────────────────
-class _PaymentMethodCard extends StatelessWidget {
-  final History history;
+// ─── Branch Card ────────────────────────────────────────────────
+class _BranchCard extends StatelessWidget {
+  final CarBranch branch;
 
-  const _PaymentMethodCard({required this.history});
+  const _BranchCard({required this.branch});
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(_S.x2),
-      decoration: BoxDecoration(
-        color: _C.surfaceCard,
-        borderRadius: BorderRadius.circular(_R.sm),
-        border: Border.all(color: _C.border, width: 1),
-        boxShadow: _Shadow.subtle,
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [_C.primary.withValues(alpha: 0.08), _C.accent.withValues(alpha: 0.04)],
-              ),
-              borderRadius: BorderRadius.circular(_R.xs),
-            ),
-            child: const Icon(Icons.credit_card_rounded, color: _C.primary, size: 22),
-          ),
-          const SizedBox(width: _S.x2),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  history.paymentType.isNotEmpty
-                      ? history.paymentType[0].toUpperCase() + history.paymentType.substring(1)
-                      : DynamicLanguage.key(Strings.paymentMethod),
-                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: _C.textPrimary, letterSpacing: -0.2),
-                ),
-                if (history.trxId != null)
-                  Text(
-                    'Ref: ${history.trxId}',
-                    style: const TextStyle(fontSize: 12, color: _C.textTertiary, letterSpacing: -0.1),
-                  ),
-              ],
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.all(_S.x1),
-            decoration: BoxDecoration(color: _C.surfaceMuted, borderRadius: BorderRadius.circular(_R.xs)),
-            child: const Icon(Icons.chevron_right_rounded, size: 18, color: _C.textTertiary),
-          ),
-        ],
-      ),
-    );
+  Future<void> _launch(String uri) async {
+    try {
+      final u = Uri.parse(uri);
+      if (await canLaunchUrl(u)) await launchUrl(u, mode: LaunchMode.externalApplication);
+    } catch (_) {}
   }
-}
-
-// ─── Vendor Card ────────────────────────────────────────────────
-class _VendorCard extends StatelessWidget {
-  final VendorInfo vendor;
-
-  const _VendorCard({required this.vendor});
 
   @override
   Widget build(BuildContext context) {
+    final hasPhone = branch.phone != null;
+    final hasEmail = branch.email != null;
+    final hasAddress = branch.address != null || branch.city != null;
+    final addressLine = [branch.city, branch.address]
+        .whereType<String>()
+        .join(', ');
+
     return Container(
       padding: const EdgeInsets.all(_S.x3),
       decoration: BoxDecoration(
@@ -960,56 +915,124 @@ class _VendorCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _sectionHeader(Icons.storefront_rounded, DynamicLanguage.key(Strings.vendor), _C.warningLight, _C.warning),
-          const SizedBox(height: _S.x2),
-          Row(
-            children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [_C.primary, _C.accent],
-                  ),
-                  borderRadius: BorderRadius.circular(_R.sm),
-                  boxShadow: [
-                    BoxShadow(color: _C.primary.withValues(alpha: 0.2), blurRadius: 8, offset: const Offset(0, 3)),
-                  ],
-                ),
-                child: Center(
-                  child: Text(
-                    (vendor.fullname ?? vendor.firstname ?? 'V').substring(0, 1).toUpperCase(),
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: _C.white),
-                  ),
-                ),
-              ),
-              const SizedBox(width: _S.x2),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      vendor.fullname ?? '${vendor.firstname ?? ''} ${vendor.lastname ?? ''}'.trim(),
-                      style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: _C.textPrimary, letterSpacing: -0.2),
-                    ),
-                    if (vendor.mobile != null) ...[
-                      const SizedBox(height: _S.x05),
-                      Text(vendor.mobile!, style: const TextStyle(fontSize: 13, color: _C.textSecondary, letterSpacing: -0.1)),
-                    ],
-                  ],
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.all(_S.x1),
-                decoration: BoxDecoration(color: _C.surfaceMuted, borderRadius: BorderRadius.circular(_R.xs)),
-                child: const Icon(Icons.chevron_right_rounded, size: 18, color: _C.textTertiary),
-              ),
-            ],
+          _sectionHeader(
+            Icons.store_mall_directory_rounded,
+            DynamicLanguage.key(Strings.branchInfo),
+            _C.primaryLight,
+            _C.primary,
           ),
+          if (branch.name != null) ...[
+            const SizedBox(height: _S.x2),
+            Text(
+              DynamicLanguage.key(Strings.branchName),
+              style: const TextStyle(fontSize: 11, color: _C.textTertiary, letterSpacing: 0.2),
+            ),
+            const SizedBox(height: _S.x05),
+            Text(
+              branch.name!,
+              style: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+                color: _C.textPrimary,
+                letterSpacing: -0.2,
+              ),
+            ),
+          ],
+          if (hasAddress) ...[
+            const SizedBox(height: _S.x1),
+            Row(
+              children: [
+                const Icon(Icons.location_on_outlined, size: 16, color: _C.textSecondary),
+                const SizedBox(width: _S.x1),
+                Expanded(
+                  child: Text(
+                    addressLine,
+                    style: const TextStyle(fontSize: 13, color: _C.textSecondary),
+                  ),
+                ),
+              ],
+            ),
+          ],
+          if (hasPhone) ...[
+            const SizedBox(height: _S.x2),
+            _ContactRow(
+              value: branch.phone!,
+              icon: Icons.phone_rounded,
+              label: DynamicLanguage.key(Strings.Phone),
+              onTap: () => _launch('tel:${branch.phone!}'),
+            ),
+          ],
+          if (hasEmail) ...[
+            const SizedBox(height: _S.x1h),
+            _ContactRow(
+              value: branch.email!,
+              icon: Icons.email_outlined,
+              label: DynamicLanguage.key(Strings.email),
+              onTap: () => _launch('mailto:${branch.email!}'),
+            ),
+          ],
         ],
       ),
+    );
+  }
+}
+
+class _ContactRow extends StatelessWidget {
+  final String value;
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  const _ContactRow({
+    required this.value,
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            value,
+            style: const TextStyle(
+              fontSize: 13,
+              color: _C.textSecondary,
+              letterSpacing: -0.1,
+            ),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+        const SizedBox(width: _S.x2),
+        InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(_R.sm),
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: _S.x1, horizontal: _S.x1h),
+            decoration: BoxDecoration(
+              color: _C.primaryLight,
+              borderRadius: BorderRadius.circular(_R.sm),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(icon, size: 14, color: _C.primary),
+                const SizedBox(width: _S.x05),
+                Text(
+                  label,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: _C.primary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

@@ -5,21 +5,25 @@ class HistoryMobileScreen extends GetView<HistoryController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: _C.surface,
-      body: Column(
-        children: [
-          _HistoryHeader(controller: controller),
-          _FilterBar(controller: controller),
-          // ── List / Empty / Shimmer ────────────────────────────
-          Expanded(
-            child: Obx(
-              () => controller.showShimmer
-                  ? const HistoryShimmer()
-                  : _bodyWidget(),
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (_) => Get.offAllNamed(Routes.dashboardScreen),
+      child: Scaffold(
+        backgroundColor: _C.surface,
+        body: Column(
+          children: [
+            _HistoryHeader(controller: controller),
+            _FilterBar(controller: controller),
+            // ── List / Empty / Shimmer ────────────────────────────
+            Expanded(
+              child: Obx(
+                () => controller.showShimmer
+                    ? const HistoryShimmer()
+                    : _bodyWidget(),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

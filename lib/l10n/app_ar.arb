@@ -347,6 +347,8 @@
   "appLReference": "المرجع",
   "appLPaymentMethod": "طريقة الدفع",
   "appLVendor": "المؤجر",
+  "appLBranchInfo": "معلومات الفرع",
+  "appLBranchName": "اسم الفرع",
   "appLReceipt": "الفاتورة",
   "appLBookingNotFound": "الحجز غير موجود",
   "appLNo": "لا",

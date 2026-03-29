@@ -9,6 +9,7 @@ import '../../../views/history_detail/model/extension_preview_model.dart';
 import '../../../views/history_detail/model/booking_transaction_model.dart';
 import '../../../views/history_detail/model/ledger_summary_model.dart';
 import '../../../views/history_detail/model/booking_extension_model.dart';
+import '../../../views/history_detail/model/car_branch_model.dart';
 
 class BookingDetailService {
   const BookingDetailService._();
@@ -146,6 +147,15 @@ class BookingDetailService {
       BookingExtensionListModel.fromJson,
       ApiEndpoint.bookingExtensions.withId(bookingId),
       method: 'GET',
+    );
+  }
+
+  static Future<CarBranchResponseModel?> fetchCarBranch(int carId) async {
+    return ApiServices.apiService<CarBranchResponseModel>(
+      CarBranchResponseModel.fromJson,
+      ApiEndpoint.carBranch.withId(carId),
+      method: 'GET',
+      showErrorMessage: false, // 404 = no branch assigned; silently ignore
     );
   }
 }

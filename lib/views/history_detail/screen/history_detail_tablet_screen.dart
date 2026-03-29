@@ -172,10 +172,16 @@ class HistoryDetailTabletScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           _RentalScheduleSection(history: history),
-                          if (history.vendorInfo != null) ...[
-                            const SizedBox(height: _S.x3),
-                            _VendorCard(vendor: history.vendorInfo!),
-                          ],
+                          Obx(() {
+                            final branch = controller.carBranch.value;
+                            if (branch == null) return const SizedBox.shrink();
+                            return Column(
+                              children: [
+                                const SizedBox(height: _S.x3),
+                                _BranchCard(branch: branch),
+                              ],
+                            );
+                          }),
                         ],
                       ),
                     ),
@@ -188,8 +194,6 @@ class HistoryDetailTabletScreen extends StatelessWidget {
                           _PaymentSummarySection(
                             history: history,
                           ),
-                          const SizedBox(height: _S.x3),
-                          _PaymentMethodCard(history: history),
                           if (history.message.isNotEmpty) ...[
                             const SizedBox(height: _S.x3),
                             _NotesCard(message: history.message),
@@ -374,9 +378,10 @@ class HistoryDetailTabletScreen extends StatelessWidget {
                         const SizedBox(width: _S.x2),
                         Expanded(
                           child: ElevatedButton(
-                            onPressed: () {
+                            onPressed: () async {
                               Navigator.pop(ctx);
-                              controller.cancelBooking();
+                              final error = await controller.cancelBooking();
+                              if (error != null) CustomSnackBar.error(error);
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: _C.error,

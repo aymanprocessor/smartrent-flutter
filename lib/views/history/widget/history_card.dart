@@ -9,7 +9,7 @@ class HistoryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final statusColor = _C.statusColor(info.status);
     final hasImage = info.cars.image != null && info.cars.image!.isNotEmpty;
-    final currency = BasicServices.baseCurCode;
+    final currency = BasicServices.baseCurCode.value;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -188,17 +188,19 @@ class HistoryCard extends StatelessWidget {
 
                             const Spacer(),
 
-                            // Price
-                            if (info.totalAmount != null &&
-                                info.totalAmount! > 0)
-                              Text(
-                                '${info.totalAmount!.toStringAsFixed(info.totalAmount! == info.totalAmount!.roundToDouble() ? 0 : 2)} $currency',
+                            // Price (includes extension totals when available)
+                            Builder(builder: (_) {
+                              final displayTotal = info.priceBreakdown?.grandTotal ?? info.totalAmount;
+                              if (displayTotal == null || displayTotal <= 0) return const SizedBox.shrink();
+                              return Text(
+                                '${displayTotal.toStringAsFixed(displayTotal == displayTotal.roundToDouble() ? 0 : 2)} $currency',
                                 style: TextStyle(
                                   fontSize: 15,
                                   fontWeight: FontWeight.w800,
                                   color: CustomColor.primary,
                                 ),
-                              ),
+                              );
+                            }),
 
                             const SizedBox(width: 6),
 

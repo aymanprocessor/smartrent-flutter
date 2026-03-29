@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../base/enums/booking_status.dart';
 import '../../../base/utils/basic_import.dart';
+import '../../../routes/routes.dart';
 import '../../../base/widgets/empty_data_widget.dart';
 import '../controller/history_controller.dart';
 import '../model/history_model.dart';
@@ -92,7 +93,13 @@ class _HistoryHeader extends StatelessWidget {
         children: [
           // ── Back button ─────────────────────────────────────
           GestureDetector(
-            onTap: () => Get.back(),
+            onTap: () {
+              if (Get.previousRoute.isEmpty) {
+                Get.offAllNamed(Routes.dashboardScreen);
+              } else {
+                Get.back();
+              }
+            },
             child: Container(
               width: 40,
               height: 40,

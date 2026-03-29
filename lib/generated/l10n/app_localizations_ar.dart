@@ -1021,6 +1021,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get appLVendor => 'المؤجر';
 
   @override
+  String get appLBranchInfo => 'معلومات الفرع';
+
+  @override
+  String get appLBranchName => 'اسم الفرع';
+
+  @override
   String get appLReceipt => 'الفاتورة';
 
   @override

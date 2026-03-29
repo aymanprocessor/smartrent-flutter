@@ -405,6 +405,8 @@ class I18nService extends GetxController {
     'appLInvoiceTotal': (l) => l.appLInvoiceTotal,
     'appLPaymentMethod': (l) => l.appLPaymentMethod,
     'appLVendor': (l) => l.appLVendor,
+    'appLBranchInfo': (l) => l.appLBranchInfo,
+    'appLBranchName': (l) => l.appLBranchName,
     'appLNotes': (l) => l.appLNotes,
     'appLBookingNotFound': (l) => l.appLBookingNotFound,
     'appLExtendBooking': (l) => l.appLExtendBooking,

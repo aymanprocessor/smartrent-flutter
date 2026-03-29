@@ -5,23 +5,27 @@ class HistoryTabletScreen extends GetView<HistoryController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: _C.surface,
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 720),
-          child: Column(
-            children: [
-              _HistoryHeader(controller: controller),
-              _FilterBar(controller: controller),
-              Expanded(
-                child: Obx(
-                  () => controller.showShimmer
-                      ? const HistoryShimmer()
-                      : _bodyWidgetTablet(),
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (_) => Get.offAllNamed(Routes.dashboardScreen),
+      child: Scaffold(
+        backgroundColor: _C.surface,
+        body: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 720),
+            child: Column(
+              children: [
+                _HistoryHeader(controller: controller),
+                _FilterBar(controller: controller),
+                Expanded(
+                  child: Obx(
+                    () => controller.showShimmer
+                        ? const HistoryShimmer()
+                        : _bodyWidgetTablet(),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

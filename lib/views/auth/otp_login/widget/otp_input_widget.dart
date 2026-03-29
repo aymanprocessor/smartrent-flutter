@@ -113,7 +113,7 @@ class _OtpInputWidgetState extends State<OtpInputWidget> {
                   _ctrl.resendOtpProcess();
                 },
                 child: TextWidget(
-                  Strings.resendOtp,
+                  DynamicLanguage.key(Strings.resendOtp),
                   typographyStyle: TypographyStyle.bodyMedium,
                   color: CustomColor.primary,
                   fontWeight: FontWeight.w700,
@@ -121,7 +121,7 @@ class _OtpInputWidgetState extends State<OtpInputWidget> {
               )
             else
               TextWidget(
-                '${Strings.resendOtp} ($_seconds s)',
+                '${DynamicLanguage.key(Strings.resendOtp)} ($_seconds s)',
                 typographyStyle: TypographyStyle.bodyMedium,
                 color: _C.stepText,
                 fontWeight: FontWeight.w500,

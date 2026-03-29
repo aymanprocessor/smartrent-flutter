@@ -348,6 +348,8 @@
   "appLReference": "REFERENCE",
   "appLPaymentMethod": "Payment Method",
   "appLVendor": "Vendor",
+  "appLBranchInfo": "Branch Info",
+  "appLBranchName": "Branch Name",
   "appLReceipt": "Receipt",
   "appLBookingNotFound": "Booking not found",
   "appLNo": "No",

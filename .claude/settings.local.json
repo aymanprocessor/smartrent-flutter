@@ -33,7 +33,8 @@
       "Bash(python3 -c \":*)",
       "Bash(pip install:*)",
       "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(d.get\\(''''mcpServers'''', d.get\\(''''projects'''',{}\\)\\), indent=2\\)\\)\")",
-      "mcp__ide__getDiagnostics"
+      "mcp__ide__getDiagnostics",
+      "Bash(find /d/Ayman/smart-rent/source-code/carbo-app/carbo-user/lib/base/api/services -type f -name *.dart)"
     ]
   }
 }

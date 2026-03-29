@@ -5,29 +5,34 @@ class OthersWidgets extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isLoggedIn = LocalStorage.isLoggedIn;
     return Column(
       children: [
         Sizes.height.v20,
-        _itemCard(
-          Icons.lock_open_outlined,
-          Strings.changePassword,
-          () => Get.toNamed(Routes.change_passwordScreen),
-        ),
-        _itemCard(
-          Icons.notifications_none,
-          Strings.notification,
-          () => Get.toNamed(Routes.notificationScreen),
-        ),
-        _itemCard(
-          Icons.history,
-          Strings.history,
-          () => Get.toNamed(Routes.historyScreen),
-        ),
-        _itemCard(
-          Icons.account_balance_wallet_outlined,
-          Strings.myWallet,
-          () => Get.toNamed(Routes.walletScreen),
-        ),
+        if (isLoggedIn)
+          _itemCard(
+            Icons.lock_open_outlined,
+            Strings.changePassword,
+            () => Get.toNamed(Routes.change_passwordScreen),
+          ),
+        if (isLoggedIn)
+          _itemCard(
+            Icons.notifications_none,
+            Strings.notification,
+            () => Get.toNamed(Routes.notificationScreen),
+          ),
+        if (isLoggedIn)
+          _itemCard(
+            Icons.history,
+            Strings.history,
+            () => Get.toNamed(Routes.historyScreen),
+          ),
+        if (isLoggedIn)
+          _itemCard(
+            Icons.account_balance_wallet_outlined,
+            Strings.myWallet,
+            () => Get.toNamed(Routes.walletScreen),
+          ),
         _itemCard(
           Icons.language,
           Strings.language,
@@ -53,25 +58,32 @@ class OthersWidgets extends StatelessWidget {
           Strings.aboutUs,
           () => _openAbout(),
         ),
-        _itemCard(
-          Icons.logout,
-          Strings.logOut,
-          () {
-            Get.back();
-            showModalBottomSheet(
-              context: context,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.vertical(
-                  top: Radius.circular(Dimensions.radius * 1.5),
+        if (isLoggedIn)
+          _itemCard(
+            Icons.logout,
+            Strings.logOut,
+            () {
+              Get.back();
+              showModalBottomSheet(
+                context: context,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.vertical(
+                    top: Radius.circular(Dimensions.radius * 1.5),
+                  ),
                 ),
-              ),
-              builder: (BuildContext context) {
-                return LogoutDialog();
-              },
-            );
-          },
-          Colors.red, //
-        ),
+                builder: (BuildContext context) {
+                  return LogoutDialog();
+                },
+              );
+            },
+            Colors.red,
+          ),
+        if (!isLoggedIn)
+          _itemCard(
+            Icons.login,
+            Strings.login,
+            () => Get.offAllNamed(Routes.otpLoginScreen),
+          ),
       ],
     );
   }

@@ -2082,6 +2082,18 @@ abstract class AppLocalizations {
   /// **'Vendor'**
   String get appLVendor;
 
+  /// No description provided for @appLBranchInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Branch Info'**
+  String get appLBranchInfo;
+
+  /// No description provided for @appLBranchName.
+  ///
+  /// In en, this message translates to:
+  /// **'Branch Name'**
+  String get appLBranchName;
+
   /// No description provided for @appLReceipt.
   ///
   /// In en, this message translates to:

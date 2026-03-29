@@ -1,7 +1,7 @@
 class ApiConfig {
   // static const String mainDomain = "https://smartrent.sa";
-  // static const String mainDomain = "http://192.168.1.211:8000";
-  static const String mainDomain = "http://192.168.1.11:8000";
+  static const String mainDomain = "http://192.168.1.211:8000";
+  
   static const String baseUrl = "$mainDomain/api/v1";
   static const String languageUrl = "$baseUrl/settings/languages";
 }
@@ -110,6 +110,7 @@ enum ApiEndpoint {
   bookingExtendPreview('/user/car-booking/{id}/extend/preview'),
   bookingExtendRequest('/user/car-booking/{id}/extend/request'),
   bookingCancel('/user/car-booking/{id}/cancel'),
+  carBranch('/user/car-booking/car/{id}/branch'),
 
   // Pusher Beams Authentication (NOTE: This endpoint is NOT under /api/v1)
   // It will be constructed separately as a full URL

@@ -1019,6 +1019,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appLVendor => 'Vendor';
 
   @override
+  String get appLBranchInfo => 'Branch Info';
+
+  @override
+  String get appLBranchName => 'Branch Name';
+
+  @override
   String get appLReceipt => 'Receipt';
 
   @override

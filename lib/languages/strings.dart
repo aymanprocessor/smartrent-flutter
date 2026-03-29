@@ -108,6 +108,8 @@ class Strings {
   static const String Phone = "appLPhone";
   static const String Address = "appLAddress";
   static const String City = "appLCity";
+  static const String branchInfo = "appLBranchInfo";
+  static const String branchName = "appLBranchName";
   static const String State = "appLState";
   static const String ZipCode = "appLZipCode";
   static const String update = "appLUpdate";

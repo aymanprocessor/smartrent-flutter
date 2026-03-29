@@ -4,12 +4,13 @@ import 'package:get/get.dart';
 import '../../../base/api/services/booking_detail_service.dart';
 import '../../../base/enums/enums.dart';
 import '../../../base/utils/booking_validators.dart';
-import '../../../base/widgets/custom_snackbar.dart';
+
 import '../../history/model/history_model.dart';
 import '../model/booking_extension_model.dart';
 import '../model/booking_transaction_model.dart';
 import '../model/ledger_summary_model.dart';
 import '../model/extension_preview_model.dart';
+import '../model/car_branch_model.dart';
 
 class BookingDetailController extends GetxController
     with WidgetsBindingObserver {
@@ -23,6 +24,8 @@ class BookingDetailController extends GetxController
   final transactions = <BookingTransaction>[].obs;
   final ledgerSummary = Rxn<LedgerSummary>();
   final extensions = <BookingExtension>[].obs;
+
+  final carBranch = Rxn<CarBranch>();
 
   final isLoadingTransactions = false.obs;
   final isLoadingLedger = false.obs;
@@ -97,7 +100,16 @@ class BookingDetailController extends GetxController
       refreshTransactions(),
       refreshLedger(),
       refreshExtensions(),
+      _loadCarBranch().catchError((_) {}),
     ]);
+  }
+
+  Future<void> _loadCarBranch() async {
+    final carId = history.value?.carId;
+    if (carId == null) return;
+    final result = await BookingDetailService.fetchCarBranch(carId);
+    if (isClosed) return;
+    carBranch.value = result?.branch;
   }
 
   Future<void> refreshTransactions() async {
@@ -187,11 +199,11 @@ class BookingDetailController extends GetxController
     history.refresh();
   }
 
-  Future<void> cancelBooking() async {
-    if (bookingId == null) return;
+  /// Returns null on success, or an error message string on failure.
+  Future<String?> cancelBooking() async {
+    if (bookingId == null) return null;
     if (!canCancel) {
-      CustomSnackBar.error('Cannot cancel this booking');
-      return;
+      return 'Cannot cancel this booking';
     }
 
     isCancelling.value = true;
@@ -246,8 +258,9 @@ class BookingDetailController extends GetxController
           priceBreakdown: prev.priceBreakdown,
         );
       }
+      return null;
     } catch (e) {
-      CustomSnackBar.error(e.toString());
+      return e.toString();
     } finally {
       isCancelling.value = false;
     }

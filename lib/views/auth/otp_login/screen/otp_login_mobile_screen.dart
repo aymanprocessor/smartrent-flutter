@@ -108,8 +108,6 @@ class OtpLoginMobileScreen extends GetView<OtpLoginController> {
             const LoginButtonWidget(),
             const SizedBox(height: 20),
             const HaveAccountWidget(),
-            const SizedBox(height: 16),
-            _BrowseCarsButton(),
             const SizedBox(height: 8),
           ],
         ),
@@ -220,32 +218,6 @@ class _StepDot extends StatelessWidget {
                   color: _active ? Colors.white : _C.stepText,
                 ),
               ),
-      ),
-    );
-  }
-}
-
-class _BrowseCarsButton extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      child: OutlinedButton.icon(
-        onPressed: () => Get.offAllNamed(Routes.dashboardScreen),
-        icon: const Icon(Icons.directions_car_rounded, size: 18),
-        label: Text(DynamicLanguage.key(Strings.browseVendorCars)),
-        style: OutlinedButton.styleFrom(
-          foregroundColor: CustomColor.primary,
-          side: BorderSide(color: CustomColor.primary, width: 1.5),
-          padding: const EdgeInsets.symmetric(vertical: 14),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
-          ),
-          textStyle: const TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
       ),
     );
   }

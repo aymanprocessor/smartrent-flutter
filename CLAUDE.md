@@ -68,7 +68,7 @@ Every route has a binding in `lib/bindings/` using `Get.lazyPut`. Register all c
 
 - All endpoints are `enum ApiEndpoint` values in `lib/base/api/endpoint/api_endpoint.dart`
 - Use `RequestProcess().request<T>(fromJson:, apiEndpoint:, isLoading:, onSuccess:)` for every API call
-- Base URL: `ApiConfig.mainDomain` — **currently hardcoded to local dev IP `192.168.1.11:8000`; change for production** (production: `https://smartrent.sa`)
+- Base URL: `ApiConfig.mainDomain` — **currently hardcoded to local dev IP `192.168.1.211:8000`; change for production** (production: `https://smartrent.sa`)
 - Endpoints with path params use `.withId(int id)` — e.g. `ApiEndpoint.bookingCancel.withId(bookingId)`
 
 ### Key Files
@@ -80,6 +80,7 @@ Every route has a binding in `lib/bindings/` using `Get.lazyPut`. Register all c
 | API config & endpoints | `lib/base/api/endpoint/api_endpoint.dart` |
 | Request wrapper | `lib/base/api/method/request_process.dart` |
 | Global settings service | `lib/base/api/services/basic_services.dart` |
+| Booking detail API calls | `lib/base/api/services/booking_detail_service.dart` |
 | Routes | `lib/routes/routes.dart` + `lib/routes/route_pages.dart` |
 | I18n keys | `lib/languages/strings.dart` |
 | Booking validation rules | `lib/base/utils/booking_validators.dart` |
@@ -95,6 +96,29 @@ Always use `DynamicLanguage.key(Strings.someKey)` — never hardcode user-facing
 ### Controller / UI Separation (strict)
 - Controllers: **no** `Get.snackbar()`, **no** `Get.back()`, **no** UI calls. Return result objects to the UI.
 - UI layer: handles all snackbars, dialogs, and navigation based on controller result objects.
+- Async actions that can fail return `Future<String?>` — `null` = success, non-null = error message to display.
+
+```dart
+// ✅ Controller
+Future<String?> cancelBooking() async {
+  if (!canCancel) return 'Cannot cancel this booking';
+  try {
+    await BookingDetailService.cancelBooking(bookingId!);
+    return null; // success
+  } catch (e) {
+    return e.toString();
+  }
+}
+
+// ✅ UI (inside a button handler after Navigator.pop / dialog close)
+onPressed: () async {
+  Navigator.pop(ctx);
+  final error = await controller.cancelBooking();
+  if (error != null) CustomSnackBar.error(error);
+},
+```
+
+> **Why:** `Get.showSnackbar()` / `CustomSnackBar` require an active `Overlay`. Calling them from a controller (or before the route's Overlay is fully mounted) throws `No Overlay widget found`. Always show snackbars from the UI layer, after any dialog/navigator transition completes.
 
 ### Dialogs — Critical GetX Bug
 **Never use `Get.dialog()` + `Get.back()` together.** GetX's `back()` calls `closeCurrentSnackbar()` which crashes with `LateInitializationError`.
@@ -118,6 +142,18 @@ Always use `DynamicLanguage.key(Strings.someKey)` — never hardcode user-facing
 
 ### UI Design System
 Premium screens define private `_C` (colors), `_S` (8px-grid spacing), `_R` (border radii), `_Shadow` classes at the top of the barrel file. Global theme tokens are in `lib/base/themes/`.
+
+### Booking Detail Feature
+
+`BookingDetailController` fetches all booking sub-resources in parallel via `loadAll()`:
+- `fetchTransactions(bookingId)` → `ApiEndpoint.bookingTransactions`
+- `fetchLedgerSummary(bookingId)` → `ApiEndpoint.bookingLedgerSummary`
+- `fetchExtensions(bookingId)` → `ApiEndpoint.bookingExtensions`
+- `fetchCarBranch(carId)` → `ApiEndpoint.carBranch` (silently ignored on 404 — branch may not be assigned)
+
+Car branch is stored as `carBranch = Rxn<CarBranch>()` on the controller. The model is in `lib/views/history_detail/model/car_branch_model.dart`. Display using `Strings.branchInfo` / `Strings.branchName` keys.
+
+Extension flow: preview via `previewExtension` → confirm → `requestExtension` returns `ExtensionRequestResult` which carries an `InsufficientBalanceInfo` on 422 (wallet shortage).
 
 ### GetX `lazyPut` Guard
 When accessing a controller that may not be registered yet (e.g. from a deep-link or notification):
