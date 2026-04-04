@@ -722,6 +722,12 @@ abstract class AppLocalizations {
   /// **'City'**
   String get appLCity;
 
+  /// No description provided for @appLAllCities.
+  ///
+  /// In en, this message translates to:
+  /// **'All Cities'**
+  String get appLAllCities;
+
   /// No description provided for @appLState.
   ///
   /// In en, this message translates to:
@@ -1261,6 +1267,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Filter By'**
   String get appLFilterBy;
+
+  /// No description provided for @appLShowResults.
+  ///
+  /// In en, this message translates to:
+  /// **'Show Results'**
+  String get appLShowResults;
 
   /// No description provided for @appLRentalDays.
   ///
@@ -2093,6 +2105,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Branch Name'**
   String get appLBranchName;
+
+  /// No description provided for @appLOpenMap.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Map'**
+  String get appLOpenMap;
 
   /// No description provided for @appLReceipt.
   ///

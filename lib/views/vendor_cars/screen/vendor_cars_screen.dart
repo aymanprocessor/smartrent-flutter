@@ -20,6 +20,8 @@ part '../widget/vendor_cars_sort_dropdown.dart';
 part '../widget/vendor_cars_header.dart';
 part '../widget/vendor_cars_guest_drawer.dart';
 part '../widget/vendor_cars_brand_filter.dart';
+part '../widget/vendor_cars_city_filter.dart';
+part '../widget/vendor_cars_filter_sheet.dart';
 
 /// Main screen for displaying vendor cars with filtering and booking
 class VendorCarsScreen extends GetView<VendorCarsController> {
@@ -30,12 +32,122 @@ class VendorCarsScreen extends GetView<VendorCarsController> {
     return Scaffold(
       backgroundColor: CustomColor.background,
       drawer: const VendorCarsGuestDrawer(),
-      body: _buildBody(context),
+      body: Stack(
+        children: [
+          _buildBody(context),
+          _buildVcFilterFab(context),
+        ],
+      ),
     );
   }
 
-  Widget _buildSliverAppBar(BuildContext context) {
-    return SliverAppBar(
+  // ─────────────────────────── Filter FAB ──────────────────
+  Widget _buildVcFilterFab(BuildContext context) {
+    final bottomInset = MediaQuery.of(context).padding.bottom;
+    return Positioned(
+      bottom: bottomInset + 24,
+      left: 0,
+      right: 0,
+      child: Center(
+        child: Obx(() {
+          final hasActive = controller.selectedBrand.value != 'all' ||
+              controller.selectedCity.value != 'all';
+          final count = (controller.selectedBrand.value != 'all' ? 1 : 0) +
+              (controller.selectedCity.value != 'all' ? 1 : 0);
+
+          return GestureDetector(
+            onTap: () => _showVcFilterSheet(context),
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 250),
+                  curve: Curves.easeOut,
+                  width: 68,
+                  height: 68,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: hasActive
+                          ? [
+                              CustomColor.primary,
+                              CustomColor.primary.withOpacity(0.8),
+                            ]
+                          : [Colors.white, Colors.white],
+                    ),
+                    border: hasActive
+                        ? null
+                        : Border.all(
+                            color: const Color(0xFFE5E7EB), width: 1.5),
+                    boxShadow: [
+                      BoxShadow(
+                        color: hasActive
+                            ? CustomColor.primary.withOpacity(0.35)
+                            : Colors.black.withOpacity(0.12),
+                        blurRadius: hasActive ? 24 : 16,
+                        spreadRadius: hasActive ? 2 : 0,
+                        offset: const Offset(0, 6),
+                      ),
+                    ],
+                  ),
+                  child: Icon(
+                    Icons.tune_rounded,
+                    size: 28,
+                    color: hasActive ? Colors.white : CustomColor.primary,
+                  ),
+                ),
+                if (hasActive)
+                  Positioned(
+                    top: -4,
+                    right: -4,
+                    child: Container(
+                      width: 22,
+                      height: 22,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                            color: CustomColor.primary, width: 2),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 4,
+                          ),
+                        ],
+                      ),
+                      child: Center(
+                        child: Text(
+                          '$count',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w800,
+                            color: CustomColor.primary,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          );
+        }),
+      ),
+    );
+  }
+
+  void _showVcFilterSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) =>
+          _VendorCarsFilterSheet(controller: controller),
+    );
+  }
+
+  Widget _buildSliverAppBar(BuildContext context) {    return SliverAppBar(
       pinned: true,
       floating: true,
       snap: true,
@@ -175,13 +287,6 @@ class VendorCarsScreen extends GetView<VendorCarsController> {
 
             // Header with count and sort
             const SliverToBoxAdapter(child: VendorCarsHeader()),
-
-            SliverToBoxAdapter(
-              child: SizedBox(height: Dimensions.verticalSize * 0.75),
-            ),
-
-            // Brand filter
-            const SliverToBoxAdapter(child: VendorCarsBrandFilter()),
 
             SliverToBoxAdapter(
               child: SizedBox(height: Dimensions.verticalSize * 0.75),

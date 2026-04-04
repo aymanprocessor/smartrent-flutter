@@ -6,8 +6,12 @@ class HistoryMobileScreen extends GetView<HistoryController> {
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      canPop: false,
-      onPopInvoked: (_) => Get.offAllNamed(Routes.dashboardScreen),
+      canPop: Navigator.canPop(context),
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) {
+          Get.offAllNamed(Routes.dashboardScreen);
+        }
+      },
       child: Scaffold(
         backgroundColor: _C.surface,
         body: Column(

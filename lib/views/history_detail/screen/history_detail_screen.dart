@@ -895,6 +895,34 @@ class _BranchCard extends StatelessWidget {
     } catch (_) {}
   }
 
+  Future<void> _openMap(double lat, double lng, String label) async {
+    try {
+      if (Platform.isIOS) {
+        final googleUri = Uri.parse('comgooglemaps://?q=$lat,$lng&zoom=16');
+        try {
+          await launchUrl(googleUri, mode: LaunchMode.externalApplication);
+          return;
+        } catch (_) {}
+        await launchUrl(
+          Uri.parse('https://maps.apple.com/?q=$lat,$lng'),
+          mode: LaunchMode.externalApplication,
+        );
+      } else {
+        final geoUri = Uri.parse('geo:$lat,$lng?q=$lat,$lng($label)');
+        try {
+          await launchUrl(geoUri, mode: LaunchMode.externalApplication);
+          return;
+        } catch (_) {}
+        await launchUrl(
+          Uri.parse('https://www.google.com/maps/search/?api=1&query=$lat,$lng'),
+          mode: LaunchMode.externalApplication,
+        );
+      }
+    } catch (e) {
+      debugPrint('[_BranchCard] Failed to open map: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final hasPhone = branch.phone != null;
@@ -950,6 +978,35 @@ class _BranchCard extends StatelessWidget {
                     style: const TextStyle(fontSize: 13, color: _C.textSecondary),
                   ),
                 ),
+                if (branch.centerLat != null && branch.centerLng != null) ...[
+                  const SizedBox(width: _S.x1),
+                  InkWell(
+                    onTap: () => _openMap(branch.centerLat!, branch.centerLng!, addressLine),
+                    borderRadius: BorderRadius.circular(_R.sm),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: _S.x1, horizontal: _S.x1h),
+                      decoration: BoxDecoration(
+                        color: _C.primaryLight,
+                        borderRadius: BorderRadius.circular(_R.sm),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.map_outlined, size: 14, color: _C.primary),
+                          const SizedBox(width: _S.x05),
+                          Text(
+                            DynamicLanguage.key(Strings.openMap),
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: _C.primary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
               ],
             ),
           ],

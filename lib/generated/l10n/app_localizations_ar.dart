@@ -323,6 +323,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get appLCity => 'المدينة';
 
   @override
+  String get appLAllCities => 'كل المدن';
+
+  @override
   String get appLState => 'الولاية';
 
   @override
@@ -593,6 +596,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get appLFilterBy => 'تصفية حسب';
+
+  @override
+  String get appLShowResults => 'عرض النتائج';
 
   @override
   String get appLRentalDays => 'عدد ايام الايجار';
@@ -1025,6 +1031,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get appLBranchName => 'اسم الفرع';
+
+  @override
+  String get appLOpenMap => 'افتح الخريطة';
 
   @override
   String get appLReceipt => 'الفاتورة';

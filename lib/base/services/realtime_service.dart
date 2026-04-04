@@ -135,7 +135,15 @@ class RealtimeService {
     try {
       log.i('[RealtimeService] Event received: ${event.eventName} on ${event.channelName}');
       log.i('[RealtimeService] Event raw data: ${event.data}');
-      final data = jsonDecode(event.data)['notification'] as Map<String, dynamic>;
+      final decoded = event.data is String
+          ? jsonDecode(event.data as String) as Map<String, dynamic>
+          : Map<String, dynamic>.from(event.data as Map);
+      final notification = decoded['notification'];
+      if (notification == null) {
+        log.w('[RealtimeService] No notification key in event data, skipping.');
+        return;
+      }
+      final data = Map<String, dynamic>.from(notification as Map);
       final title = data['title'] as String?;
       final body = data['message'] as String?;
       final type = data['type'];

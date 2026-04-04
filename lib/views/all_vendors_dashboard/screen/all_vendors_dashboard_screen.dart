@@ -24,6 +24,7 @@ part '../widget/all_vendors_car_list_view.dart';
 part '../widget/all_vendors_search_button.dart';
 part '../widget/all_vendors_app_bar.dart';
 part '../widget/all_vendors_brand_filter.dart';
+part '../widget/all_vendors_city_filter.dart';
 
 class AllVendorsDashboardScreen extends GetView<AllVendorsDashboardController> {
   const AllVendorsDashboardScreen({Key? key}) : super(key: key);

@@ -94,10 +94,10 @@ class _HistoryHeader extends StatelessWidget {
           // ── Back button ─────────────────────────────────────
           GestureDetector(
             onTap: () {
-              if (Get.previousRoute.isEmpty) {
-                Get.offAllNamed(Routes.dashboardScreen);
+              if (Navigator.canPop(context)) {
+                Navigator.pop(context);
               } else {
-                Get.back();
+                Get.offAllNamed(Routes.dashboardScreen);
               }
             },
             child: Container(

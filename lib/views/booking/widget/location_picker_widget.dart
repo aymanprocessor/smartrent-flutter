@@ -291,7 +291,7 @@ class _LocationPickerWidgetState extends State<LocationPickerWidget> {
         address: _selectedAddress,
       );
       widget.onLocationSelected(pickupLocation);
-      Get.back();
+      Navigator.pop(context);
     }
   }
 

@@ -323,6 +323,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appLCity => 'City';
 
   @override
+  String get appLAllCities => 'All Cities';
+
+  @override
   String get appLState => 'State';
 
   @override
@@ -591,6 +594,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get appLFilterBy => 'Filter By';
+
+  @override
+  String get appLShowResults => 'Show Results';
 
   @override
   String get appLRentalDays => 'Rental Days';
@@ -1023,6 +1029,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get appLBranchName => 'Branch Name';
+
+  @override
+  String get appLOpenMap => 'Open Map';
 
   @override
   String get appLReceipt => 'Receipt';

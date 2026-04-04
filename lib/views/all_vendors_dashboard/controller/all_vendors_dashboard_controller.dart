@@ -1,4 +1,5 @@
 import 'package:carbo/base/utils/basic_import.dart';
+import 'package:flutter/material.dart' show ScrollController;
 import 'package:carbo/base/localization/dynamic_language_shim.dart';
 import 'package:carbo/base/widgets/logger.dart';
 import '../../../base/api/endpoint/api_endpoint.dart';
@@ -11,6 +12,9 @@ import 'package:carbo/base/services/delivery_service.dart';
 final log = logger(AllVendorsDashboardController);
 
 class AllVendorsDashboardController extends GetxController {
+  // Scroll controller for infinite scroll
+  final scrollController = ScrollController();
+
   // Basic selections
   RxInt currentIndex = 0.obs;
   var selectedCarIndex = 0.obs;
@@ -58,6 +62,9 @@ class AllVendorsDashboardController extends GetxController {
   // Brand filter
   RxString selectedBrand = 'all'.obs;
 
+  // City filter
+  RxString selectedCity = 'all'.obs;
+
   // Delivery tracking
   final deliveryAvailabilityMap = <int, bool>{}.obs; // branchId -> isAvailable
   final deliveryFeeMap = <int, double>{}.obs; // branchId -> deliveryFee
@@ -71,8 +78,25 @@ class AllVendorsDashboardController extends GetxController {
     log.i('Current language: ${DynamicLanguage.selectedLanguage.value}');
     log.i('App language is loading: ${DynamicLanguage.isLoading}');
     log.i('Language direction: ${DynamicLanguage.languageDirection}');
+    scrollController.addListener(_onScroll);
     // Load all cars without filters
     searchAllVendorsCars();
+  }
+
+  void _onScroll() {
+    if (scrollController.position.pixels >=
+        scrollController.position.maxScrollExtent - 300) {
+      if (hasMore.value && !_isLoadingMore.value) {
+        searchAllVendorsCars(loadMore: true);
+      }
+    }
+  }
+
+  @override
+  void onClose() {
+    scrollController.removeListener(_onScroll);
+    scrollController.dispose();
+    super.onClose();
   }
 
   // SEARCH ALL CARS FROM ALL VENDORS - Simplified without filters
@@ -94,6 +118,9 @@ class AllVendorsDashboardController extends GetxController {
         'page': currentPage.value.toString(),
         'per_page': '15',
       };
+      if (selectedCity.value != 'all') {
+        queryParams['city'] = selectedCity.value;
+      }
 
       final token = LocalStorage.token;
       final headers = {
@@ -258,16 +285,14 @@ class AllVendorsDashboardController extends GetxController {
 
   // Check if a car has delivery available
   bool isDeliveryAvailable(VendorCar car) {
-    // Check by branch ID if available
+    // Vendor must have marked this car as delivery-available
+    if (!car.isDeliveryAvailable) return false;
+    // Check if user is within branch delivery radius
     if (car.branchId != null) {
       return deliveryAvailabilityMap[car.branchId] ?? false;
     }
-    // Fallback: Show delivery available if car has vendor location with coordinates
-    // This indicates the vendor has a physical location and can potentially deliver
-    if (car.vendorLocation?.latitude != null && car.vendorLocation?.longitude != null) {
-      return true; // Show delivery badge for cars with location data
-    }
-    return false;
+    // Fallback when no branch ID: require vendor location coordinates
+    return car.vendorLocation?.latitude != null && car.vendorLocation?.longitude != null;
   }
 
   // Manually trigger delivery check (when user enables location)
@@ -311,6 +336,16 @@ class AllVendorsDashboardController extends GetxController {
     log.i('Brand filter changed to: $brand');
     _applySortAndFilter();
   }
+
+  // Change city filter — server-side, re-fetches
+  void changeCityFilter(String city) {
+    selectedCity.value = city;
+    log.i('City filter changed to: $city');
+    searchAllVendorsCars();
+  }
+
+  /// Unique sorted list of cities from meta info
+  List<String> get availableCities => metaInfo.value?.availableCities ?? [];
 
   /// Unique sorted list of brands from all loaded cars
   List<String> get availableBrands {

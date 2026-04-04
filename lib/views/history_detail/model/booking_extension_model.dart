@@ -21,9 +21,15 @@ class BookingExtensionListModel {
         message: json['message'] != null
             ? ExtListMessage.fromJson(json['message'])
             : null,
-        data: json['data'] != null
-            ? ExtListData.fromJson(json['data'])
-            : null,
+        data: json['data'] is List
+            ? ExtListData(
+                extensions: (json['data'] as List)
+                    .map((x) => BookingExtension.fromJson(x as Map<String, dynamic>))
+                    .toList(),
+              )
+            : json['data'] != null
+                ? ExtListData.fromJson(json['data'])
+                : null,
         type: json['type']?.toString() ?? '',
       );
 

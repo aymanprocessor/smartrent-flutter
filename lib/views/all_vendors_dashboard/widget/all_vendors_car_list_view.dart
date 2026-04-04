@@ -17,6 +17,7 @@ class _C {
   static const Color greenBadge = Color(0xFF10B981);
   static const Color amberBadge = Color(0xFFF59E0B);
   static const Color blueBadge = Color(0xFF3B82F6);
+  static const Color purpleBadge = Color(0xFF8B5CF6);
 }
 
 class _S {
@@ -59,6 +60,7 @@ class AllVendorsCarListView extends GetView<AllVendorsDashboardController> {
         backgroundColor: Colors.white,
         displacement: 60,
         child: CustomScrollView(
+            controller: controller.scrollController,
             physics: const AlwaysScrollableScrollPhysics(),
             slivers: [
               // Animated sliver header
@@ -67,8 +69,7 @@ class AllVendorsCarListView extends GetView<AllVendorsDashboardController> {
               // Filter bar
               SliverToBoxAdapter(child: _buildFilterBar(context)),
 
-              // Brand filter
-              const SliverToBoxAdapter(child: AllVendorsBrandFilter()),
+
 
               // Location banner
               if (controller.locationPermissionDenied.value)
@@ -87,16 +88,9 @@ class AllVendorsCarListView extends GetView<AllVendorsDashboardController> {
                         return _buildLoadMore();
                       }
                       final car = controller.vendorCars[index];
-                      return Obx(
-                        () => _buildShimmerWrapper(
-                          isLoading: controller.isCheckingDelivery.value,
-                          child: _PremiumCarCard(
-                            car: car,
-                            isDeliveryAvailable:
-                                controller.isDeliveryAvailable(car),
-                            onTap: () => _onCarTap(car),
-                          ),
-                        ),
+                      return _PremiumCarCard(
+                        car: car,
+                        onTap: () => _onCarTap(car),
                       );
                     },
                     childCount: controller.vendorCars.length +
@@ -357,6 +351,8 @@ class AllVendorsCarListView extends GetView<AllVendorsDashboardController> {
     return Obx(() {
       final filter = controller.quickFilter.value;
       final sort = controller.sortOption.value;
+      final brand = controller.selectedBrand.value;
+      final city = controller.selectedCity.value;
 
       final filterLabel = switch (filter) {
         'available' => DynamicLanguage.key(Strings.available),
@@ -399,6 +395,22 @@ class AllVendorsCarListView extends GetView<AllVendorsDashboardController> {
                     ? () => controller.changeSortOption('popularity')
                     : null,
               ),
+              if (brand != 'all') ...[
+                const SizedBox(width: _S.xs),
+                _ActiveChip(
+                  label: brand,
+                  icon: Icons.directions_car_outlined,
+                  onRemove: () => controller.changeBrandFilter('all'),
+                ),
+              ],
+              if (city != 'all') ...[
+                const SizedBox(width: _S.xs),
+                _ActiveChip(
+                  label: city,
+                  icon: Icons.location_city_outlined,
+                  onRemove: () => controller.changeCityFilter('all'),
+                ),
+              ],
             ],
           ),
         ),
@@ -417,10 +429,14 @@ class AllVendorsCarListView extends GetView<AllVendorsDashboardController> {
         child: Obx(() {
           final hasActive =
               controller.quickFilter.value != 'all' ||
-              controller.sortOption.value != 'popularity';
+              controller.sortOption.value != 'popularity' ||
+              controller.selectedBrand.value != 'all' ||
+              controller.selectedCity.value != 'all';
           final count =
               (controller.quickFilter.value != 'all' ? 1 : 0) +
-              (controller.sortOption.value != 'popularity' ? 1 : 0);
+              (controller.sortOption.value != 'popularity' ? 1 : 0) +
+              (controller.selectedBrand.value != 'all' ? 1 : 0) +
+              (controller.selectedCity.value != 'all' ? 1 : 0);
 
           return GestureDetector(
             onTap: () => _showFilterSheet(context),
@@ -609,29 +625,7 @@ class AllVendorsCarListView extends GetView<AllVendorsDashboardController> {
                     strokeWidth: 2.5,
                   ),
                 )
-              : OutlinedButton.icon(
-                  onPressed: () =>
-                      controller.searchAllVendorsCars(loadMore: true),
-                  icon: const Icon(Icons.expand_more_rounded, size: 20),
-                  label: Text(
-                    DynamicLanguage.key(Strings.loadMore),
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: CustomColor.primary,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: _S.xl,
-                      vertical: _S.md,
-                    ),
-                    side: BorderSide(color: CustomColor.primary, width: 1.5),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(_R.md),
-                    ),
-                  ),
-                ),
+              : const SizedBox.shrink(),
         ),
       ),
     );
@@ -737,30 +731,6 @@ class AllVendorsCarListView extends GetView<AllVendorsDashboardController> {
     Get.toNamed(Routes.bookingScreen, arguments: {'car': car});
   }
 
-  Widget _buildShimmerWrapper({
-    required bool isLoading,
-    required Widget child,
-  }) {
-    if (!isLoading) return child;
-    return Stack(
-      children: [
-        Opacity(opacity: 0.5, child: child),
-        Positioned.fill(
-          child: Shimmer.fromColors(
-            baseColor: Colors.grey[300]!,
-            highlightColor: Colors.grey[100]!,
-            child: Container(
-              margin: const EdgeInsets.only(bottom: _S.md),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(_R.xl),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -823,12 +793,10 @@ class _HeaderLoginButton extends StatelessWidget {
 // ════════════════════════════════════════════════════════════════
 class _PremiumCarCard extends StatelessWidget {
   final VendorCar car;
-  final bool isDeliveryAvailable;
   final VoidCallback onTap;
 
   const _PremiumCarCard({
     required this.car,
-    required this.isDeliveryAvailable,
     required this.onTap,
   });
 
@@ -872,6 +840,10 @@ class _PremiumCarCard extends StatelessWidget {
                     _buildFeatures(),
                   ],
                   const SizedBox(height: _S.md),
+                  Container(height: 1, color: _C.border.withOpacity(0.6)),
+                  const SizedBox(height: _S.sm),
+                  _buildStatusBadgeRow(),
+                  const SizedBox(height: _S.sm),
                   Container(height: 1, color: _C.border.withOpacity(0.6)),
                   const SizedBox(height: _S.md),
                   _buildPriceAndCTA(),
@@ -942,31 +914,15 @@ class _PremiumCarCard extends StatelessWidget {
               ),
             ),
           ),
-          // Availability badge
-          Positioned(
-            top: _S.md,
-            right: _S.md,
-            child: _Badge(
-              label: car.availabilityStatus == 'available'
-                  ? DynamicLanguage.key(Strings.available)
-                  : DynamicLanguage.key(Strings.limited),
-              color: car.availabilityStatus == 'available'
-                  ? _C.greenBadge
-                  : _C.amberBadge,
-              icon: car.availabilityStatus == 'available'
-                  ? Icons.check_circle_rounded
-                  : Icons.schedule_rounded,
-            ),
-          ),
-          // Delivery badge
-          if (isDeliveryAvailable)
+          // Branch badge
+          if (car.vendorLocation?.city != null)
             Positioned(
               top: _S.md,
               left: _S.md,
               child: _Badge(
-                label: DynamicLanguage.key(Strings.deliveryCar),
-                color: _C.blueBadge,
-                icon: Icons.local_shipping_rounded,
+                label: car.vendorLocation!.city!,
+                color: _C.purpleBadge,
+                icon: Icons.location_on_rounded,
               ),
             ),
         ],
@@ -1062,6 +1018,30 @@ class _PremiumCarCard extends StatelessWidget {
           ),
         );
       }).toList(),
+    );
+  }
+
+  Widget _buildStatusBadgeRow() {
+    return Row(
+      children: [
+        if (Get.find<AllVendorsDashboardController>().isDeliveryAvailable(car)) ...[
+          _Badge(
+            label: DynamicLanguage.key(Strings.deliveryCar),
+            color: _C.blueBadge,
+            icon: Icons.local_shipping_rounded,
+          ),
+          const SizedBox(width: _S.sm),
+        ],
+        _Badge(
+          label: car.isAvailable
+              ? DynamicLanguage.key(Strings.available)
+              : DynamicLanguage.key(Strings.limited),
+          color: car.isAvailable ? _C.greenBadge : _C.amberBadge,
+          icon: car.isAvailable
+              ? Icons.check_circle_rounded
+              : Icons.schedule_rounded,
+        ),
+      ],
     );
   }
 
@@ -1384,6 +1364,8 @@ class _FilterSheet extends StatefulWidget {
 class _FilterSheetState extends State<_FilterSheet> {
   late String _selectedFilter;
   late String _selectedSort;
+  late String _selectedBrand;
+  late String _selectedCity;
 
   AllVendorsDashboardController get c => widget.controller;
 
@@ -1392,6 +1374,8 @@ class _FilterSheetState extends State<_FilterSheet> {
     super.initState();
     _selectedFilter = c.quickFilter.value;
     _selectedSort = c.sortOption.value;
+    _selectedBrand = c.selectedBrand.value;
+    _selectedCity = c.selectedCity.value;
   }
 
   void _applyFilters() {
@@ -1401,6 +1385,12 @@ class _FilterSheetState extends State<_FilterSheet> {
     if (_selectedSort != c.sortOption.value) {
       c.changeSortOption(_selectedSort);
     }
+    if (_selectedBrand != c.selectedBrand.value) {
+      c.changeBrandFilter(_selectedBrand);
+    }
+    if (_selectedCity != c.selectedCity.value) {
+      c.changeCityFilter(_selectedCity);
+    }
     Navigator.pop(context);
   }
 
@@ -1408,17 +1398,25 @@ class _FilterSheetState extends State<_FilterSheet> {
     setState(() {
       _selectedFilter = 'all';
       _selectedSort = 'popularity';
+      _selectedBrand = 'all';
+      _selectedCity = 'all';
     });
   }
 
   bool get _isModified =>
-      _selectedFilter != 'all' || _selectedSort != 'popularity';
+      _selectedFilter != 'all' || _selectedSort != 'popularity' ||
+      _selectedBrand != 'all' || _selectedCity != 'all';
 
   @override
   Widget build(BuildContext context) {
     final bottomInset = MediaQuery.of(context).padding.bottom;
+    final brands = c.availableBrands;
+    final cities = c.availableCities;
 
     return Container(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.85,
+      ),
       decoration: const BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.only(
@@ -1427,7 +1425,6 @@ class _FilterSheetState extends State<_FilterSheet> {
         ),
       ),
       child: Column(
-        mainAxisSize: MainAxisSize.min,
         children: [
           // ── Drag handle ──
           const SizedBox(height: _S.md),
@@ -1498,99 +1495,173 @@ class _FilterSheetState extends State<_FilterSheet> {
 
           const SizedBox(height: _S.xl),
           const Divider(height: 1, color: _C.border),
-          const SizedBox(height: _S.xl),
 
-          // ── Section: Car Status ──
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: _S.lg),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _sectionLabel(Icons.filter_list_rounded, 'Car Status'),
-                const SizedBox(height: _S.md),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _OptionCard(
-                        icon: Icons.apps_rounded,
-                        label: DynamicLanguage.key(Strings.allCars),
-                        isSelected: _selectedFilter == 'all',
-                        onTap: () => setState(() => _selectedFilter = 'all'),
-                      ),
-                    ),
-                    const SizedBox(width: _S.sm),
-                    Expanded(
-                      child: _OptionCard(
-                        icon: Icons.check_circle_outline_rounded,
-                        label: DynamicLanguage.key(Strings.available),
-                        isSelected: _selectedFilter == 'available',
-                        onTap: () =>
-                            setState(() => _selectedFilter = 'available'),
-                      ),
-                    ),
-                    if (!c.locationPermissionDenied.value) ...[
-                      const SizedBox(width: _S.sm),
-                      Expanded(
-                        child: _OptionCard(
-                          icon: Icons.local_shipping_outlined,
-                          label: DynamicLanguage.key(Strings.deliveryCar),
-                          isSelected: _selectedFilter == 'deliveryAvailable',
-                          onTap: () => setState(
-                              () => _selectedFilter = 'deliveryAvailable'),
+          // ── Scrollable content ──
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: _S.xl),
+
+                  // ── Section: Car Status ──
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: _S.lg),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _sectionLabel(Icons.filter_list_rounded, 'Car Status'),
+                        const SizedBox(height: _S.md),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _OptionCard(
+                                icon: Icons.apps_rounded,
+                                label: DynamicLanguage.key(Strings.allCars),
+                                isSelected: _selectedFilter == 'all',
+                                onTap: () => setState(() => _selectedFilter = 'all'),
+                              ),
+                            ),
+                            const SizedBox(width: _S.sm),
+                            Expanded(
+                              child: _OptionCard(
+                                icon: Icons.check_circle_outline_rounded,
+                                label: DynamicLanguage.key(Strings.available),
+                                isSelected: _selectedFilter == 'available',
+                                onTap: () =>
+                                    setState(() => _selectedFilter = 'available'),
+                              ),
+                            ),
+                            if (!c.locationPermissionDenied.value) ...[
+                              const SizedBox(width: _S.sm),
+                              Expanded(
+                                child: _OptionCard(
+                                  icon: Icons.local_shipping_outlined,
+                                  label: DynamicLanguage.key(Strings.deliveryCar),
+                                  isSelected: _selectedFilter == 'deliveryAvailable',
+                                  onTap: () => setState(
+                                      () => _selectedFilter = 'deliveryAvailable'),
+                                ),
+                              ),
+                            ],
+                          ],
                         ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: _S.xl),
+
+                  // ── Section: Sort By ──
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: _S.lg),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _sectionLabel(Icons.swap_vert_rounded,
+                            DynamicLanguage.key(Strings.sortBy)),
+                        const SizedBox(height: _S.md),
+                        _SortOption(
+                          icon: Icons.trending_up_rounded,
+                          label: DynamicLanguage.key(Strings.popularity),
+                          isSelected: _selectedSort == 'popularity',
+                          onTap: () => setState(() => _selectedSort = 'popularity'),
+                        ),
+                        const SizedBox(height: _S.sm),
+                        _SortOption(
+                          icon: Icons.arrow_upward_rounded,
+                          label: DynamicLanguage.key(Strings.priceLowToHigh),
+                          isSelected: _selectedSort == 'priceLowToHigh',
+                          onTap: () =>
+                              setState(() => _selectedSort = 'priceLowToHigh'),
+                        ),
+                        const SizedBox(height: _S.sm),
+                        _SortOption(
+                          icon: Icons.arrow_downward_rounded,
+                          label: DynamicLanguage.key(Strings.priceHighToLow),
+                          isSelected: _selectedSort == 'priceHighToLow',
+                          onTap: () =>
+                              setState(() => _selectedSort = 'priceHighToLow'),
+                        ),
+                        const SizedBox(height: _S.sm),
+                        _SortOption(
+                          icon: Icons.star_rounded,
+                          label: DynamicLanguage.key(Strings.rating),
+                          isSelected: _selectedSort == 'rating',
+                          onTap: () => setState(() => _selectedSort = 'rating'),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // ── Section: Brand ──
+                  if (brands.isNotEmpty) ...[
+                    const SizedBox(height: _S.xl),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: _S.lg),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _sectionLabel(Icons.directions_car_rounded, 'Brands'),
+                          const SizedBox(height: _S.md),
+                          Wrap(
+                            spacing: _S.xs,
+                            runSpacing: _S.xs,
+                            children: [
+                              _SheetChip(
+                                label: 'All',
+                                isSelected: _selectedBrand == 'all',
+                                onTap: () => setState(() => _selectedBrand = 'all'),
+                              ),
+                              ...brands.map((b) => _SheetChip(
+                                    label: b,
+                                    isSelected: _selectedBrand == b,
+                                    onTap: () => setState(() => _selectedBrand = b),
+                                  )),
+                            ],
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ],
-                ),
-              ],
+
+                  // ── Section: City ──
+                  if (cities.isNotEmpty) ...[
+                    const SizedBox(height: _S.xl),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: _S.lg),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _sectionLabel(Icons.location_city_rounded, 'Cities'),
+                          const SizedBox(height: _S.md),
+                          Wrap(
+                            spacing: _S.xs,
+                            runSpacing: _S.xs,
+                            children: [
+                              _SheetChip(
+                                label: DynamicLanguage.key(Strings.allCities),
+                                isSelected: _selectedCity == 'all',
+                                onTap: () => setState(() => _selectedCity = 'all'),
+                              ),
+                              ...cities.map((city) => _SheetChip(
+                                    label: city,
+                                    isSelected: _selectedCity == city,
+                                    onTap: () => setState(() => _selectedCity = city),
+                                  )),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+
+                  const SizedBox(height: _S.xl),
+                ],
+              ),
             ),
           ),
 
-          const SizedBox(height: _S.xl),
-
-          // ── Section: Sort By ──
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: _S.lg),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _sectionLabel(Icons.swap_vert_rounded,
-                    DynamicLanguage.key(Strings.sortBy)),
-                const SizedBox(height: _S.md),
-                _SortOption(
-                  icon: Icons.trending_up_rounded,
-                  label: DynamicLanguage.key(Strings.popularity),
-                  isSelected: _selectedSort == 'popularity',
-                  onTap: () => setState(() => _selectedSort = 'popularity'),
-                ),
-                const SizedBox(height: _S.sm),
-                _SortOption(
-                  icon: Icons.arrow_upward_rounded,
-                  label: DynamicLanguage.key(Strings.priceLowToHigh),
-                  isSelected: _selectedSort == 'priceLowToHigh',
-                  onTap: () =>
-                      setState(() => _selectedSort = 'priceLowToHigh'),
-                ),
-                const SizedBox(height: _S.sm),
-                _SortOption(
-                  icon: Icons.arrow_downward_rounded,
-                  label: DynamicLanguage.key(Strings.priceHighToLow),
-                  isSelected: _selectedSort == 'priceHighToLow',
-                  onTap: () =>
-                      setState(() => _selectedSort = 'priceHighToLow'),
-                ),
-                const SizedBox(height: _S.sm),
-                _SortOption(
-                  icon: Icons.star_rounded,
-                  label: DynamicLanguage.key(Strings.rating),
-                  isSelected: _selectedSort == 'rating',
-                  onTap: () => setState(() => _selectedSort = 'rating'),
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: _S.xl),
           const Divider(height: 1, color: _C.border),
 
           // ── Apply Button ──
@@ -1822,6 +1893,55 @@ class _SortOption extends StatelessWidget {
                   : null,
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── Filter sheet pill chip (used inside _FilterSheet for brand/city) ─────────
+class _SheetChip extends StatelessWidget {
+  final String label;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _SheetChip({
+    required this.label,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? CustomColor.primary : Colors.white,
+          borderRadius: BorderRadius.circular(_R.xl),
+          border: Border.all(
+            color: isSelected ? CustomColor.primary : _C.border,
+            width: 1.5,
+          ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: CustomColor.primary.withOpacity(0.2),
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
+                  ),
+                ]
+              : [],
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: isSelected ? Colors.white : _C.textPrimary,
+          ),
         ),
       ),
     );

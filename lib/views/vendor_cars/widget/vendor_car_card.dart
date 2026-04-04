@@ -117,7 +117,7 @@ class VendorCarCard extends GetView<VendorCarsController> {
   }
 
   Widget _buildAvailabilityBadge() {
-    final isAvailable = car.availabilityStatus == 'available';
+    final isAvailable = car.isAvailable;
     return Container(
       padding: EdgeInsets.symmetric(
         horizontal: Dimensions.horizontalSize * 0.7,

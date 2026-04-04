@@ -23,9 +23,15 @@ class BookingTransactionListModel {
         message: json['message'] != null
             ? TransactionMessage.fromJson(json['message'])
             : null,
-        data: json['data'] != null
-            ? TransactionData.fromJson(json['data'])
-            : null,
+        data: json['data'] is List
+            ? TransactionData(
+                transactions: (json['data'] as List)
+                    .map((x) => BookingTransaction.fromJson(x as Map<String, dynamic>))
+                    .toList(),
+              )
+            : json['data'] != null
+                ? TransactionData.fromJson(json['data'])
+                : null,
         type: json['type']?.toString() ?? '',
       );
 

@@ -10,6 +10,14 @@ double? _parseCoord(dynamic v) {
   return d;
 }
 
+int? _parseInt(dynamic v) {
+  if (v == null) return null;
+  if (v is int) return v;
+  return int.tryParse(v.toString());
+}
+
+int _parseIntOr(dynamic v, int fallback) => _parseInt(v) ?? fallback;
+
 class HistoryModel {
   Message message;
   Data data;
@@ -71,12 +79,12 @@ class Pagination {
   });
 
   factory Pagination.fromJson(Map<String, dynamic> json) => Pagination(
-    currentPage: json["current_page"] ?? 1,
-    perPage: json["per_page"] ?? 5,
-    total: json["total"] ?? 0,
-    totalPages: json["total_pages"] ?? 0,
-    from: json["from"],
-    to: json["to"],
+    currentPage: _parseIntOr(json["current_page"], 1),
+    perPage: _parseIntOr(json["per_page"], 5),
+    total: _parseIntOr(json["total"], 0),
+    totalPages: _parseIntOr(json["total_pages"], 0),
+    from: _parseInt(json["from"]),
+    to: _parseInt(json["to"]),
     hasMore: json["has_more"] ?? false,
   );
 
@@ -189,19 +197,19 @@ class History {
   });
 
   factory History.fromJson(Map<String, dynamic> json) => History(
-    id: json["id"],
-    vendorId: json["vendor_id"],
-    branchId: json["branch_id"],
+    id: _parseInt(json["id"]),
+    vendorId: _parseInt(json["vendor_id"]),
+    branchId: _parseInt(json["branch_id"]),
     approvedBy: json["approved_by"]?.toString(),
     approvedAt: json["approved_at"] == null
         ? null
         : DateTime.tryParse(json["approved_at"]),
-    carId: json["car_id"],
-    userId: json["user_id"],
+    carId: _parseInt(json["car_id"]),
+    userId: _parseInt(json["user_id"]),
     slug: json["slug"]?.toString(),
     phone: json["phone"]?.toString(),
     email: json["email"]?.toString(),
-    tripId: json["trip_id"],
+    tripId: _parseInt(json["trip_id"]),
     location:
         (json["location"] == null || json["location"].toString().trim().isEmpty)
         ? null
@@ -212,8 +220,8 @@ class History {
     trxId: json["trx_id"]?.toString(),
     amount: json["amount"],
     charges: json["charges"],
-    distance: json["distance"] ?? 0,
-    rentalDays: json["rental_days"] ?? 0,
+    distance: _parseIntOr(json["distance"], 0),
+    rentalDays: _parseIntOr(json["rental_days"], 0),
     pickupTime: json["pickup_time"],
     roundPickupTime: json["round_pickup_time"]?.toString(),
     pickupDate: DateTime.parse(json["pickup_date"]),
@@ -419,7 +427,7 @@ class VendorInfo {
   });
 
   factory VendorInfo.fromJson(Map<String, dynamic> json) => VendorInfo(
-    id: json["id"],
+    id: _parseInt(json["id"]),
     firstname: json["firstname"]?.toString(),
     lastname: json["lastname"]?.toString(),
     fullname: json["fullname"]?.toString(),
@@ -456,7 +464,7 @@ class PriceBreakdown {
 
   factory PriceBreakdown.fromJson(Map<String, dynamic> json) {
     return PriceBreakdown(
-      rentalDays: json['rental_days'] as int? ?? 0,
+      rentalDays: _parseIntOr(json['rental_days'], 0),
       rental: _pd(json['rental']),
       delivery: _pd(json['delivery']),
       tax: _pd(json['tax']),

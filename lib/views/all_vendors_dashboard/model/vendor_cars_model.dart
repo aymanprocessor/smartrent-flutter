@@ -136,6 +136,7 @@ class VendorCar {
   double? deliveryPrice;
   String? cancellationPolicy;
   VendorLocation? vendorLocation;
+  bool isDeliveryAvailable;
 
   VendorCar({
     required this.id,
@@ -171,6 +172,7 @@ class VendorCar {
     this.deliveryPrice,
     this.cancellationPolicy,
     this.vendorLocation,
+    required this.isDeliveryAvailable,
   });
 
   factory VendorCar.fromJson(Map<String, dynamic> json) => VendorCar(
@@ -219,6 +221,7 @@ class VendorCar {
     vendorLocation: json["vendor_location"] != null
         ? VendorLocation.fromJson(json["vendor_location"])
         : null,
+    isDeliveryAvailable: json["is_delivery_available"] ?? false,
   );
 
   Map<String, dynamic> toJson() => {
@@ -255,9 +258,12 @@ class VendorCar {
     "delivery_price": deliveryPrice,
     "cancellation_policy": cancellationPolicy,
     "vendor_location": vendorLocation?.toJson(),
+    "is_delivery_available": isDeliveryAvailable,
   };
 
   String get displayName => '$make $model';
+
+  bool get isAvailable => availabilityStatus == 'available';
 
   String get formattedPrice {
     // Map currency codes to their symbols (SAR for Saudi Riyal)
@@ -454,12 +460,14 @@ class MetaInfo {
   List<String> pricingTypes;
   Map<String, PricingRange> priceRanges;
   YearRange yearRange;
+  List<String> availableCities;
 
   MetaInfo({
     required this.availableTypes,
     required this.pricingTypes,
     required this.priceRanges,
     required this.yearRange,
+    required this.availableCities,
   });
 
   factory MetaInfo.fromJson(Map<String, dynamic> json) => MetaInfo(
@@ -481,6 +489,9 @@ class MetaInfo {
     yearRange: json["year_range"] != null
         ? YearRange.fromJson(json["year_range"])
         : YearRange.empty(),
+    availableCities: json["available_cities"] != null
+        ? List<String>.from(json["available_cities"].map((x) => x.toString()))
+        : [],
   );
 
   factory MetaInfo.empty() => MetaInfo(
@@ -488,6 +499,7 @@ class MetaInfo {
     pricingTypes: [],
     priceRanges: {},
     yearRange: YearRange.empty(),
+    availableCities: [],
   );
 
   Map<String, dynamic> toJson() {
@@ -495,6 +507,7 @@ class MetaInfo {
       "available_types": List<dynamic>.from(availableTypes.map((x) => x)),
       "pricing_types": List<dynamic>.from(pricingTypes.map((x) => x)),
       "year_range": yearRange.toJson(),
+      "available_cities": List<dynamic>.from(availableCities.map((x) => x)),
     };
     final priceRangesMap = <String, dynamic>{};
     priceRanges.forEach((key, value) {

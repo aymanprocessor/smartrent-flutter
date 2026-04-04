@@ -8,6 +8,7 @@ class VendorCarsFilter {
   final double? maxPrice;
   final String? sortBy;
   final String? sortOrder;
+  final String? city;
 
   VendorCarsFilter({
     this.vendorId,
@@ -18,6 +19,7 @@ class VendorCarsFilter {
     this.maxPrice,
     this.sortBy,
     this.sortOrder,
+    this.city,
   });
 
   Map<String, String> toQueryParams() {
@@ -31,6 +33,7 @@ class VendorCarsFilter {
     if (maxPrice != null) params['max_price'] = maxPrice.toString();
     if (sortBy != null && sortBy!.isNotEmpty) params['sort_by'] = sortBy!;
     if (sortOrder != null && sortOrder!.isNotEmpty) params['sort_order'] = sortOrder!;
+    if (city != null && city!.isNotEmpty) params['city'] = city!;
     
     return params;
   }
@@ -44,6 +47,7 @@ class VendorCarsFilter {
     double? maxPrice,
     String? sortBy,
     String? sortOrder,
+    String? city,
   }) {
     return VendorCarsFilter(
       vendorId: vendorId ?? this.vendorId,
@@ -54,10 +58,11 @@ class VendorCarsFilter {
       maxPrice: maxPrice ?? this.maxPrice,
       sortBy: sortBy ?? this.sortBy,
       sortOrder: sortOrder ?? this.sortOrder,
+      city: city ?? this.city,
     );
   }
 
-  /// Clear all filters
+  /// Clear all filters (preserves vendorId)
   VendorCarsFilter clear() {
     return VendorCarsFilter(vendorId: vendorId);
   }

@@ -333,26 +333,25 @@ class BookingController extends GetxController {
   /// Check if delivery is available for the selected car
   bool isDeliveryAvailable() {
     if (selectedCar.value == null) return false;
-    
+
     final car = selectedCar.value!;
-    
+
+    // Vendor must have marked this car as delivery-available
+    if (!car.isDeliveryAvailable) return false;
+
     try {
       final vendorController = Get.find<AllVendorsDashboardController>();
-      
-      // Check by branch ID if available
+
+      // Check if user is within branch delivery radius
       if (car.branchId != null) {
         return vendorController.deliveryAvailabilityMap[car.branchId] ?? false;
       }
     } catch (e) {
       // Controller not found, fall through to location check
     }
-    
-    // Fallback: Check if car has vendor location with coordinates
-    if (car.vendorLocation?.latitude != null && car.vendorLocation?.longitude != null) {
-      return true;
-    }
-    
-    return false;
+
+    // Fallback when no branch ID: require vendor location coordinates
+    return car.vendorLocation?.latitude != null && car.vendorLocation?.longitude != null;
   }
 
   /// Look up the zone-based delivery fee from the dashboard controller.

@@ -87,6 +87,7 @@ class VendorCarsController extends GetxController {
   RxString sortOption = 'popularity'.obs;
   RxString quickFilter = 'all'.obs;
   RxString selectedBrand = 'all'.obs;
+  RxString selectedCity = 'all'.obs;
 
   // ═══════════════════════════════════════════════════════════════════════════
   // DELIVERY TRACKING
@@ -316,14 +317,11 @@ class VendorCarsController extends GetxController {
   }
 
   bool isDeliveryAvailable(VendorCar car) {
+    if (!car.isDeliveryAvailable) return false;
     if (car.branchId != null) {
       return deliveryAvailabilityMap[car.branchId] ?? false;
     }
-    if (car.vendorLocation?.latitude != null &&
-        car.vendorLocation?.longitude != null) {
-      return true;
-    }
-    return false;
+    return car.vendorLocation?.latitude != null && car.vendorLocation?.longitude != null;
   }
 
   Future<void> retryDeliveryCheck() async {
@@ -352,6 +350,24 @@ class VendorCarsController extends GetxController {
     _applySortAndFilter();
   }
 
+  void changeCityFilter(String city) {
+    selectedCity.value = city;
+    log.i('City filter: $city');
+    final f = filter.value;
+    filter.value = VendorCarsFilter(
+      vendorId: f.vendorId,
+      carType: f.carType,
+      minYear: f.minYear,
+      maxYear: f.maxYear,
+      minPrice: f.minPrice,
+      maxPrice: f.maxPrice,
+      sortBy: f.sortBy,
+      sortOrder: f.sortOrder,
+      city: city == 'all' ? null : city,
+    );
+    fetchVendorCars();
+  }
+
   /// Unique sorted list of brands from all loaded cars, uppercase-normalised
   List<String> get availableBrands {
     final brands = allVendorCars
@@ -362,6 +378,9 @@ class VendorCarsController extends GetxController {
     brands.sort();
     return brands;
   }
+
+  /// Unique sorted list of cities from meta info
+  List<String> get availableCities => metaInfo.value?.availableCities ?? [];
 
   /// How many cars match a given brand ('all' returns total)
   int brandCarCount(String brand) {
