@@ -4,6 +4,13 @@
 
 import 'dart:convert';
 
+double? _parseDouble(dynamic v) {
+  if (v == null) return null;
+  if (v is double) return v;
+  if (v is num) return v.toDouble();
+  return double.tryParse(v.toString());
+}
+
 VendorCarsModel vendorCarsModelFromJson(String str) =>
     VendorCarsModel.fromJson(json.decode(str));
 
@@ -137,6 +144,7 @@ class VendorCar {
   String? cancellationPolicy;
   VendorLocation? vendorLocation;
   bool isDeliveryAvailable;
+  double? distanceKm;
 
   VendorCar({
     required this.id,
@@ -173,6 +181,7 @@ class VendorCar {
     this.cancellationPolicy,
     this.vendorLocation,
     required this.isDeliveryAvailable,
+    this.distanceKm,
   });
 
   factory VendorCar.fromJson(Map<String, dynamic> json) => VendorCar(
@@ -222,6 +231,7 @@ class VendorCar {
         ? VendorLocation.fromJson(json["vendor_location"])
         : null,
     isDeliveryAvailable: json["is_delivery_available"] ?? false,
+    distanceKm: _parseDouble(json["distance_km"]),
   );
 
   Map<String, dynamic> toJson() => {
