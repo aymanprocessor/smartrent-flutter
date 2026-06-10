@@ -1,5 +1,6 @@
 import 'package:carbo/base/utils/basic_import.dart';
-import 'package:flutter/material.dart' show ScrollController;
+import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:carbo/base/localization/dynamic_language_shim.dart';
 import 'package:carbo/base/widgets/logger.dart';
 import '../../../base/api/endpoint/api_endpoint.dart';
@@ -71,6 +72,9 @@ class AllVendorsDashboardController extends GetxController {
   RxBool isCheckingDelivery = false.obs;
   RxBool locationPermissionDenied = false.obs;
 
+  // Resolved GPS position for the current session (null = no location / denied)
+  Position? _userPosition;
+
   @override
   void onInit() {
     super.onInit();
@@ -79,8 +83,62 @@ class AllVendorsDashboardController extends GetxController {
     log.i('App language is loading: ${DynamicLanguage.isLoading}');
     log.i('Language direction: ${DynamicLanguage.languageDirection}');
     scrollController.addListener(_onScroll);
-    // Load all cars without filters
-    searchAllVendorsCars();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _initLocationAndFetch());
+  }
+
+  Future<void> _initLocationAndFetch() async {
+    final permission = await Geolocator.checkPermission();
+
+    if (permission == LocationPermission.always ||
+        permission == LocationPermission.whileInUse) {
+      final locationService = Get.find<LocationService>();
+      _userPosition = await locationService.getUserLocation();
+    } else if (permission == LocationPermission.denied) {
+      final allowed = await showDialog<bool>(
+        context: Get.context!,
+        barrierDismissible: true,
+        builder: (ctx) => AlertDialog(
+          icon: const Icon(
+            Icons.location_on_outlined,
+            size: 48,
+            color: Color(0xFF0EA5E9),
+          ),
+          title: Text(DynamicLanguage.key(Strings.locationPermissionTitle)),
+          content: Text(
+            DynamicLanguage.key(Strings.locationPermissionMessage),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: Text(DynamicLanguage.key(Strings.cancel)),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: Text(
+                DynamicLanguage.key(Strings.allow),
+                style: const TextStyle(
+                  color: Color(0xFF0EA5E9),
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+
+      if (allowed == true) {
+        final locationService = Get.find<LocationService>();
+        _userPosition = await locationService.getUserLocation();
+      } else {
+        _userPosition = null;
+      }
+    } else {
+      // deniedForever — no dialog, silent fallback
+      _userPosition = null;
+    }
+
+    if (isClosed) return;
+    await searchAllVendorsCars();
   }
 
   void _onScroll() {
@@ -120,6 +178,13 @@ class AllVendorsDashboardController extends GetxController {
       };
       if (selectedCity.value != 'all') {
         queryParams['city'] = selectedCity.value;
+      }
+      if (_userPosition != null) {
+        queryParams['lat'] = _userPosition!.latitude.toString();
+        queryParams['lng'] = _userPosition!.longitude.toString();
+        // No sort_by needed — backend defaults to distance_asc when coords supplied
+      } else {
+        queryParams['sort_by'] = 'price_asc';
       }
 
       final token = LocalStorage.token;
@@ -213,7 +278,7 @@ class AllVendorsDashboardController extends GetxController {
   Future<void> refreshCars() async {
     _isRefreshing.value = true;
     log.i('Refreshing vendor cars list');
-    await searchAllVendorsCars();
+    await _initLocationAndFetch();
     _isRefreshing.value = false;
   }
 
