@@ -147,6 +147,9 @@ class Strings {
   static const String logOut = "appLLogOut";
   static const String logOu = "appLLogOu";
   static const String cancel = "appLCancel";
+  static const String locationPermissionTitle = "appLLocationPermissionTitle";
+  static const String locationPermissionMessage = "appLLocationPermissionMessage";
+  static const String allow = "appLAllow";
   static const String longTitle = "appLLongTitle";
   static const String longText = "appLLongText";
   static const String contactUs = "appLContactUs";

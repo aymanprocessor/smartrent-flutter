@@ -430,6 +430,9 @@ class I18nService extends GetxController {
     'appLEnterMobileForOtp': (l) => l.appLEnterMobileForOtp,
     'appLEnterOtpCode': (l) => l.appLEnterOtpCode,
     'appLOtpSentToPhone': (l) => l.appLOtpSentToPhone,
+    'appLLocationPermissionTitle': (l) => l.appLLocationPermissionTitle,
+    'appLLocationPermissionMessage': (l) => l.appLLocationPermissionMessage,
+    'appLAllow': (l) => l.appLAllow,
   };
   
   /// Change current language

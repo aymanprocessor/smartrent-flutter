@@ -362,5 +362,9 @@
   "appLBrowseVendorCars": "تصفح السيارات",
   "appLEnterMobileForOtp": "أدخل رقم هاتفك لتلقي رمز التحقق عبر الرسائل القصيرة",
   "appLEnterOtpCode": "أدخل رمز OTP",
-  "appLOtpSentToPhone": "تم إرسال رمز مكون من 6 أرقام إلى هاتفك عبر الرسائل القصيرة"
+  "appLOtpSentToPhone": "تم إرسال رمز مكون من 6 أرقام إلى هاتفك عبر الرسائل القصيرة",
+
+  "appLLocationPermissionTitle": "تفعيل الموقع",
+  "appLLocationPermissionMessage": "اسمح بالوصول إلى موقعك لعرض أقرب السيارات أولاً",
+  "appLAllow": "السماح"
 }

@@ -2177,6 +2177,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'A 6-digit code was sent to your phone via SMS'**
   String get appLOtpSentToPhone;
+
+  /// No description provided for @appLLocationPermissionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable Location'**
+  String get appLLocationPermissionTitle;
+
+  /// No description provided for @appLLocationPermissionMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow location access to show you the closest cars first'**
+  String get appLLocationPermissionMessage;
+
+  /// No description provided for @appLAllow.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow'**
+  String get appLAllow;
 }
 
 class _AppLocalizationsDelegate

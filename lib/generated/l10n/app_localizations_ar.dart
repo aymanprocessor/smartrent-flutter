@@ -1069,4 +1069,14 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get appLOtpSentToPhone =>
       'تم إرسال رمز مكون من 6 أرقام إلى هاتفك عبر الرسائل القصيرة';
+
+  @override
+  String get appLLocationPermissionTitle => 'تفعيل الموقع';
+
+  @override
+  String get appLLocationPermissionMessage =>
+      'اسمح بالوصول إلى موقعك لعرض أقرب السيارات أولاً';
+
+  @override
+  String get appLAllow => 'السماح';
 }

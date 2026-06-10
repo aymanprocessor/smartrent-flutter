@@ -1067,4 +1067,14 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get appLOtpSentToPhone =>
       'A 6-digit code was sent to your phone via SMS';
+
+  @override
+  String get appLLocationPermissionTitle => 'Enable Location';
+
+  @override
+  String get appLLocationPermissionMessage =>
+      'Allow location access to show you the closest cars first';
+
+  @override
+  String get appLAllow => 'Allow';
 }

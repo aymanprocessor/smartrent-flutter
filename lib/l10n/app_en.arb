@@ -363,6 +363,10 @@
   "appLBrowseVendorCars": "Browse Cars",
   "appLEnterMobileForOtp": "Enter your mobile number to receive a verification code via SMS",
   "appLEnterOtpCode": "Enter OTP Code",
-  "appLOtpSentToPhone": "A 6-digit code was sent to your phone via SMS"
+  "appLOtpSentToPhone": "A 6-digit code was sent to your phone via SMS",
+
+  "appLLocationPermissionTitle": "Enable Location",
+  "appLLocationPermissionMessage": "Allow location access to show you the closest cars first",
+  "appLAllow": "Allow"
 }
 
