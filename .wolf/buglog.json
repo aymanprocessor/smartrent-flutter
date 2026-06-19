@@ -1,0 +1,149 @@
+{
+  "version": 1,
+  "bugs": [
+    {
+      "id": "bug-001",
+      "timestamp": "2026-06-10T23:27:05.442Z",
+      "error_message": "Missing guard clause",
+      "file": "lib/views/all_vendors_dashboard/model/vendor_cars_model.dart",
+      "root_cause": "No early return/throw for edge case: v == null",
+      "fix": "Added guard clause: if (v == null)",
+      "tags": [
+        "auto-detected",
+        "guard-clause",
+        "dart"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-10T23:27:05.442Z"
+    },
+    {
+      "id": "bug-002",
+      "timestamp": "2026-06-10T23:28:05.021Z",
+      "error_message": "Missing import: package:geolocator/geolocator.dart",
+      "file": "lib/views/all_vendors_dashboard/controller/all_vendors_dashboard_controller.dart",
+      "root_cause": "Module(s) not imported: package:geolocator/geolocator.dart",
+      "fix": "Added import(s) for package:geolocator/geolocator.dart",
+      "tags": [
+        "auto-detected",
+        "missing-import",
+        "dart"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-10T23:28:05.021Z"
+    },
+    {
+      "id": "bug-003",
+      "timestamp": "2026-06-10T23:28:33.383Z",
+      "error_message": "Missing guard clause",
+      "file": "lib/views/all_vendors_dashboard/controller/all_vendors_dashboard_controller.dart",
+      "root_cause": "No early return/throw for edge case: permission == LocationPermission.always ||\n        permissio",
+      "fix": "Added guard clause: if (permission == LocationPermission.always )",
+      "tags": [
+        "auto-detected",
+        "guard-clause",
+        "dart"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-10T23:28:33.383Z"
+    },
+    {
+      "id": "bug-004",
+      "timestamp": "2026-06-10T23:28:48.530Z",
+      "error_message": "Null/undefined access in ",
+      "file": "lib/views/all_vendors_dashboard/controller/all_vendors_dashboard_controller.dart",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "dart"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-10T23:28:48.530Z"
+    },
+    {
+      "id": "bug-005",
+      "timestamp": "2026-06-14T14:01:54.352Z",
+      "error_message": "Missing error handling in unknown",
+      "file": ".claude/worktrees/squishy-doodling-snowglobe/lib/views/vendor_cars/controller/vendor_cars_controller.dart",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "dart"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-14T14:01:54.352Z"
+    },
+    {
+      "id": "bug-006",
+      "timestamp": "2026-06-18T12:08:31.859Z",
+      "error_message": "Significant refactor of ",
+      "file": "lib/views/all_vendors_dashboard/controller/all_vendors_dashboard_controller.dart",
+      "root_cause": "34 lines replaced/restructured",
+      "fix": "Rewrote 40→4 lines (34 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "dart"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-18T12:08:31.859Z"
+    },
+    {
+      "id": "bug-007",
+      "timestamp": "2026-06-18T12:08:41.544Z",
+      "error_message": "Wrong operator: == should be !=",
+      "file": "lib/views/all_vendors_dashboard/controller/all_vendors_dashboard_controller.dart",
+      "root_cause": "Used \"==\" instead of \"!=\"",
+      "fix": "Changed operator == → !=",
+      "tags": [
+        "auto-detected",
+        "operator-fix",
+        "dart"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-18T12:08:41.544Z"
+    },
+    {
+      "id": "bug-008",
+      "timestamp": "2026-06-18T12:08:55.683Z",
+      "error_message": "Incorrect value in code",
+      "file": "lib/views/all_vendors_dashboard/controller/all_vendors_dashboard_controller.dart",
+      "root_cause": "Had 'package:flutter/material.dart'",
+      "fix": "Changed to 'package:geolocator/geolocator.dart'",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "dart"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-06-18T12:10:58.735Z"
+    },
+    {
+      "id": "bug-009",
+      "timestamp": "2026-06-18T12:25:04.143Z",
+      "error_message": "Missing error handling in unknown",
+      "file": "lib/views/all_vendors_dashboard/controller/all_vendors_dashboard_controller.dart",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "dart"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-18T12:25:04.143Z"
+    }
+  ]
+}

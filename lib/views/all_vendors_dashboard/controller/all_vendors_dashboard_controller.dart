@@ -87,53 +87,16 @@ class AllVendorsDashboardController extends GetxController {
   }
 
   Future<void> _initLocationAndFetch() async {
-    final permission = await Geolocator.checkPermission();
-
-    if (permission == LocationPermission.always ||
-        permission == LocationPermission.whileInUse) {
-      final locationService = Get.find<LocationService>();
-      _userPosition = await locationService.getUserLocation();
-    } else if (permission == LocationPermission.denied) {
-      final allowed = await showDialog<bool>(
-        context: Get.context!,
-        barrierDismissible: true,
-        builder: (ctx) => AlertDialog(
-          icon: const Icon(
-            Icons.location_on_outlined,
-            size: 48,
-            color: Color(0xFF0EA5E9),
-          ),
-          title: Text(DynamicLanguage.key(Strings.locationPermissionTitle)),
-          content: Text(
-            DynamicLanguage.key(Strings.locationPermissionMessage),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: Text(DynamicLanguage.key(Strings.cancel)),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, true),
-              child: Text(
-                DynamicLanguage.key(Strings.allow),
-                style: const TextStyle(
-                  color: Color(0xFF0EA5E9),
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
-
-      if (allowed == true) {
+    try {
+      final permission = await Geolocator.checkPermission();
+      if (permission != LocationPermission.deniedForever) {
         final locationService = Get.find<LocationService>();
         _userPosition = await locationService.getUserLocation();
       } else {
         _userPosition = null;
       }
-    } else {
-      // deniedForever — no dialog, silent fallback
+    } catch (e) {
+      log.e('Location init error: $e');
       _userPosition = null;
     }
 

@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     id "com.android.application"
     id "kotlin-android"
@@ -5,17 +7,32 @@ plugins {
     id "com.google.gms.google-services"
 }
 
+def keystorePropertiesFile = rootProject.file("key.properties")
+def keystoreProperties = new Properties()
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
 android {
     namespace = "com.next.smartrent"
     compileSdk = flutter.compileSdkVersion
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_1_8
+        jvmTarget = JavaVersion.VERSION_17.toString()
+    }
+
+    signingConfigs {
+        release {
+            storeFile = rootProject.file(keystoreProperties["storeFile"])
+            storePassword = keystoreProperties["storePassword"]
+            keyAlias = keystoreProperties["keyAlias"]
+            keyPassword = keystoreProperties["keyPassword"]
+        }
     }
 
     defaultConfig {
@@ -24,19 +41,15 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
-        // Inject Google Maps API key into the Android manifest via manifest placeholders.
-        // Prefer setting MAPS_API_KEY in local.properties (do not commit) or an environment variable.
-            manifestPlaceholders = [
-                'com.google.android.geo.API_KEY': project.hasProperty('MAPS_API_KEY') ? project.property('MAPS_API_KEY') : "AIzaSyDBtOCLLOaWvNjc5WPOQjBbHkSGSy3Y-9k",
-                // Provide a default applicationName placeholder so the manifest's ${applicationName} resolves.
-                // Using android.app.Application as a safe default; change if your app uses a custom Application subclass.
-                'applicationName': project.hasProperty('APPLICATION_NAME') ? project.property('APPLICATION_NAME') : "android.app.Application"
+        manifestPlaceholders = [
+            'com.google.android.geo.API_KEY': project.hasProperty('MAPS_API_KEY') ? project.property('MAPS_API_KEY') : "AIzaSyDBtOCLLOaWvNjc5WPOQjBbHkSGSy3Y-9k",
+            'applicationName': project.hasProperty('APPLICATION_NAME') ? project.property('APPLICATION_NAME') : "android.app.Application"
         ]
     }
 
     buildTypes {
         release {
-            signingConfig = signingConfigs.debug
+            signingConfig = signingConfigs.release
             // Enable code shrinking and use the app-level ProGuard rules.
             // `minifyEnabled` is required to run R8; if it's already enabled
             // by another config, this keeps the behavior consistent and ensures

@@ -36,7 +36,19 @@
       "mcp__ide__getDiagnostics",
       "Bash(find /d/Ayman/smart-rent/source-code/carbo-app/carbo-user/lib/base/api/services -type f -name *.dart)",
       "Skill(claude-md-management:revise-claude-md)",
-      "Skill(claude-md-management:revise-claude-md:*)"
+      "Skill(claude-md-management:revise-claude-md:*)",
+      "PowerShell(& \"C:\\\\Users\\\\PC\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\build-tools\\\\36.1.0\\\\apksigner.bat\" verify --print-certs \"C:\\\\DATA\\\\smart-rent\\\\source-code\\\\carbo-app\\\\carbo-user\\\\build\\\\app\\\\outputs\\\\flutter-apk\\\\app-release.apk\" 2>&1)",
+      "Bash(./gradlew clean *)",
+      "Bash(./gradlew assembleRelease --no-build-cache --no-configuration-cache)",
+      "Bash(grep -E \"SIGNING|packageRelease$|signRelease|BUILD|FAILED|SUCCESS\")",
+      "Bash(./gradlew assembleRelease --no-build-cache --rerun-tasks)",
+      "Bash(flutter clean *)",
+      "Bash(flutter build *)",
+      "Bash(unzip -p app-release.aab META-INF/ANDROIDD.RSA)",
+      "Bash(keytool -printcert)",
+      "Bash(unzip -l app-release.aab)",
+      "Bash(grep \"META-INF/.*\\\\\\\\.RSA\")",
+      "Bash(unzip -p app-release.aab \"META-INF/CARBO.RSA\")"
     ]
   }
 }
