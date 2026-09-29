@@ -1,6 +1,7 @@
 import 'package:carbo/views/booking/controller/booking_controller.dart';
 import 'package:carbo/controllers/wallet_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:carbo/generated/l10n/app_localizations.dart';
 import '../../../base/utils/basic_import.dart';
 import '../../../base/localization/dynamic_language_shim.dart';
 import '../../../base/widgets/dynamic_image_widget.dart';

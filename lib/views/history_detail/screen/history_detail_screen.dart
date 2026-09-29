@@ -751,13 +751,70 @@ class _PaymentSummarySection extends StatelessWidget {
           // ── Unified breakdown: merges API fields, invoice_rows,
           //    transactions, and extension data.
           _buildUnifiedBreakdown(currency),
+          const SizedBox(height: _S.x4),
+          // ── Excess Liability Insurance (displayed separately, not in total)
+          if (history.priceBreakdown?.insuranceType == 'excess_liability' &&
+              (history.priceBreakdown?.insuranceExcessLiabilityAmount ?? 0) > 0)
+            _buildExcessLiabilitySection(currency),
         ],
       ),
     );
   }
 
-  /// Unified price breakdown — sources from embedded price_breakdown.
-  /// Falls back to legacy History fields when price_breakdown is absent.
+  /// Excess Liability Insurance section — displayed separately below the price breakdown.
+  /// Not included in the total calculation.
+  Widget _buildExcessLiabilitySection(String currency) {
+    final pb = history.priceBreakdown;
+    final amount = pb?.insuranceExcessLiabilityAmount ?? 0.0;
+    final msg = pb?.insuranceMessage;
+    final lang = Get.locale?.languageCode ?? 'en';
+
+    return Container(
+      padding: const EdgeInsets.all(_S.x2),
+      decoration: BoxDecoration(
+        color: _C.warningLight,
+        borderRadius: BorderRadius.circular(_R.sm),
+        border: Border.all(color: _C.warning, width: 1),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                DynamicLanguage.key(Strings.insuranceExcessLiability),
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: _C.textPrimary,
+                ),
+              ),
+              Text(
+                CurrencyFormatter.formatAmount(amount, currency: currency),
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: _C.warning,
+                ),
+              ),
+            ],
+          ),
+          if (msg != null) ...[  
+            const SizedBox(height: _S.x1),
+            Text(
+              (msg[lang] ?? msg['en'] ?? msg.values.first ?? '').toString(),
+              style: const TextStyle(
+                fontSize: 12,
+                color: _C.textSecondary,
+                height: 1.5,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
   Widget _buildUnifiedBreakdown(String currency) {
     final pb = history.priceBreakdown;
 
@@ -767,6 +824,11 @@ class _PaymentSummarySection extends StatelessWidget {
         (rentalDays > 0 ? rental / rentalDays : 0.0);
     final delivery = pb?.delivery ?? _parseAmount(history.deliveryFee ?? history.charges);
     final discount = history.discountAmount ?? 0;
+
+    // Insurance
+    final insuranceType = pb?.insuranceType ?? history.insuranceType;
+    final insuranceDailyAmount = pb?.insuranceDailyAmount ?? history.insuranceDailyAmount ?? 0.0;
+    final dailyInsuranceTotal = insuranceType == 'daily' ? insuranceDailyAmount * rentalDays : 0.0;
 
     // Extensions from price_breakdown (approved only)
     final approvedExts = (pb?.extensions ?? [])
@@ -778,14 +840,9 @@ class _PaymentSummarySection extends StatelessWidget {
     final extensionTax = approvedExts.fold<double>(0, (s, e) => s + e.taxAmount);
     final tax = baseTax + extensionTax;
 
-    // Extensions subtotal (extraAmount only, tax is aggregated above)
-    final extTotal = approvedExts.fold<double>(0, (s, e) => s + e.extraAmount);
-
-    // Grand total: when price_breakdown is present use computed sum;
-    // fall back to history.totalAmount only if both are absent.
-    final total = pb != null
-        ? rental + delivery + extTotal + tax - discount
-        : (history.totalAmount ?? (rental + delivery + extTotal + tax - discount));
+    // Grand total: Always use history.totalAmount (API's ground truth)
+    // This total does NOT include Excess Liability Insurance (displayed separately below breakdown)
+    final total = history.totalAmount ?? 0.0;
 
     String _fmtRate(double rate) => CurrencyFormatter.formatAmount(rate, currency: currency);
 
@@ -801,6 +858,12 @@ class _PaymentSummarySection extends StatelessWidget {
           _payRow(
             DynamicLanguage.key(Strings.deliveryFee),
             CurrencyFormatter.formatAmount(delivery, currency: currency),
+          ),
+        // Insurance row (daily only — excess_liability shown separately below)
+        if (insuranceType == 'daily' && dailyInsuranceTotal > 0)
+          _payRow(
+            '${DynamicLanguage.key(Strings.insuranceDaily)} · $rentalDays × ${_fmtRate(insuranceDailyAmount)}',
+            CurrencyFormatter.formatAmount(dailyInsuranceTotal, currency: currency),
           ),
         // One row per approved extension: N × daily_rate
         for (final ext in approvedExts)
@@ -1118,6 +1181,49 @@ class _NotesCard extends StatelessWidget {
           Text(
             message,
             style: const TextStyle(fontSize: 14, color: _C.textSecondary, height: 1.6, letterSpacing: -0.1),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Rejection Reason Card ──────────────────────────────────────
+// Shows the top-level booking `rejection_reason` from the backend.
+// Raw user text — only the label is localized, never the body.
+class _RejectionReasonCard extends StatelessWidget {
+  final String reason;
+
+  const _RejectionReasonCard({required this.reason});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(_S.x3),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFEF2F2),
+        borderRadius: BorderRadius.circular(_R.md),
+        border: Border.all(color: _C.error.withValues(alpha: 0.35), width: 1),
+        boxShadow: _Shadow.subtle,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _sectionHeader(
+            Icons.info_outline_rounded,
+            DynamicLanguage.key(Strings.rejectionReason),
+            const Color(0xFFFEE2E2),
+            _C.error,
+          ),
+          const SizedBox(height: _S.x2),
+          Text(
+            reason,
+            style: const TextStyle(
+              fontSize: 14,
+              color: _C.textPrimary,
+              height: 1.6,
+              letterSpacing: -0.1,
+            ),
           ),
         ],
       ),

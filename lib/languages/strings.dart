@@ -230,6 +230,15 @@ class Strings {
   static const String total = "appLTotal";
   static const String quantity = "appLQuantity";
 
+  // Insurance related strings
+  static const String appLSelectInsurance = "appLSelectInsurance";
+  static const String appLDailyInsurance = "appLDailyInsurance";
+  static const String appLExcessLiabilityInsurance = "appLExcessLiabilityInsurance";
+  static const String appLInsuranceType = "appLInsuranceType";
+  static const String appLInsuranceAmount = "appLInsuranceAmount";
+  static const String appLInsuranceWarning = "appLInsuranceWarning";
+  static const String appLInsuranceIncluded = "appLInsuranceIncluded";
+
   // Location picker specific strings
   static const String SnappedOutsideAllowed = "appLSnappedOutsideAllowed";
   static const String SnappedShort = "appLSnappedShort";
@@ -289,6 +298,10 @@ class Strings {
   static const String bookingInformation = "appLBookingInformation";
   static const String carDetails = "appLCarDetails";
   static const String tripDetails = "appLTripDetails";
+  
+  // KM Allowance related strings
+  static const String kmAllowanceLabel = "appLKmAllowanceLabel";
+  static const String kmAllowanceMessage = "appLKmAllowanceMessage";
   static const String contactDetails = "appLContactDetails";
   static const String message = "appLMessage";
 
@@ -363,6 +376,8 @@ class Strings {
   static const String invoiceDiscount = "appLInvoiceDiscount";
   static const String invoiceTotal = "appLInvoiceTotal";
   static const String priceBreakdown = "appLPriceBreakdown";
+  static const String insuranceDaily = "appLInsuranceDaily";
+  static const String insuranceExcessLiability = "appLInsuranceExcessLiability";
 
   // Booking Detail Screen
   static const String rentalSchedule = "appLRentalSchedule";
@@ -380,4 +395,5 @@ class Strings {
   static const String deliveryFee = "appLDeliveryFee";
   static const String dailyPrice = "appLDailyPrice";
   static const String yes = "appLYes";
+  static const String outOfDeliveryRange = "appLOutOfDeliveryRange";
 }

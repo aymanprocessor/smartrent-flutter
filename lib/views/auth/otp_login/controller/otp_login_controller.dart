@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:phone_numbers_parser/phone_numbers_parser.dart';
 import '../../../../base/api/services/auth_services.dart';
 import '../../../../base/api/services/profile_kyc_service.dart';
 import '../../../../base/services/realtime_service.dart';
 import '../../../../base/utils/local_storage.dart';
 import '../../../../base/utils/next_action_guard.dart';
+import '../../../../base/utils/phone_validator.dart';
 import '../../../../base/widgets/custom_snackbar.dart';
 import '../../../../base/widgets/logger.dart';
 import '../../../../languages/strings.dart';
@@ -15,13 +15,26 @@ class OtpLoginController extends GetxController {
   final mobileController = TextEditingController();
   final otpController = TextEditingController();
 
-  RxString mobileCode = '+966'.obs; // Default to Saudi Arabia
+  RxString mobileCode = '+966'.obs;
   RxBool isMobileValid = false.obs;
   RxBool isOtpSent = false.obs;
-  RxBool isOtpDisabled = false.obs; // Track if OTP is disabled by server
+  RxBool isOtpDisabled = false.obs;
   RxString otp = ''.obs;
   RxBool isOtpValid = false.obs;
   RxInt expiresInMinutes = 10.obs;
+
+  /// Clean NSN for API calls (no trunk prefix 0).
+  /// "01099613699" → "1099613699"
+  String? get cleanMobile => PhoneValidator.getNsn(
+        rawInput: mobileController.text,
+        dialCode: mobileCode.value,
+      );
+
+  /// Full normalized format: 201099613699
+  String? get normalizedMobile => PhoneValidator.getNormalizedForApi(
+        rawInput: mobileController.text,
+        dialCode: mobileCode.value,
+      );
 
   get onSendOtp => sendOtpProcess();
   get onVerifyOtp => verifyOtpProcess();
@@ -44,22 +57,10 @@ class OtpLoginController extends GetxController {
   }
 
   void _validateMobile() {
-    try {
-      if (mobileController.text.isEmpty) {
-        isMobileValid.value = false;
-        return;
-      }
-
-      // Parse phone number with country code
-      final phoneNumber = PhoneNumber.parse(
-        mobileCode.value + mobileController.text,
-      );
-
-      // Validate phone number
-      isMobileValid.value = phoneNumber.isValid();
-    } catch (e) {
-      isMobileValid.value = false;
-    }
+    isMobileValid.value = PhoneValidator.isValid(
+      rawInput: mobileController.text,
+      dialCode: mobileCode.value,
+    );
   }
 
   final _isLoading = false.obs;
@@ -68,8 +69,6 @@ class OtpLoginController extends GetxController {
   final _isResending = false.obs;
   bool get isResending => _isResending.value;
 
-  // Send OTP to user's mobile
-  // If OTP is disabled (otp_disabled: true), directly login without OTP
   sendOtpProcess() async {
     if (!isMobileValid.value) {
       Get.snackbar(
@@ -84,23 +83,18 @@ class OtpLoginController extends GetxController {
 
     final result = await AuthServices.sendUserOtp(
       mobileCode: mobileCode.value,
-      mobile: mobileController.text,
+      mobile: cleanMobile ?? mobileController.text, // ← cleaned
       isLoading: _isLoading,
     );
 
     if (result != null) {
-      // Update expires time from server response
       expiresInMinutes.value = result.expiresInMinutes;
-      
-      // Check if OTP is disabled - direct login without OTP
+
       if (result.otpDisabled) {
         log.i('OTP is disabled, proceeding with direct login...');
         isOtpDisabled.value = true;
-        
-        // Call direct login (verify endpoint without OTP code)
         await _loginDirectWithoutOtp();
       } else {
-        // OTP is enabled - show OTP input screen
         log.i('OTP is enabled, waiting for user to enter OTP...');
         isOtpDisabled.value = false;
         isOtpSent.value = true;
@@ -116,13 +110,15 @@ class OtpLoginController extends GetxController {
     }
   }
 
-  // Direct login without OTP (when OTP is disabled)
   Future<void> _loginDirectWithoutOtp() async {
-    log.i('Attempting direct login without OTP for mobile: ${mobileCode.value}${mobileController.text}');
-    
+    final phone = normalizedMobile ??
+        '${mobileCode.value}${mobileController.text}';
+
+    log.i('Attempting direct login without OTP for mobile: $phone');
+
     final loginResult = await AuthServices.loginViaMobileWithoutOtp(
       mobileCode: mobileCode.value,
-      mobile: mobileController.text,
+      mobile: cleanMobile ?? mobileController.text, // ← cleaned
       isLoading: _isLoading,
     );
 
@@ -130,39 +126,31 @@ class OtpLoginController extends GetxController {
 
     if (loginResult != null) {
       log.i('Direct login successful!');
-      // Clear form after successful login
       mobileController.clear();
       otpController.clear();
       otp.value = '';
       isOtpSent.value = false;
       isOtpDisabled.value = false;
-      // Navigation is handled in AuthServices.loginViaMobileWithoutOtp
     } else {
       log.e('Direct login failed');
-      CustomSnackBar.error(
-        'Failed to login. Please try again.',
-      );
+      CustomSnackBar.error('Failed to login. Please try again.');
     }
   }
 
-  // Resend OTP
   resendOtpProcess() async {
-    if (!isMobileValid.value) {
-      return;
-    }
+    if (!isMobileValid.value) return;
 
     _isResending.value = true;
 
     final result = await AuthServices.sendUserOtp(
       mobileCode: mobileCode.value,
-      mobile: mobileController.text,
+      mobile: cleanMobile ?? mobileController.text, // ← cleaned
       isLoading: _isResending,
     );
 
     _isResending.value = false;
 
     if (result != null) {
-      // Check if OTP became disabled (edge case: server config changed)
       if (result.otpDisabled) {
         log.i('OTP disabled during resend, attempting direct login...');
         isOtpDisabled.value = true;
@@ -170,8 +158,7 @@ class OtpLoginController extends GetxController {
         await _loginDirectWithoutOtp();
         return;
       }
-      
-      // OTP still enabled - reset OTP input
+
       otp.value = '';
       otpController.clear();
       expiresInMinutes.value = result.expiresInMinutes;
@@ -183,7 +170,6 @@ class OtpLoginController extends GetxController {
     }
   }
 
-  // Verify OTP and login
   verifyOtpProcess() async {
     if (otp.value.length != 6) {
       Get.snackbar(
@@ -196,10 +182,9 @@ class OtpLoginController extends GetxController {
 
     _isLoading.value = true;
 
-    // Use new service with next_action support
     final response = await ProfileKycService.verifyOtpWithNextAction(
       mobileCode: mobileCode.value,
-      mobile: mobileController.text,
+      mobile: cleanMobile ?? mobileController.text, // ← cleaned
       otpCode: otp.value,
     );
 
@@ -207,38 +192,42 @@ class OtpLoginController extends GetxController {
 
     if (response != null && response.success && response.data != null) {
       final data = response.data!;
-      
-      // Save userId to LocalStorage
+
       await LocalStorage.save(
         userId: data.userInfo?.id ?? 0,
         token: data.token,
         kycStatus: data.kycStatus,
         isLoggedIn: true,
       );
-      
-      log.i('[OtpLoginController] User logged in via OTP: ${data.userInfo!.id}');
-      
-      // Connect to realtime service for push notifications
+
+      log.i(
+        '[OtpLoginController] User logged in via OTP: ${data.userInfo!.id}',
+      );
+
       try {
         final realtime = RealtimeService();
         await realtime.init();
         await realtime.subscribeToChannel('all-users');
         if (data.userInfo != null && data.userInfo!.id > 0) {
-          await realtime.subscribeToChannel('user-notification-${data.userInfo!.id}');
-          log.i('[OtpLoginController] Connected to realtime service for user ${data.userInfo!.id}');
+          await realtime.subscribeToChannel(
+            'user-notification-${data.userInfo!.id}',
+          );
+          log.i(
+            '[OtpLoginController] Connected to realtime service for user ${data.userInfo!.id}',
+          );
         }
         await realtime.connect();
       } catch (e) {
-        log.e('[OtpLoginController] Failed to connect realtime service: $e');
+        log.e(
+          '[OtpLoginController] Failed to connect realtime service: $e',
+        );
       }
-      
-      // Clear form
+
       mobileController.clear();
       otpController.clear();
       otp.value = '';
       isOtpSent.value = false;
 
-      // Use NextActionGuard to handle routing based on next_action
       await NextActionGuard.handlePostAuth(data);
     } else {
       CustomSnackBar.error(

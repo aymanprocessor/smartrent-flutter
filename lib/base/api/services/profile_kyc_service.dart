@@ -38,6 +38,14 @@ class ProfileKycService {
       if (response.statusCode == 200) {
         final jsonData = jsonDecode(response.body);
         return OtpVerifyResponseModel.fromJson(jsonData);
+      } else {
+        // Log error response body for debugging
+        log.e('OTP verify failed with status ${response.statusCode}');
+        log.e('Response body: ${response.body}');
+        try {
+          final errorData = jsonDecode(response.body) as Map<String, dynamic>;
+          log.e('Error message: ${errorData['message'] ?? errorData['error'] ?? 'Unknown error'}');
+        } catch (_) {}
       }
       
       return null;
@@ -74,6 +82,13 @@ class ProfileKycService {
       if (response.statusCode == 200) {
         final jsonData = jsonDecode(response.body);
         return ProfileStatusModel.fromJson(jsonData);
+      } else {
+        log.e('getProfileStatus failed with status ${response.statusCode}');
+        log.e('Response body: ${response.body}');
+        try {
+          final errorData = jsonDecode(response.body) as Map<String, dynamic>;
+          log.e('Error message: ${errorData['message'] ?? errorData['error'] ?? 'Unknown error'}');
+        } catch (_) {}
       }
       
       return null;
@@ -119,6 +134,13 @@ class ProfileKycService {
       if (response.statusCode == 200) {
         final jsonData = jsonDecode(response.body);
         return ProfileCompleteResponseModel.fromJson(jsonData);
+      } else {
+        log.e('completeProfile failed with status ${response.statusCode}');
+        log.e('Response body: ${response.body}');
+        try {
+          final errorData = jsonDecode(response.body) as Map<String, dynamic>;
+          log.e('Error message: ${errorData['message'] ?? errorData['error'] ?? 'Unknown error'}');
+        } catch (_) {}
       }
       
       return null;
@@ -155,6 +177,13 @@ class ProfileKycService {
       if (response.statusCode == 200) {
         final jsonData = jsonDecode(response.body);
         return KycFieldsResponseModel.fromJson(jsonData);
+      } else {
+        log.e('getKycFields failed with status ${response.statusCode}');
+        log.e('Response body: ${response.body}');
+        try {
+          final errorData = jsonDecode(response.body) as Map<String, dynamic>;
+          log.e('Error message: ${errorData['message'] ?? errorData['error'] ?? 'Unknown error'}');
+        } catch (_) {}
       }
       
       return null;
@@ -209,6 +238,13 @@ class ProfileKycService {
       if (response.statusCode == 200) {
         final jsonData = jsonDecode(response.body);
         return KycSubmitResponseModel.fromJson(jsonData);
+      } else {
+        log.e('submitKyc failed with status ${response.statusCode}');
+        log.e('Response body: ${response.body}');
+        try {
+          final errorData = jsonDecode(response.body) as Map<String, dynamic>;
+          log.e('Error message: ${errorData['message'] ?? errorData['error'] ?? 'Unknown error'}');
+        } catch (_) {}
       }
       
       return null;

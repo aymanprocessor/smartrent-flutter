@@ -550,7 +550,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get appLLimited => 'محدود';
 
   @override
-  String get appLInsuranceIncluded => 'التأمين مشمول';
+  String get appLInsuranceIncluded => 'التأمين مدرج';
 
   @override
   String get appLAutomatic => 'أوتوماتيك';
@@ -628,6 +628,25 @@ class AppLocalizationsAr extends AppLocalizations {
   String get appLQuantity => 'الكمية';
 
   @override
+  String get appLSelectInsurance => 'اختر التأمين';
+
+  @override
+  String get appLDailyInsurance => 'التأمين اليومي';
+
+  @override
+  String get appLExcessLiabilityInsurance => 'تأمين قسط التحمل';
+
+  @override
+  String get appLInsuranceType => 'التأمين';
+
+  @override
+  String get appLInsuranceAmount => 'مبلغ التأمين';
+
+  @override
+  String get appLInsuranceWarning =>
+      'تنبيه: لقد قمت باختيار تأمين قسط التحمل. يرجى العلم بأن قيمة قسط التحمل الخاص بهذه الفئة من السيارات هي 3,500.00 ريال فقط، وتطبق في حالات الحوادث وفقاً للشروط والأحكام.';
+
+  @override
   String get appLSnappedOutsideAllowed =>
       'الموقع الذي اخترته كان خارج النطاق المسموح — تم تقريبه إلى أقرب نقطة مسموح بها.';
 
@@ -647,6 +666,14 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get appLSelectedLocation => 'الموقع المختار:';
+
+  @override
+  String get appLKmAllowanceLabel => 'حد المسافة المسموح';
+
+  @override
+  String appLKmAllowanceMessage(Object charge, Object km) {
+    return 'الكيلومترات المسموح بها هي $km كم، وفي حال تجاوزها يتم احتساب $charge SAR لكل كيلومتر إضافي';
+  }
 
   @override
   String appLDistanceLabel(Object km) {
@@ -1003,6 +1030,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get appLPriceBreakdown => 'تفاصيل السعر';
 
   @override
+  String get appLInsuranceDaily => 'التأمين اليومي';
+
+  @override
+  String get appLInsuranceExcessLiability => 'تأمين قسط التحمل';
+
+  @override
   String get appLRentalSchedule => 'جدول الإيجار';
 
   @override
@@ -1079,4 +1112,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get appLAllow => 'السماح';
+
+  @override
+  String get appLOutOfDeliveryRange => 'خارج نطاق التوصيل';
 }

@@ -131,6 +131,12 @@ class HistoryDetailMobileScreen extends StatelessWidget {
               ],
             ),
 
+            // ── Rejection reason (backend `rejection_reason`, shown as-is)
+            if (controller.bookingRejectionReason != null) ...[
+              const SizedBox(height: _S.x2),
+              _RejectionReasonCard(reason: controller.bookingRejectionReason!),
+            ],
+
             // ── Delivery / Extension banners
             if (history.isDeliver != null || controller.hasPendingExtension) ...[
               const SizedBox(height: _S.x2),

@@ -1328,6 +1328,42 @@ abstract class AppLocalizations {
   /// **'Quantity'**
   String get appLQuantity;
 
+  /// No description provided for @appLSelectInsurance.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Insurance'**
+  String get appLSelectInsurance;
+
+  /// No description provided for @appLDailyInsurance.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily Insurance'**
+  String get appLDailyInsurance;
+
+  /// No description provided for @appLExcessLiabilityInsurance.
+  ///
+  /// In en, this message translates to:
+  /// **'Excess Liability Insurance'**
+  String get appLExcessLiabilityInsurance;
+
+  /// No description provided for @appLInsuranceType.
+  ///
+  /// In en, this message translates to:
+  /// **'Insurance'**
+  String get appLInsuranceType;
+
+  /// No description provided for @appLInsuranceAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Insurance Amount'**
+  String get appLInsuranceAmount;
+
+  /// No description provided for @appLInsuranceWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Warning: You selected Excess Liability Insurance'**
+  String get appLInsuranceWarning;
+
   /// No description provided for @appLSnappedOutsideAllowed.
   ///
   /// In en, this message translates to:
@@ -1363,6 +1399,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Selected Location:'**
   String get appLSelectedLocation;
+
+  /// No description provided for @appLKmAllowanceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'KM Allowance'**
+  String get appLKmAllowanceLabel;
+
+  /// No description provided for @appLKmAllowanceMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The allowed kilometers are {km} km, and if exceeded, will be charged {charge} SAR/km for each additional kilometer.'**
+  String appLKmAllowanceMessage(Object charge, Object km);
 
   /// No description provided for @appLDistanceLabel.
   ///
@@ -2046,6 +2094,18 @@ abstract class AppLocalizations {
   /// **'Price Breakdown'**
   String get appLPriceBreakdown;
 
+  /// No description provided for @appLInsuranceDaily.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily Insurance'**
+  String get appLInsuranceDaily;
+
+  /// No description provided for @appLInsuranceExcessLiability.
+  ///
+  /// In en, this message translates to:
+  /// **'Excess Liability Insurance'**
+  String get appLInsuranceExcessLiability;
+
   /// No description provided for @appLRentalSchedule.
   ///
   /// In en, this message translates to:
@@ -2195,6 +2255,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Allow'**
   String get appLAllow;
+
+  /// No description provided for @appLOutOfDeliveryRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Out of delivery range'**
+  String get appLOutOfDeliveryRange;
 }
 
 class _AppLocalizationsDelegate

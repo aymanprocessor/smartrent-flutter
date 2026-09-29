@@ -312,6 +312,12 @@ class I18nService extends GetxController {
     'appLTax': (l) => l.appLTax,
     'appLTotal': (l) => l.appLTotal,
     'appLQuantity': (l) => l.appLQuantity,
+    'appLSelectInsurance': (l) => l.appLSelectInsurance,
+    'appLDailyInsurance': (l) => l.appLDailyInsurance,
+    'appLExcessLiabilityInsurance': (l) => l.appLExcessLiabilityInsurance,
+    'appLInsuranceType': (l) => l.appLInsuranceType,
+    'appLInsuranceAmount': (l) => l.appLInsuranceAmount,
+    'appLInsuranceWarning': (l) => l.appLInsuranceWarning,
     'appLSnappedOutsideAllowed': (l) => l.appLSnappedOutsideAllowed,
     'appLSnappedShort': (l) => l.appLSnappedShort,
     'appLCurrentLocation': (l) => l.appLCurrentLocation,
@@ -397,6 +403,8 @@ class I18nService extends GetxController {
     'appLReturnLabel': (l) => l.appLReturnLabel,
     'appLLocationNotSpecified': (l) => l.appLLocationNotSpecified,
     'appLPriceBreakdown': (l) => l.appLPriceBreakdown,
+    'appLInsuranceDaily': (l) => l.appLInsuranceDaily,
+    'appLInsuranceExcessLiability': (l) => l.appLInsuranceExcessLiability,
     'appLReceipt': (l) => l.appLReceipt,
     'appLBaseRental': (l) => l.appLBaseRental,
     'appLDeliveryFee': (l) => l.appLDeliveryFee,
@@ -411,6 +419,7 @@ class I18nService extends GetxController {
     'appLBranchName': (l) => l.appLBranchName,
     'appLOpenMap': (l) => l.appLOpenMap,
     'appLNotes': (l) => l.appLNotes,
+    'appLRejectionReason': (l) => l.appLRejectionReason,
     'appLBookingNotFound': (l) => l.appLBookingNotFound,
     'appLExtendBooking': (l) => l.appLExtendBooking,
     'appLExtensionPending': (l) => l.appLExtensionPending,
@@ -433,6 +442,8 @@ class I18nService extends GetxController {
     'appLLocationPermissionTitle': (l) => l.appLLocationPermissionTitle,
     'appLLocationPermissionMessage': (l) => l.appLLocationPermissionMessage,
     'appLAllow': (l) => l.appLAllow,
+    'appLOutOfDeliveryRange': (l) => l.appLOutOfDeliveryRange,
+    'appLKmAllowanceLabel': (l) => l.appLKmAllowanceLabel,
   };
   
   /// Change current language

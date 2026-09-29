@@ -15,6 +15,7 @@ if (keystorePropertiesFile.exists()) {
 
 android {
     namespace = "com.next.smartrent"
+        ndkVersion = "28.2.13676358"
     compileSdk = flutter.compileSdkVersion
 
     compileOptions {
@@ -75,11 +76,6 @@ dependencies {
     // Pusher Beams will use the pusher_beams Flutter plugin
     // Removed: implementation 'com.pusher:push-notifications-android:1.9.0'
 
-    // Add language package you need to use
-    implementation 'com.google.mlkit:text-recognition-chinese:16.0.0'
-    implementation 'com.google.mlkit:text-recognition-devanagari:16.0.0'
-    implementation 'com.google.mlkit:text-recognition-japanese:16.0.0'
-    implementation 'com.google.mlkit:text-recognition-korean:16.0.0'
 }
 
 flutter {

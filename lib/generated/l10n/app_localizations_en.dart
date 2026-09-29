@@ -626,6 +626,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appLQuantity => 'Quantity';
 
   @override
+  String get appLSelectInsurance => 'Select Insurance';
+
+  @override
+  String get appLDailyInsurance => 'Daily Insurance';
+
+  @override
+  String get appLExcessLiabilityInsurance => 'Excess Liability Insurance';
+
+  @override
+  String get appLInsuranceType => 'Insurance';
+
+  @override
+  String get appLInsuranceAmount => 'Insurance Amount';
+
+  @override
+  String get appLInsuranceWarning =>
+      'Warning: You selected Excess Liability Insurance';
+
+  @override
   String get appLSnappedOutsideAllowed =>
       'Selected location was outside the allowed area — snapped to nearest allowed point.';
 
@@ -645,6 +664,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get appLSelectedLocation => 'Selected Location:';
+
+  @override
+  String get appLKmAllowanceLabel => 'KM Allowance';
+
+  @override
+  String appLKmAllowanceMessage(Object charge, Object km) {
+    return 'The allowed kilometers are $km km, and if exceeded, will be charged $charge SAR/km for each additional kilometer.';
+  }
 
   @override
   String appLDistanceLabel(Object km) {
@@ -1001,6 +1028,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appLPriceBreakdown => 'Price Breakdown';
 
   @override
+  String get appLInsuranceDaily => 'Daily Insurance';
+
+  @override
+  String get appLInsuranceExcessLiability => 'Excess Liability Insurance';
+
+  @override
   String get appLRentalSchedule => 'Rental Schedule';
 
   @override
@@ -1077,4 +1110,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get appLAllow => 'Allow';
+
+  @override
+  String get appLOutOfDeliveryRange => 'Out of delivery range';
 }

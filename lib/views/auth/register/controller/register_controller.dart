@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:phone_numbers_parser/phone_numbers_parser.dart';
-
 import '../../../../base/api/services/auth_services.dart';
-// OTP removed: Strings and Routes imports no longer needed
-// import '../../../../languages/strings.dart';
-// import '../../../../routes/routes.dart';
+import '../../../../base/utils/phone_validator.dart';
 
 class RegisterController extends GetxController {
   final firstNameController = TextEditingController();
@@ -15,15 +11,18 @@ class RegisterController extends GetxController {
   final passwordController = TextEditingController();
 
   RxBool agree = false.obs;
-  RxString mobileCode = '+966'.obs; // Default to Saudi Arabia
-  // OTP verification removed: isMobileVerified removed
+  RxString mobileCode = '+966'.obs;
 
   get onRegistration => registrationProcess();
-  // OTP removed: onSendOtp removed
   get onPrivacyPolicy => '';
 
   RxBool isFormValid = false.obs;
   RxBool isMobileValid = false.obs;
+
+  String? get cleanMobile => PhoneValidator.getNsn(
+        rawInput: mobileController.text,
+        dialCode: mobileCode.value,
+      );
 
   @override
   void onInit() {
@@ -37,7 +36,6 @@ class RegisterController extends GetxController {
 
   @override
   void onClose() {
-    // Remove listeners and dispose controllers to avoid callbacks after dispose
     try {
       mobileController.removeListener(_updateFormValidity);
       mobileController.removeListener(_validateMobile);
@@ -56,22 +54,10 @@ class RegisterController extends GetxController {
   }
 
   void _validateMobile() {
-    try {
-      if (mobileController.text.isEmpty) {
-        isMobileValid.value = false;
-        return;
-      }
-
-      // Parse phone number with country code
-      final phoneNumber = PhoneNumber.parse(
-        mobileCode.value + mobileController.text,
-      );
-
-      // Validate phone number
-      isMobileValid.value = phoneNumber.isValid();
-    } catch (e) {
-      isMobileValid.value = false;
-    }
+    isMobileValid.value = PhoneValidator.isValid(
+      rawInput: mobileController.text,
+      dialCode: mobileCode.value,
+    );
   }
 
   void _updateFormValidity() {
@@ -81,29 +67,22 @@ class RegisterController extends GetxController {
         firstNameController.text.isNotEmpty &&
         lastNameController.text.isNotEmpty &&
         isMobileValid.value;
-        // OTP removed: isMobileVerified check removed
   }
 
   final _isLoading = false.obs;
   bool get isLoading => _isLoading.value;
 
-  // OTP removed: _isOtpLoading and isOtpLoading removed
-  // OTP removed: sendOtpAndNavigate removed
-
-  // Complete registration (OTP check removed)
   registrationProcess() async {
-    // OTP removed: no isMobileVerified check
-
     return AuthServices.registrationProcess(
       firstName: firstNameController.text,
       lastName: lastNameController.text,
       mobileCode: mobileCode.value,
-      mobile: mobileController.text,
+      mobile: cleanMobile ?? mobileController.text, // ← cleaned
       email: emailAddressController.text.isEmpty
           ? null
           : emailAddressController.text,
       password: passwordController.text,
-      country: 'Saudi Arabia', // Default country
+      country: 'Saudi Arabia',
       isLoading: _isLoading,
     );
   }

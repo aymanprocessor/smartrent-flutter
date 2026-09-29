@@ -40,12 +40,21 @@ class BookingController extends GetxController {
   RxString pricingType = ''.obs; // 'per_day' or 'per_km'
   RxString pricingUnit = ''.obs; // 'day', 'km', etc.
   RxDouble deliveryCharge = 0.0.obs;
+  Rxn<double> deliveryDistance = Rxn<double>();
+  Rxn<String> deliverySource = Rxn<String>();
   RxDouble subtotal = 0.0.obs;
   RxDouble taxAmount = 0.0.obs;
   RxDouble total = 0.0.obs;
   RxDouble effectivePrice = 0.0.obs;
   RxBool isPriceLoading = false.obs;
   RxString pricingTier = ''.obs;
+  
+  // Insurance selection and amounts
+  Rxn<String> selectedInsuranceType = Rxn<String>(); // 'daily' or 'excess_liability'
+  RxDouble insuranceDailyAmount = 0.0.obs;
+  RxDouble insuranceSubtotal = 0.0.obs;
+  RxDouble insuranceExcessLiabilityAmount = 0.0.obs;
+  Rxn<Map<String, String>> insuranceMessage = Rxn<Map<String, String>>();
 
   Timer? _debounceTimer;
 
@@ -86,14 +95,40 @@ class BookingController extends GetxController {
     ever(pickupDate, (_) => _updateFormValidity());
     ever(pickupTime, (_) => _updateFormValidity());
     
-    // Listen to pickup location changes
-    ever(pickupLocation, (_) => _updateFormValidity());
+    // Listen to pickup location changes — trigger price estimate when location is set
+    ever(pickupLocation, (location) {
+      debugPrint('[BookingController] pickupLocation changed: ${location?.address}');
+      _updateFormValidity();
+      if (isDeliver.value) {
+        debugPrint('[BookingController] Delivery enabled, scheduling price estimate...');
+        _scheduleDebounce();
+      }
+    });
     
     // Recalculate when delivery toggle changes
-    ever(isDeliver, (_) {
+    ever(isDeliver, (deliver) {
+      debugPrint('[BookingController] isDeliver changed: $deliver');
       _updateFormValidity();
       _scheduleDebounce();
     });
+    
+    // Debug: Track delivery charge changes
+    ever(deliveryCharge, (charge) {
+      debugPrint('[BookingController] deliveryCharge updated: $charge');
+    });
+    
+    // Debug: Track delivery source changes
+    ever(deliverySource, (source) {
+      debugPrint('[BookingController] deliverySource updated: $source');
+    });
+    
+    // Listen to insurance type selection changes — trigger price estimate
+    ever(selectedInsuranceType, (type) {
+      debugPrint('[BookingController] selectedInsuranceType changed: $type');
+      _updateFormValidity();
+      _scheduleDebounce();
+    });
+    
     // Debug: print validity changes to help trace why Continue is disabled
     ever(isFormValid, (val) {
       debugPrint('BookingController.isFormValid changed: \\$val');
@@ -104,6 +139,9 @@ class BookingController extends GetxController {
       debugPrint('  pickupTime: "' + pickupTime.value + '"');
       debugPrint('  isDeliver: ' + isDeliver.value.toString());
       debugPrint('  pickupLocation: ' + (pickupLocation.value == null ? 'null' : pickupLocation.value!.address));
+      debugPrint('  deliveryCharge: ' + deliveryCharge.value.toString());
+      debugPrint('  deliverySource: ' + (deliverySource.value ?? 'null'));
+      debugPrint('  selectedInsuranceType: ' + (selectedInsuranceType.value ?? 'null'));
     });
   }
 
@@ -138,8 +176,12 @@ class BookingController extends GetxController {
         pickupDate.value.isNotEmpty &&
         pickupTime.value.isNotEmpty &&
         _isPickupDateTimeValid() &&
+        // insurance must be selected (daily or excess_liability)
+        selectedInsuranceType.value != null && selectedInsuranceType.value!.isNotEmpty &&
         // pickup location is required only when isDeliver is true
-      (isDeliver.value ? pickupLocation.value != null : true);
+        (isDeliver.value ? pickupLocation.value != null : true) &&
+        // block checkout if delivery is out of all zones
+        !(isDeliver.value && deliverySource.value == 'none');
   }
 
   /// Validates that the selected pickup date and time is in the future
@@ -182,11 +224,18 @@ class BookingController extends GetxController {
   }
 
   Future<void> _fetchPriceEstimate() async {
-    if (selectedCar.value == null) return;
+    if (selectedCar.value == null) {
+      debugPrint('[PriceEstimate] Skipped: selectedCar is null');
+      return;
+    }
+    
     final int? days = int.tryParse(quantityController.text);
     if (days == null || days <= 0) {
+      debugPrint('[PriceEstimate] Skipped: invalid rental days: ${quantityController.text}');
       subtotal.value = 0;
       deliveryCharge.value = 0;
+      deliveryDistance.value = null;
+      deliverySource.value = null;
       taxAmount.value = 0;
       total.value = 0;
       effectivePrice.value = 0;
@@ -194,25 +243,81 @@ class BookingController extends GetxController {
       return;
     }
 
+    final requestBody = {
+      'car_id': selectedCar.value!.id,
+      'rental_days': days,
+      'with_delivery': isDeliver.value,
+      if (isDeliver.value && pickupLocation.value != null) ...{
+        'user_lat': pickupLatitude.value,
+        'user_lng': pickupLongitude.value,
+      },
+      // Add insurance type to request (required)
+      if (selectedInsuranceType.value != null && selectedInsuranceType.value!.isNotEmpty)
+        'insurance_type': selectedInsuranceType.value,
+    };
+    
+    debugPrint('[PriceEstimate] Calling API with body: $requestBody');
+
     await RequestProcess().request<PriceEstimateModel>(
       fromJson: PriceEstimateModel.fromJson,
       apiEndpoint: ApiEndpoint.priceEstimate,
       isLoading: isPriceLoading,
       method: HttpMethod.POST,
       showErrorMessage: false,
-      body: {
-        'car_id': selectedCar.value!.id,
-        'rental_days': days,
-        'with_delivery': isDeliver.value,
-      },
+      body: requestBody,
       onSuccess: (estimate) {
-        if (isClosed || estimate == null) return;
+        if (isClosed) {
+          debugPrint('[PriceEstimate] Controller is closed, ignoring response');
+          return;
+        }
+        if (estimate == null) {
+          debugPrint('[PriceEstimate] Response model is null');
+          return;
+        }
+        
+        debugPrint('[PriceEstimate] ✅ API Success:');
+        debugPrint('  - subtotal: ${estimate.subtotal}');
+        debugPrint('  - deliveryFee: ${estimate.deliveryFee}');
+        debugPrint('  - deliveryDistance: ${estimate.deliveryDistance}');
+        debugPrint('  - deliverySource: ${estimate.deliverySource}');
+        debugPrint('  - taxAmount: ${estimate.taxAmount}');
+        debugPrint('  - total: ${estimate.total}');
+        debugPrint('  - insuranceType: ${estimate.insuranceType}');
+        debugPrint('  - insuranceDailyAmount: ${estimate.insuranceDailyAmount}');
+        debugPrint('  - insuranceSubtotal: ${estimate.insuranceSubtotal}');
+        debugPrint('  - insuranceExcessLiabilityAmount: ${estimate.insuranceExcessLiabilityAmount}');
+        debugPrint('  - insuranceMessage: ${estimate.insuranceMessage}');
+        
         subtotal.value = estimate.subtotal;
-        deliveryCharge.value = estimate.deliveryFee;
+        deliveryCharge.value = estimate.deliveryFee ?? 0.0;
+        deliveryDistance.value = estimate.deliveryDistance;
+        deliverySource.value = estimate.deliverySource;
         taxAmount.value = estimate.taxAmount;
         total.value = estimate.total;
         effectivePrice.value = estimate.rateUsed;
         pricingTier.value = estimate.pricingTier;
+        
+        // Update insurance fields from response
+        insuranceDailyAmount.value = estimate.insuranceDailyAmount ?? 0.0;
+        insuranceSubtotal.value = estimate.insuranceSubtotal ?? 0.0;
+        insuranceExcessLiabilityAmount.value = estimate.insuranceExcessLiabilityAmount ?? 0.0;
+        if (estimate.insuranceMessage != null) {
+          insuranceMessage.value = estimate.insuranceMessage;
+        }
+        
+        _updateFormValidity();
+      },
+      onError: (error) {
+        debugPrint('[PriceEstimate] ❌ API Error: $error');
+        // Reset prices on error to force user to fix the issue
+        if (!isClosed) {
+          subtotal.value = 0;
+          deliveryCharge.value = 0;
+          deliveryDistance.value = null;
+          deliverySource.value = null;
+          taxAmount.value = 0;
+          total.value = 0;
+        }
       },
     );
   }
@@ -327,6 +432,10 @@ class BookingController extends GetxController {
       'car_name': '${selectedCar.value?.make} ${selectedCar.value?.model}',
       'currency': selectedCar.value?.currency ?? 'SAR',
       'token': bookingToken,  // Booking token from vendor cars API or fallback
+      // Insurance
+      'insurance_type': selectedInsuranceType.value,
+      'insurance_daily_amount': insuranceDailyAmount.value,
+      'insurance_excess_liability_amount': insuranceExcessLiabilityAmount.value,
     };
   }
 

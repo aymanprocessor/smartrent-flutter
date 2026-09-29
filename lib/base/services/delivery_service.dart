@@ -1,9 +1,12 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'dart:io';
 import 'package:get/get.dart';
 import '../widgets/logger.dart';
 import '../api/endpoint/api_endpoint.dart';
 import '../../views/all_vendors_dashboard/model/delivery_check_model.dart';
+import '../../views/all_vendors_dashboard/model/delivery_zones_model.dart';
+import '../utils/local_storage.dart';
 
 final log = logger(DeliveryService);
 
@@ -13,6 +16,10 @@ class DeliveryService extends GetxService {
   // Cache delivery results per branch
   // Key: "branchId_lat_lng" (rounded to 2 decimals)
   final _deliveryCache = <String, DeliveryCheckResponse>{}.obs;
+
+  // Cache delivery zones per branch
+  // Key: branchId (as string)
+  final _deliveryZonesCache = <String, DeliveryZonesResponse>{}.obs;
 
   /// Check delivery availability for a specific branch
   Future<DeliveryCheckResponse?> checkDeliveryAvailability({
@@ -88,6 +95,56 @@ class DeliveryService extends GetxService {
     return results;
   }
 
+  /// Fetch delivery zones and coverage for a specific branch
+  /// Returns null on error; returns empty zones list if branch has no delivery zones configured
+  Future<DeliveryZonesResponse?> fetchDeliveryZones({
+    required int branchId,
+  }) async {
+    try {
+      final cacheKey = branchId.toString();
+
+      // Return cached result if available
+      if (_deliveryZonesCache.containsKey(cacheKey)) {
+        log.i('Returning cached delivery zones for branch $branchId');
+        return _deliveryZonesCache[cacheKey];
+      }
+
+      // Build URL with branchId parameter
+      final endpoint = ApiEndpoint.deliveryZones;
+      final url = Uri.parse(
+        '${ApiConfig.baseUrl}${endpoint.path.replaceAll('{branchId}', branchId.toString())}',
+      );
+
+      // Get auth token
+      final accessToken = LocalStorage.token;
+
+      final response = await http.get(
+        url,
+        headers: {
+          HttpHeaders.acceptHeader: "application/json",
+          HttpHeaders.contentTypeHeader: "application/json",
+          HttpHeaders.authorizationHeader: "Bearer $accessToken",
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final result = deliveryZonesResponseFromJson(response.body);
+
+        // Cache the result
+        _deliveryZonesCache[cacheKey] = result;
+
+        log.i('Delivery zones for branch $branchId: ${result.status}, zones: ${result.data?.totalZones ?? 0}');
+        return result;
+      } else {
+        log.e('Delivery zones fetch failed with status: ${response.statusCode}');
+        return null;
+      }
+    } catch (e) {
+      log.e('Error fetching delivery zones: $e');
+      return null;
+    }
+  }
+
   String _getCacheKey(int branchId, double lat, double lng) {
     final roundedLat = (lat * 100).round() / 100;
     final roundedLng = (lng * 100).round() / 100;
@@ -97,12 +154,14 @@ class DeliveryService extends GetxService {
   /// Clear delivery cache
   void clearCache() {
     _deliveryCache.clear();
+    _deliveryZonesCache.clear();
     log.i('Delivery cache cleared');
   }
 
   /// Clear cache for specific branch
   void clearBranchCache(int branchId) {
     _deliveryCache.removeWhere((key, value) => key.startsWith('$branchId'));
+    _deliveryZonesCache.remove(branchId.toString());
     log.i('Cleared cache for branch $branchId');
   }
 }

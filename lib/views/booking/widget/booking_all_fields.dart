@@ -40,7 +40,11 @@ class BookingAllFields extends GetView<BookingController> {
         const SizedBox(height: 14),
         _buildDeliveryCard(),
         const SizedBox(height: 14),
+        _buildInsuranceCard(),
+        const SizedBox(height: 14),
         _buildPricingCard(),
+        const SizedBox(height: 14),
+        _buildKmAllowanceCard(),
         const SizedBox(height: 14),
         _buildNoteCard(),
         const SizedBox(height: 8),
@@ -100,24 +104,44 @@ class BookingAllFields extends GetView<BookingController> {
     );
   }
 
-  // ── Quantity + date + time ──────────────────────────────────────────────
+    // ── Quantity + date + time ──────────────────────────────────────────────
   Widget _quantityAndDateTime() {
     return Column(
       children: [
-        // Quantity field
-        Obx(() => _styledInput(
-          icon: controller.pricingType.value == 'per_day'
-              ? Icons.calendar_month_rounded
-              : Icons.route_rounded,
-          child: PrimaryInputWidget(
-            textInputType: TextInputType.number,
-            controller: controller.quantityController,
-            label: controller.getQuantityLabel(),
-            hintText: controller.getQuantityHint(),
-            showBorderSide: false,
-            skipEnterText: true,
-          ),
-        )),
+        // Quantity field — counter for per_day, text input for per_km
+        Obx(() {
+          if (controller.pricingType.value == 'per_day') {
+            return CounterInput(
+              controller: controller.quantityController,
+              label: controller.getQuantityLabel(),
+              min: 1,
+              max: 90,
+              suffixBuilder: (count) {
+                final isArabic =
+                    DynamicLanguage.selectedLanguage.value == 'ar';
+                if (isArabic) {
+                  if (count == 1) return 'يوم';
+                  if (count == 2) return 'يومان';
+                  if (count <= 10) return 'أيام';
+                  return 'يومًا';
+                }
+                return count == 1 ? 'Day' : 'Days';
+              },
+            );
+          }
+          // per_km or unknown — keep text input
+          return _styledInput(
+            icon: Icons.route_rounded,
+            child: PrimaryInputWidget(
+              textInputType: TextInputType.number,
+              controller: controller.quantityController,
+              label: controller.getQuantityLabel(),
+              hintText: controller.getQuantityHint(),
+              showBorderSide: false,
+              skipEnterText: true,
+            ),
+          );
+        }),
         const SizedBox(height: 12),
         // Pickup date
         _styledInput(
@@ -143,7 +167,6 @@ class BookingAllFields extends GetView<BookingController> {
       ],
     );
   }
-
   Widget _styledInput({required IconData icon, required Widget child}) {
     return Container(
       decoration: BoxDecoration(
@@ -217,13 +240,24 @@ class BookingAllFields extends GetView<BookingController> {
                             color: Color(0xFF0D1B2A),
                           ),
                         ),
-                        Text(
-                          DynamicLanguage.key(Strings.deliveryCharge),
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Color(0xFF6B7A8D),
+                        if (controller.deliverySource.value == 'zone' &&
+                            controller.deliveryDistance.value != null)
+                          Text(
+                            '${controller.deliveryDistance.value!.toStringAsFixed(1)} km',
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: Color(0xFF0B5FA5),
+                              fontWeight: FontWeight.w600,
+                            ),
+                          )
+                        else
+                          Text(
+                            DynamicLanguage.key(Strings.deliveryCharge),
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Color(0xFF6B7A8D),
+                            ),
                           ),
-                        ),
                       ],
                     ),
                   ),
@@ -273,6 +307,39 @@ class BookingAllFields extends GetView<BookingController> {
                 ],
               );
             }),
+            // Out-of-range warning (source == "none": zones exist but user is outside all)
+            Obx(() {
+              if (!controller.isDeliver.value) return const SizedBox.shrink();
+              if (controller.deliverySource.value != 'none') return const SizedBox.shrink();
+              return Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFF3E0),
+                    border: Border.all(color: const Color(0xFFFF9800)),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.warning_amber_rounded,
+                          color: Color(0xFFE65100), size: 18),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          DynamicLanguage.key(Strings.outOfDeliveryRange),
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: Color(0xFF7B4000),
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }),
           ],
         ),
       );
@@ -284,21 +351,41 @@ class BookingAllFields extends GetView<BookingController> {
     return Obx(() {
       final hasLocation = controller.pickupLocation.value != null;
       return GestureDetector(
-        onTap: () {
-          final vendorLoc = controller.selectedCar.value?.vendorLocation;
+        onTap: () async {
+          final selectedCar = controller.selectedCar.value;
+          if (selectedCar == null) return;
+
+          final vendorLoc = selectedCar.vendorLocation;
           LatLng? center;
           double? radiusMeters;
+
+          // Set center location if available
           if (vendorLoc != null && vendorLoc.latitude != null && vendorLoc.longitude != null) {
             center = LatLng(vendorLoc.latitude!, vendorLoc.longitude!);
-            if (vendorLoc.radiusKm != null) {
-              radiusMeters = vendorLoc.radiusKm! * 1000.0;
+          }
+
+          // Fetch delivery zones from API for coverage radius
+          if (selectedCar.branchId != null && center != null) {
+            final deliveryService = Get.find<DeliveryService>();
+            final zonesResponse = await deliveryService.fetchDeliveryZones(
+              branchId: selectedCar.branchId!,
+            );
+
+            if (zonesResponse != null && zonesResponse.isSuccess && zonesResponse.data?.coverage?.isValid == true) {
+              // Use coverage.max_km from API (convert km to meters)
+              radiusMeters = zonesResponse.data!.coverage!.maxKm! * 1000.0;
             }
           }
+
           Get.to(() => LocationPickerWidget(
             onLocationSelected: (location) {
+              debugPrint('[LocationPicker] Location selected: ${location.address}');
+              debugPrint('[LocationPicker] Coordinates: ${location.latitude}, ${location.longitude}');
               controller.pickupLocation.value = location;
               controller.pickupLatitude.value = location.latitude;
               controller.pickupLongitude.value = location.longitude;
+              debugPrint('[LocationPicker] Controller state updated');
+              debugPrint('[LocationPicker] isDeliver: ${controller.isDeliver.value}');
             },
             initialLocation: controller.pickupLocation.value,
             center: center,
@@ -398,6 +485,232 @@ class BookingAllFields extends GetView<BookingController> {
     });
   }
 
+  // ── Insurance card ────────────────────────────────────────────────────────
+  Widget _buildInsuranceCard() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF0B5FA5).withOpacity(0.06),
+            blurRadius: 18,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+            child: Row(
+              children: [
+                Container(
+                  width: 38,
+                  height: 38,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE8F5E9),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.shield_rounded,
+                    color: Color(0xFF4CAF50),
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  DynamicLanguage.key(Strings.appLSelectInsurance),
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF0D1B2A),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Divider(height: 1, color: const Color(0xFFE8ECF0), indent: 16, endIndent: 16),
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                // Daily Insurance Option
+                Obx(() => _buildInsuranceOption(
+                  label: DynamicLanguage.key(Strings.appLDailyInsurance),
+                  value: 'daily',
+                  isSelected: controller.selectedInsuranceType.value == 'daily',
+                  icon: Icons.today_rounded,
+                )),
+                const SizedBox(height: 12),
+                // Excess Liability Insurance Option
+                Obx(() => _buildInsuranceOption(
+                  label: DynamicLanguage.key(Strings.appLExcessLiabilityInsurance),
+                  value: 'excess_liability',
+                  isSelected: controller.selectedInsuranceType.value == 'excess_liability',
+                  icon: Icons.warning_rounded,
+                )),
+                const SizedBox(height: 12),
+                // Warning message for excess_liability
+                Obx(() {
+                  if (controller.selectedInsuranceType.value != 'excess_liability') {
+                    return const SizedBox.shrink();
+                  }
+                  return _buildInsuranceWarning();
+                }),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Build a single insurance option button
+  Widget _buildInsuranceOption({
+    required String label,
+    required String value,
+    required bool isSelected,
+    required IconData icon,
+  }) {
+    return GestureDetector(
+      onTap: () => controller.selectedInsuranceType.value = value,
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? const Color(0xFFE3F0FB)
+              : const Color(0xFFF8FAFD),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected
+                ? const Color(0xFF0B5FA5)
+                : const Color(0xFFDDE3EA),
+            width: 2,
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 24,
+              height: 24,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: isSelected
+                      ? const Color(0xFF0B5FA5)
+                      : const Color(0xFF9EAAB8),
+                  width: 2,
+                ),
+              ),
+              child: isSelected
+                  ? Container(
+                      margin: const EdgeInsets.all(4),
+                      decoration: const BoxDecoration(
+                        color: Color(0xFF0B5FA5),
+                        shape: BoxShape.circle,
+                      ),
+                    )
+                  : null,
+            ),
+            const SizedBox(width: 12),
+            Icon(
+              icon,
+              color: isSelected ? const Color(0xFF0B5FA5) : const Color(0xFF9EAAB8),
+              size: 20,
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                  color: isSelected
+                      ? const Color(0xFF0B5FA5)
+                      : const Color(0xFF6B7A8D),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Build insurance warning card for excess_liability
+  Widget _buildInsuranceWarning() {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFF3E0),
+        border: Border.all(color: const Color(0xFFFF9800), width: 1.5),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.warning_amber_rounded,
+                color: Color(0xFFE65100),
+                size: 18,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                DynamicLanguage.key(Strings.appLInsuranceWarning),
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF7B4000),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          // Display message based on app language
+          Obx(() {
+            String message = '';
+            if (controller.insuranceMessage.value != null) {
+              // Get current app language from DynamicLanguage
+              final currentLang = DynamicLanguage.selectedLanguage.value;
+              message = controller.insuranceMessage.value![currentLang] ??
+                  controller.insuranceMessage.value!['en'] ??
+                  '';
+            }
+            return Text(
+              message.isNotEmpty ? message : DynamicLanguage.key(Strings.appLInsuranceWarning),
+              style: const TextStyle(
+                fontSize: 12,
+                color: Color(0xFF7B4000),
+                height: 1.4,
+              ),
+            );
+          }),
+          const SizedBox(height: 8),
+          // Show insurance amount
+          Obx(() {
+            if (controller.insuranceExcessLiabilityAmount.value <= 0) {
+              return const SizedBox.shrink();
+            }
+            final currency = _cur(controller.selectedPricing.value?.currency);
+            return Text(
+              '${DynamicLanguage.key(Strings.appLInsuranceAmount)}: ${_smartPrice(controller.insuranceExcessLiabilityAmount.value)} $currency',
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFFE65100),
+              ),
+            );
+          }),
+        ],
+      ),
+    );
+  }
+
   // ── Pricing card ──────────────────────────────────────────────────────────
   Widget _buildPricingCard() {
     return Obx(() {
@@ -453,20 +766,10 @@ class BookingAllFields extends GetView<BookingController> {
               padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
-                  // Price per unit
-                  _pricingRow(
-                    DynamicLanguage.key(controller.pricingType.value == 'per_day'
-                        ? Strings.pricePerDay
-                        : Strings.pricePerKm),
-                    '${_smartPrice(controller.effectivePrice.value > 0 ? controller.effectivePrice.value : (controller.selectedPricing.value?.price ?? 0))} $currency',
-                    isWhite: true,
-                    isSubtle: true,
-                  ),
-                  // Subtotal
-                  if (controller.quantityController.text.isNotEmpty) ...[
-                    const SizedBox(height: 8),
+                  // Vehicle Rental (subtotal)
+                  if (controller.subtotal.value > 0) ...[
                     _pricingRow(
-                      DynamicLanguage.key(Strings.totalRent),
+                      'Vehicle Rental',
                       '${_smartPrice(controller.subtotal.value)} $currency',
                       isWhite: true,
                       isSubtle: true,
@@ -477,18 +780,31 @@ class BookingAllFields extends GetView<BookingController> {
                     const SizedBox(height: 8),
                     _pricingRow(
                       DynamicLanguage.key(Strings.deliveryCharge),
-                      '${_smartPrice(controller.deliveryCharge.value)} $currency',
+                      controller.deliverySource.value == 'zone' &&
+                              controller.deliveryDistance.value != null
+                          ? '${_smartPrice(controller.deliveryCharge.value)} $currency (${controller.deliveryDistance.value!.toStringAsFixed(1)} km)'
+                          : '${_smartPrice(controller.deliveryCharge.value)} $currency',
                       isWhite: true,
                       isSubtle: true,
                     ),
                   ],
-                  // Tax
+                  // Daily Insurance (only when selected)
+                  if (controller.selectedInsuranceType.value == 'daily' && controller.insuranceSubtotal.value > 0) ...[
+                    const SizedBox(height: 8),
+                    _pricingRow(
+                      DynamicLanguage.key(Strings.appLDailyInsurance),
+                      '${_smartPrice(controller.insuranceSubtotal.value)} $currency',
+                      isWhite: true,
+                      isSubtle: true,
+                    ),
+                  ],
+                  // VAT (15%)
                   if (controller.selectedCar.value != null &&
                       controller.selectedCar.value!.taxEnabled &&
                       controller.taxAmount.value > 0) ...[
                     const SizedBox(height: 8),
                     _pricingRow(
-                      DynamicLanguage.key(Strings.tax),
+                      'VAT (15%)',
                       '${_smartPrice(controller.taxAmount.value)} $currency',
                       isWhite: true,
                       isSubtle: true,
@@ -543,6 +859,79 @@ class BookingAllFields extends GetView<BookingController> {
         ),
       ],
     );
+  }
+
+  Widget _buildKmAllowanceCard() {
+    return Obx(() {
+      final car = controller.selectedCar.value;
+      if (car?.kmOverageCharge == null || car!.kmOverageCharge! <= 0) {
+        return const SizedBox.shrink();
+      }
+
+      final kmStr = _smartPrice(car.kmAllowance ?? 0);
+      final chargeStr = _smartPrice(car.kmOverageCharge ?? 0);
+      final appLocalizations = AppLocalizations.of(Get.context!);
+      final message = appLocalizations?.appLKmAllowanceMessage(chargeStr, kmStr) ?? '';
+
+      return Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFFEAF1FD),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: const Color(0xFF0B5FA5).withOpacity(0.15),
+            width: 1,
+          ),
+        ),
+        child: Column(
+          children: [
+            // Header
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+              child: Row(
+                children: [
+                  Container(
+                    width: 38,
+                    height: 38,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF0B5FA5).withOpacity(0.10),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.info_outline_rounded, color: Color(0xFF0B5FA5), size: 20),
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    DynamicLanguage.key(Strings.kmAllowanceLabel),
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF0D1B2A),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Divider(
+              height: 1,
+              color: const Color(0xFF0B5FA5).withOpacity(0.10),
+              indent: 16,
+              endIndent: 16,
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text(
+                message,
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: Color(0xFF0D1B2A),
+                  height: 1.5,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    });
   }
 
   // ── Note card ─────────────────────────────────────────────────────────────

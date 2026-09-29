@@ -205,12 +205,21 @@
   "appLTax": "Tax",
   "appLTotal": "Total",
   "appLQuantity": "Quantity",
+  "appLSelectInsurance": "Select Insurance",
+  "appLDailyInsurance": "Daily Insurance",
+  "appLExcessLiabilityInsurance": "Excess Liability Insurance",
+  "appLInsuranceType": "Insurance",
+  "appLInsuranceAmount": "Insurance Amount",
+  "appLInsuranceWarning": "Warning: You selected Excess Liability Insurance",
+  "appLInsuranceIncluded": "Insurance Included",
   "appLSnappedOutsideAllowed": "Selected location was outside the allowed area — snapped to nearest allowed point.",
   "appLSnappedShort": "Snapped to allowed area",
   "appLCurrentLocation": "Current Location",
   "appLCenter": "Center",
   "appLLatLngFormat": "Lat: {lat}, Lng: {lng}",
   "appLSelectedLocation": "Selected Location:",
+  "appLKmAllowanceLabel": "KM Allowance",
+  "appLKmAllowanceMessage": "The allowed kilometers are {km} km, and if exceeded, will be charged {charge} SAR/km for each additional kilometer.",
   "appLDistanceLabel": "Distance: {km} km",
   "appLConfirmLocation": "Confirm Location",
   "appLLocationPermissionDenied": "Location permission denied. Open settings to enable location.",
@@ -341,6 +350,8 @@
   "appLInvoiceDiscount": "Discount",
   "appLInvoiceTotal": "Total",
   "appLPriceBreakdown": "Price Breakdown",
+  "appLInsuranceDaily": "Daily Insurance",
+  "appLInsuranceExcessLiability": "Excess Liability Insurance",
 
   "appLRentalSchedule": "Rental Schedule",
   "appLPickUp": "PICK-UP",
@@ -367,6 +378,7 @@
 
   "appLLocationPermissionTitle": "Enable Location",
   "appLLocationPermissionMessage": "Allow location access to show you the closest cars first",
-  "appLAllow": "Allow"
+  "appLAllow": "Allow",
+  "appLOutOfDeliveryRange": "Out of delivery range"
 }
 

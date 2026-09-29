@@ -145,6 +145,8 @@ class VendorCar {
   VendorLocation? vendorLocation;
   bool isDeliveryAvailable;
   double? distanceKm;
+  double? kmAllowance;
+  double? kmOverageCharge;
 
   VendorCar({
     required this.id,
@@ -182,6 +184,8 @@ class VendorCar {
     this.vendorLocation,
     required this.isDeliveryAvailable,
     this.distanceKm,
+    this.kmAllowance,
+    this.kmOverageCharge,
   });
 
   factory VendorCar.fromJson(Map<String, dynamic> json) => VendorCar(
@@ -232,6 +236,8 @@ class VendorCar {
         : null,
     isDeliveryAvailable: json["is_delivery_available"] ?? false,
     distanceKm: _parseDouble(json["distance_km"]),
+    kmAllowance: _parseDouble(json["km_allowance"]),
+    kmOverageCharge: _parseDouble(json["km_overage_charge"]),
   );
 
   Map<String, dynamic> toJson() => {
@@ -269,6 +275,8 @@ class VendorCar {
     "cancellation_policy": cancellationPolicy,
     "vendor_location": vendorLocation?.toJson(),
     "is_delivery_available": isDeliveryAvailable,
+    if (kmAllowance != null) "km_allowance": kmAllowance,
+    if (kmOverageCharge != null) "km_overage_charge": kmOverageCharge,
   };
 
   String get displayName => '$make $model';

@@ -1,0 +1,5 @@
+android/settings.gradle
+android/build.gradle
+android/app/build.gradle
+android/gradle/wrapper/gradle-wrapper.properties
+pubspec.yaml

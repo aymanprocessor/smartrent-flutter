@@ -29,6 +29,14 @@ class _Radii {
 }
 // ─────────────────────────────────────────────────────────────────────────────
 
+// ─── KM Allowance Formatter ───────────────────────────────────────────────────
+String _formatKmAllowanceMessage(double? kmAllowance, double? kmOverageCharge, String Function(num) p) {
+  final kmStr = p(kmAllowance ?? 0);
+  final chargeStr = p(kmOverageCharge ?? 0);
+  final appLocalizations = AppLocalizations.of(Get.context!);
+  return appLocalizations?.appLKmAllowanceMessage(chargeStr, kmStr) ?? '';
+}
+
 class PreviewMobileScreen extends GetView<PreviewController> {
   const PreviewMobileScreen({super.key});
 
@@ -372,12 +380,28 @@ class _PricingCard extends StatelessWidget {
                 value: '${p(bookCtrl.deliveryCharge.value)} $c',
               ),
             ],
+            if (bookCtrl.selectedInsuranceType.value == 'daily' && bookCtrl.insuranceSubtotal.value > 0) ...[
+              _PreviewDivider(),
+              _PriceRow(
+                label: DynamicLanguage.key(Strings.appLDailyInsurance),
+                value: '${p(bookCtrl.insuranceSubtotal.value)} $c',
+              ),
+            ],
             if (bookCtrl.selectedCar.value?.taxEnabled == true &&
                 bookCtrl.taxAmount.value > 0) ...[
               _PreviewDivider(),
               _PriceRow(
-                label: DynamicLanguage.key(Strings.tax),
+                label: 'VAT (15%)',
                 value: '${p(bookCtrl.taxAmount.value)} $c',
+              ),
+            ],
+            if (bookCtrl.selectedCar.value?.kmOverageCharge != null &&
+                bookCtrl.selectedCar.value!.kmOverageCharge! > 0) ...[
+              _PreviewDivider(),
+              _KmAllowanceAlertCard(
+                kmAllowance: bookCtrl.selectedCar.value!.kmAllowance,
+                kmOverageCharge: bookCtrl.selectedCar.value!.kmOverageCharge,
+                p: p,
               ),
             ],
             const SizedBox(height: _S.sm),
@@ -422,6 +446,58 @@ class _PricingCard extends StatelessWidget {
           ],
         );
       });
+  }
+}
+
+// ─── KM Allowance Alert Card ──────────────────────────────────────────────────
+class _KmAllowanceAlertCard extends StatelessWidget {
+  final double? kmAllowance;
+  final double? kmOverageCharge;
+  final String Function(num) p;
+
+  const _KmAllowanceAlertCard({
+    required this.kmAllowance,
+    required this.kmOverageCharge,
+    required this.p,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final message = _formatKmAllowanceMessage(kmAllowance, kmOverageCharge, p);
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: _S.sm),
+      padding: const EdgeInsets.all(_S.md),
+      decoration: BoxDecoration(
+        color: _C.surfaceBlue,
+        borderRadius: BorderRadius.circular(_Radii.card),
+        border: Border.all(
+          color: _C.primary.withOpacity(0.15),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            Icons.info_outline_rounded,
+            size: 20,
+            color: _C.primary,
+          ),
+          const SizedBox(width: _S.md),
+          Expanded(
+            child: Text(
+              message,
+              style: TextStyle(
+                fontSize: 13,
+                color: _C.textDark,
+                height: 1.5,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 

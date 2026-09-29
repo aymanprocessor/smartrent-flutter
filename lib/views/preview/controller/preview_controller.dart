@@ -596,6 +596,9 @@ class PreviewController extends GetxController {
       'payment': 'wallet', // Payment method: wallet
       'pickup_lat': bookingData.value?['delivery_latitude'] ?? Get.find<BookingController>().pickupLatitude.value,
       'pickup_lng': bookingData.value?['delivery_longitude'] ?? Get.find<BookingController>().pickupLongitude.value,
+      // Insurance type
+      if (bookingData.value?['insurance_type'] != null && (bookingData.value!['insurance_type'] as String).isNotEmpty)
+        'insurance_type': bookingData.value!['insurance_type'],
     };
 
     // Invoice breakdown fields (sent when known from pricing calculation)

@@ -18,6 +18,13 @@ int? _parseInt(dynamic v) {
 
 int _parseIntOr(dynamic v, int fallback) => _parseInt(v) ?? fallback;
 
+String? _parseReason(dynamic v) {
+  if (v == null) return null;
+  final s = v.toString().trim();
+  if (s.isEmpty) return null;
+  return s;
+}
+
 class HistoryModel {
   Message message;
   Data data;
@@ -145,6 +152,10 @@ class History {
   PriceBreakdown? priceBreakdown;
   double? pickupLat;
   double? pickupLng;
+  String? insuranceType;
+  double? insuranceDailyAmount;
+  double? insuranceExcessLiabilityAmount;
+  String? rejectionReason;
 
   BookingStatus get bookingStatus => status;
 
@@ -194,6 +205,10 @@ class History {
     this.priceBreakdown,
     this.pickupLat,
     this.pickupLng,
+    this.insuranceType,
+    this.insuranceDailyAmount,
+    this.insuranceExcessLiabilityAmount,
+    this.rejectionReason,
   });
 
   factory History.fromJson(Map<String, dynamic> json) => History(
@@ -253,6 +268,10 @@ class History {
         : null,
     pickupLat: _parseCoord(json["pickup_lat"] ?? json["lat"] ?? json["delivery_latitude"] ?? json["pickup_latitude"]),
     pickupLng: _parseCoord(json["pickup_lng"] ?? json["lng"] ?? json["delivery_longitude"] ?? json["pickup_longitude"]),
+    insuranceType: json["insurance_type"]?.toString(),
+    insuranceDailyAmount: double.tryParse(json["insurance_daily_amount"]?.toString() ?? ''),
+    insuranceExcessLiabilityAmount: double.tryParse(json["insurance_excess_liability_amount"]?.toString() ?? ''),
+    rejectionReason: _parseReason(json["rejection_reason"]),
   );
 
   Map<String, dynamic> toJson() => {
@@ -300,6 +319,10 @@ class History {
     if (canCancel != null) "can_cancel": canCancel,
     if (canPay != null) "can_pay": canPay,
     if (priceBreakdown != null) "price_breakdown": priceBreakdown!.toJson(),
+    if (insuranceType != null) "insurance_type": insuranceType,
+    if (insuranceDailyAmount != null) "insurance_daily_amount": insuranceDailyAmount,
+    if (insuranceExcessLiabilityAmount != null) "insurance_excess_liability_amount": insuranceExcessLiabilityAmount,
+    if (rejectionReason != null) "rejection_reason": rejectionReason,
   };
 }
 
@@ -453,6 +476,10 @@ class PriceBreakdown {
   final double delivery;
   final double tax;
   final List<BookingExtension> extensions;
+  final String? insuranceType;
+  final double insuranceDailyAmount;
+  final double insuranceExcessLiabilityAmount;
+  final Map<String, dynamic>? insuranceMessage;
 
   const PriceBreakdown({
     required this.rentalDays,
@@ -460,6 +487,10 @@ class PriceBreakdown {
     required this.delivery,
     required this.tax,
     required this.extensions,
+    this.insuranceType,
+    this.insuranceDailyAmount = 0.0,
+    this.insuranceExcessLiabilityAmount = 0.0,
+    this.insuranceMessage,
   });
 
   factory PriceBreakdown.fromJson(Map<String, dynamic> json) {
@@ -471,12 +502,26 @@ class PriceBreakdown {
       extensions: (json['extensions'] as List<dynamic>? ?? [])
           .map((e) => BookingExtension.fromJson(e as Map<String, dynamic>))
           .toList(),
+      insuranceType: json['insurance_type']?.toString(),
+      insuranceDailyAmount: _pd(json['insurance_daily_amount']),
+      insuranceExcessLiabilityAmount: _pd(json['insurance_excess_liability_amount']),
+      insuranceMessage: json['insurance_message'] is Map
+          ? Map<String, dynamic>.from(json['insurance_message'] as Map)
+          : null,
     );
+  }
+
+  /// Total insurance cost (daily insurance only).
+  /// - daily: insuranceDailyAmount × rentalDays
+  /// - excess_liability: NOT included (displayed separately, not in total)
+  double get totalInsurance {
+    if (insuranceType == 'daily') return insuranceDailyAmount * rentalDays;
+    return 0.0;
   }
 
   double get grandTotal {
     final extTotal = extensions.fold(0.0, (s, e) => s + e.totalAmount);
-    return rental + delivery + tax + extTotal;
+    return rental + delivery + tax + totalInsurance + extTotal;
   }
 
   Map<String, dynamic> toJson() => {
@@ -493,6 +538,10 @@ class PriceBreakdown {
       'total_amount': e.totalAmount,
       'status': e.status.value,
     }).toList(),
+    if (insuranceType != null) 'insurance_type': insuranceType,
+    'insurance_daily_amount': insuranceDailyAmount,
+    'insurance_excess_liability_amount': insuranceExcessLiabilityAmount,
+    if (insuranceMessage != null) 'insurance_message': insuranceMessage,
   };
 
   static double _pd(dynamic v) {

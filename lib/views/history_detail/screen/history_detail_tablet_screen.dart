@@ -160,6 +160,12 @@ class HistoryDetailTabletScreen extends StatelessWidget {
                   ),
                 ],
 
+                // ── Rejection reason (backend `rejection_reason`, shown as-is)
+                if (controller.bookingRejectionReason != null) ...[
+                  const SizedBox(height: _S.x2),
+                  _RejectionReasonCard(reason: controller.bookingRejectionReason!),
+                ],
+
                 const SizedBox(height: _S.x4),
 
                 // ── Two-Column Layout

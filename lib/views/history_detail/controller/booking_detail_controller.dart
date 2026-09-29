@@ -56,6 +56,14 @@ class BookingDetailController extends GetxController
       (history.value?.priceBreakdown?.extensions ?? [])
           .firstWhereOrNull((e) => e.status == ExtensionStatus.pending);
 
+  /// Top-level booking rejection/cancel reason from the backend
+  /// (`rejection_reason`). Null when absent — UI hides the card.
+  String? get bookingRejectionReason {
+    final r = history.value?.rejectionReason?.trim();
+    if (r == null || r.isEmpty) return null;
+    return r;
+  }
+
   @override
   void onInit() {
     super.onInit();
@@ -191,6 +199,10 @@ class BookingDetailController extends GetxController
         delivery: h.priceBreakdown!.delivery,
         tax: h.priceBreakdown!.tax + preview.taxAmount,
         extensions: [...h.priceBreakdown!.extensions, newExt],
+        insuranceType: h.priceBreakdown!.insuranceType,
+        insuranceDailyAmount: h.priceBreakdown!.insuranceDailyAmount,
+        insuranceExcessLiabilityAmount: h.priceBreakdown!.insuranceExcessLiabilityAmount,
+        insuranceMessage: h.priceBreakdown!.insuranceMessage,
       );
       h.priceBreakdown = updated;
     }
@@ -256,6 +268,7 @@ class BookingDetailController extends GetxController
           canCancel: false,
           canPay: false,
           priceBreakdown: prev.priceBreakdown,
+          rejectionReason: prev.rejectionReason,
         );
       }
       return null;

@@ -1,7 +1,6 @@
 class ApiConfig {
   // static const String mainDomain = "https://smartrent.sa";
-  // 
-  static const String mainDomain = "http://192.168.1.211:8001";
+  static const String mainDomain = "https://stage.smartrent.sa";
   
   static const String baseUrl = "$mainDomain/api/v1";
   static const String languageUrl = "$baseUrl/settings/languages";
@@ -87,6 +86,7 @@ enum ApiEndpoint {
 
   // Delivery Zone Check
   deliveryCheck('/api/delivery/check'),
+  deliveryZones('/user/branches/{branchId}/delivery-zones'),
 
   // Wallet Endpoints
   walletBalance('/wallet/balance'),

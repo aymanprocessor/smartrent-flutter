@@ -92,9 +92,16 @@ class PrimaryInputWidget extends StatefulWidget {
 class _PrimaryInputWidgetState extends State<PrimaryInputWidget> {
   FocusNode? focusNode;
   bool isVisibility = true;
-
   @override
   Widget build(BuildContext context) {
+    // Guard: Obx in parent may trigger rebuild after controller is disposed
+    // during navigation (e.g. back button while async operation completes)
+    try {
+      widget.controller.text;
+    } catch (_) {
+      return const SizedBox.shrink();
+    }
+
     return widget.alignment != null
         ? Align(
             alignment: widget.alignment ?? Alignment.center,

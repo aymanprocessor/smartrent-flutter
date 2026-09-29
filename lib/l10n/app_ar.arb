@@ -205,12 +205,21 @@
   "appLTax": "الضريبة",
   "appLTotal": "الإجمالي",
   "appLQuantity": "الكمية",
+  "appLSelectInsurance": "اختر التأمين",
+  "appLDailyInsurance": "التأمين اليومي",
+  "appLExcessLiabilityInsurance": "تأمين قسط التحمل",
+  "appLInsuranceType": "التأمين",
+  "appLInsuranceAmount": "مبلغ التأمين",
+  "appLInsuranceWarning": "تنبيه: لقد قمت باختيار تأمين قسط التحمل. يرجى العلم بأن قيمة قسط التحمل الخاص بهذه الفئة من السيارات هي 3,500.00 ريال فقط، وتطبق في حالات الحوادث وفقاً للشروط والأحكام.",
+  "appLInsuranceIncluded": "التأمين مدرج",
   "appLSnappedOutsideAllowed": "الموقع الذي اخترته كان خارج النطاق المسموح — تم تقريبه إلى أقرب نقطة مسموح بها.",
   "appLSnappedShort": "تم تقريبه إلى المنطقة المسموحة",
   "appLCurrentLocation": "الموقع الحالي",
   "appLCenter": "المركز",
   "appLLatLngFormat": "خط عرض: {lat}, خط طول: {lng}",
   "appLSelectedLocation": "الموقع المختار:",
+  "appLKmAllowanceLabel": "حد المسافة المسموح",
+  "appLKmAllowanceMessage": "الكيلومترات المسموح بها هي {km} كم، وفي حال تجاوزها يتم احتساب {charge} SAR لكل كيلومتر إضافي",
   "appLDistanceLabel": "المسافة: {km} كم",
   "appLConfirmLocation": "تأكيد الموقع",
   "appLLocationPermissionDenied": "تم رفض إذن الوصول إلى الموقع. افتح الإعدادات لتمكينه.",
@@ -340,6 +349,8 @@
   "appLInvoiceDiscount": "الخصم",
   "appLInvoiceTotal": "الإجمالي",
   "appLPriceBreakdown": "تفاصيل السعر",
+  "appLInsuranceDaily": "التأمين اليومي",
+  "appLInsuranceExcessLiability": "تأمين قسط التحمل",
 
   "appLRentalSchedule": "جدول الإيجار",
   "appLPickUp": "الاستلام",
@@ -366,5 +377,6 @@
 
   "appLLocationPermissionTitle": "تفعيل الموقع",
   "appLLocationPermissionMessage": "اسمح بالوصول إلى موقعك لعرض أقرب السيارات أولاً",
-  "appLAllow": "السماح"
+  "appLAllow": "السماح",
+  "appLOutOfDeliveryRange": "خارج نطاق التوصيل"
 }

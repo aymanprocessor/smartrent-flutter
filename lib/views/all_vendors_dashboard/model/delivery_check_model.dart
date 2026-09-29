@@ -12,6 +12,8 @@ class DeliveryCheckResponse {
   double? distanceKm;
   double? deliveryFee;
   double? maxRadiusKm;
+  String? deliverySource;
+  int? zoneId;
   DeliveryBranch? branch;
 
   DeliveryCheckResponse({
@@ -20,26 +22,33 @@ class DeliveryCheckResponse {
     this.distanceKm,
     this.deliveryFee,
     this.maxRadiusKm,
+    this.deliverySource,
+    this.zoneId,
     this.branch,
   });
 
-  factory DeliveryCheckResponse.fromJson(Map<String, dynamic> json) =>
-      DeliveryCheckResponse(
-        status: json["status"] ?? 'error',
-        message: json["message"] ?? '',
-        distanceKm: json["distance_km"] != null
-            ? (json["distance_km"]).toDouble()
-            : null,
-        deliveryFee: json["delivery_fee"] != null
-            ? (json["delivery_fee"]).toDouble()
-            : null,
-        maxRadiusKm: json["max_radius_km"] != null
-            ? (json["max_radius_km"]).toDouble()
-            : null,
-        branch: json["branch"] != null
-            ? DeliveryBranch.fromJson(json["branch"])
-            : null,
-      );
+  factory DeliveryCheckResponse.fromJson(Map<String, dynamic> json) {
+    double? _dn(dynamic v) => v == null ? null : double.tryParse(v.toString());
+    int? _in(dynamic v) {
+      if (v == null) return null;
+      if (v is int) return v;
+      return int.tryParse(v.toString());
+    }
+    // Support both top-level fields and nested under data{}
+    final d = json['data'] is Map ? json['data'] as Map<String, dynamic> : json;
+    return DeliveryCheckResponse(
+      status: json["status"] ?? d["status"] ?? 'error',
+      message: json["message"] ?? d["message"] ?? '',
+      distanceKm: _dn(d["distance_km"] ?? json["distance_km"]),
+      deliveryFee: _dn(d["delivery_fee"] ?? json["delivery_fee"]),
+      maxRadiusKm: _dn(d["max_radius_km"] ?? json["max_radius_km"]),
+      deliverySource: (d["delivery_source"] ?? json["delivery_source"])?.toString(),
+      zoneId: _in(d["zone_id"] ?? json["zone_id"]),
+      branch: (d["branch"] ?? json["branch"]) != null
+          ? DeliveryBranch.fromJson((d["branch"] ?? json["branch"]) as Map<String, dynamic>)
+          : null,
+    );
+  }
 
   Map<String, dynamic> toJson() => {
         "status": status,
@@ -47,11 +56,13 @@ class DeliveryCheckResponse {
         if (distanceKm != null) "distance_km": distanceKm,
         if (deliveryFee != null) "delivery_fee": deliveryFee,
         if (maxRadiusKm != null) "max_radius_km": maxRadiusKm,
+        if (deliverySource != null) "delivery_source": deliverySource,
+        if (zoneId != null) "zone_id": zoneId,
         if (branch != null) "branch": branch?.toJson(),
       };
 
-  bool get isAvailable => status == 'available';
-  bool get isUnavailable => status == 'unavailable';
+  bool get isAvailable => status == 'available' || deliverySource == 'zone' || deliverySource == 'flat';
+  bool get isUnavailable => status == 'unavailable' || deliverySource == 'none';
   bool get isError => status == 'error';
 }
 

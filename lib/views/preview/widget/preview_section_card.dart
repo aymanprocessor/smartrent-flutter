@@ -25,10 +25,17 @@ class PreviewSectionCard extends GetView<PreviewController> {
     }
   }
 
-  final bookController = Get.put(BookingController());
+  /// Get the existing BookingController (registered by binding, not a new instance)
+  late final bookController = Get.find<BookingController>();
 
   @override
   Widget build(BuildContext context) {
+    debugPrint('[PreviewSectionCard] Building with bookController:');
+    debugPrint('  - isDeliver: ${bookController.isDeliver.value}');
+    debugPrint('  - deliveryCharge: ${bookController.deliveryCharge.value}');
+    debugPrint('  - deliverySource: ${bookController.deliverySource.value}');
+    debugPrint('  - pickupLocation: ${bookController.pickupLocation.value?.address}');
+    
     return Column(
       crossAxisAlignment: crossStart,
       children: [
@@ -50,7 +57,13 @@ class PreviewSectionCard extends GetView<PreviewController> {
             borderRadius: BorderRadius.circular(Dimensions.radius * 0.5),
           ),
           child: Obx(
-            () => Column(
+            () {
+              debugPrint('[PreviewSectionCard] Obx rebuild triggered:');
+              debugPrint('  - deliveryCharge: ${bookController.deliveryCharge.value}');
+              debugPrint('  - isDeliver: ${bookController.isDeliver.value}');
+              debugPrint('  - Show delivery? ${bookController.isDeliver.value && bookController.deliveryCharge.value > 0}');
+              
+              return Column(
               children: [
                 if (bookController.isDeliver.value)
                   _cardSection(
@@ -104,7 +117,8 @@ class PreviewSectionCard extends GetView<PreviewController> {
                   '${_smartPrice(bookController.total.value)} ${_cur(bookController.selectedPricing.value?.currency)}',
                 ),
               ],
-            ),
+              );
+            },
           ),
         ),
       ],
