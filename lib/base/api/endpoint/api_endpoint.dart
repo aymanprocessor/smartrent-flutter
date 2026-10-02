@@ -1,6 +1,6 @@
 class ApiConfig {
-  // static const String mainDomain = "https://smartrent.sa";
-  static const String mainDomain = "https://stage.smartrent.sa";
+  static const String mainDomain = "https://smartrent.sa";
+  // static const String mainDomain = "https://stage.smartrent.sa";
   
   static const String baseUrl = "$mainDomain/api/v1";
   static const String languageUrl = "$baseUrl/settings/languages";
