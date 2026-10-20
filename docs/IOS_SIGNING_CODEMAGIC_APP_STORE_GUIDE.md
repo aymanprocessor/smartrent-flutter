@@ -255,3 +255,86 @@ flutter build ipa --release -v
 
 Use `flutter clean` only to clear generated build output; it does not fix incorrect Apple certificates, profiles, bundle IDs, or account permissions.
 
+
+
+## Apple sign-in and connecting the Apple team to Codemagic
+
+You need two related Apple services: the **Apple Developer account** for certificates and provisioning, and **App Store Connect** for the app record, API key, TestFlight, and App Store submission. Sign in to both with the Apple Account that owns or has been invited to the publishing team.
+
+### 1. Create or sign in to an Apple Account
+
+If you do not have an Apple Account, create one at [account.apple.com](https://account.apple.com/). Use an email address you control and enable two-factor authentication. Keep access to the trusted phone number/device because Apple may request verification.
+
+Then:
+
+1. Open [developer.apple.com/account](https://developer.apple.com/account/).
+2. Sign in with that Apple Account.
+3. Accept the Apple Developer Agreement if shown.
+4. If you are only preparing the project, a free Apple developer registration is enough to explore the portal and use Xcode Personal Team for limited development. It does **not** enable App Store Connect distribution.
+5. To publish, choose **Join the Apple Developer Program** and enroll as an individual or organization. Complete identity/business verification and pay the displayed regional membership fee. Wait until membership is active.
+
+**If you are joining someone else's developer team:** ask its Account Holder/Admin to invite the email address associated with your Apple Account. Accept the invitation from Apple's email or from App Store Connect. Ask the team admin to grant the least access needed: developer portal access for certificates/identifiers/profiles and an App Store Connect role that can manage the app/builds (Codemagic recommends App Manager for publishing). The account that owns the app should remain the publisher; do not create a separate app record under the wrong team.
+
+### 2. Sign in to App Store Connect and create the app record
+
+1. Open [appstoreconnect.apple.com](https://appstoreconnect.apple.com/) and sign in using the enrolled or invited Apple Account.
+2. Confirm the correct team is selected (if the account belongs to multiple teams).
+3. Go to **Apps → + → New App**.
+4. Select **iOS**, enter the app name and primary language, select the correct team, and choose the bundle ID `com.next.smartrent`.
+5. Enter an SKU (an internal identifier such as `smart-rent-ios`; it is not shown to customers) and create the record.
+
+If `com.next.smartrent` is unavailable or belongs to another team, stop and resolve ownership before proceeding. Choose a bundle ID controlled by your team, update the iOS Runner target in Xcode, and create the app record with exactly that same ID. In this repository the current value is in `ios/Runner.xcodeproj/project.pbxproj` under `PRODUCT_BUNDLE_IDENTIFIER`.
+
+### 3. Create an App Store Connect API key
+
+1. In App Store Connect, open **Users and Access → Integrations → App Store Connect API**.
+2. Select the correct team/provider if prompted.
+3. Under **Team Keys**, click **+** to create a key.
+4. Name it, for example `Codemagic CI`, and choose **App Manager** access.
+5. Generate the key. Download the `.p8` private key immediately; Apple only makes it downloadable once.
+6. Copy the **Key ID** and **Issuer ID** shown on the page. Store the `.p8` file and IDs securely. Do not commit them to the repository or send them in chat.
+
+The key authenticates Codemagic to App Store Connect. It does not itself sign the app. Signing requires the distribution certificate/profile as described next.
+
+### 4. Connect the Apple account to Codemagic
+
+1. Sign in to [Codemagic](https://codemagic.io/) and open the Codemagic team that contains this app.
+2. Open **Team settings → Integrations → Developer Portal** (the labels may vary slightly with Codemagic UI updates).
+3. Choose **Connect** or **Manage keys → Add key**.
+4. Enter a recognizable integration name such as `carbo-appstore`.
+5. Enter the Apple **Issuer ID** and **Key ID**, then upload the downloaded `.p8` file as the API key/private key.
+6. Save the integration. If prompted for an Apple team/provider, select the same team that owns the App Store Connect app record and bundle ID.
+
+In the root `codemagic.yaml`, use that exact integration name:
+
+```yaml
+integrations:
+  app_store_connect: carbo-appstore
+```
+
+If the YAML already has this block, replace its placeholder with the name you saved in Codemagic. The name is a reference to a secret in Codemagic, not a password or API key value.
+
+### 5. Configure code signing in Codemagic
+
+1. In Codemagic team settings, open **codemagic.yaml settings → Code signing identities**.
+2. Open the iOS certificates section. Use **Fetch certificates** / automatic signing if available, select the connected Apple Developer Portal integration and the `com.next.smartrent` App ID, and let Codemagic create or fetch an Apple Distribution certificate and App Store provisioning profile.
+3. If using manual signing instead, upload:
+   - An Apple Distribution `.p12` exported with its private key and protected by a password.
+   - An App Store Connect `.mobileprovision` profile for the matching explicit App ID and distribution certificate.
+4. Give the uploaded signing assets a label if requested. The `ios_signing` block in the workflow should specify the same bundle identifier and `distribution_type: app_store`.
+5. Return to **Applications**, open this repository, select the branch containing `codemagic.yaml`, scan/check the YAML configuration, and start the `ios-app-store` workflow.
+
+A successful run should produce `build/ios/ipa/*.ipa` and upload it to App Store Connect using the API key. Check **App Store Connect → TestFlight** after Apple's processing finishes.
+
+### What each connection does
+
+| Item | Where it comes from | What Codemagic uses it for |
+|---|---|---|
+| Apple Account and team membership | Apple Developer / team invitation | Permission to manage the app and signing resources |
+| App Store Connect API key (`.p8`, Key ID, Issuer ID) | App Store Connect | Uploading builds and managing publishing actions |
+| Apple Distribution certificate with private key | Apple Developer team | Signing the release app |
+| App Store provisioning profile | Apple Developer team | Authorizing the signed app for App Store Connect distribution |
+| Codemagic integration name | Codemagic settings | Lets YAML select the securely stored Apple API key |
+
+If a Codemagic menu or Apple page has moved, use the current official walkthroughs: [Codemagic App Store Connect publishing](https://docs.codemagic.io/yaml-publishing/app-store-connect/), [Codemagic iOS signing](https://docs.codemagic.io/yaml-code-signing/yaml-code-signing/), and [Apple Developer Program enrollment](https://developer.apple.com/programs/enroll/).
+
