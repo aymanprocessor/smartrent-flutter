@@ -7,6 +7,7 @@ import '../../../base/utils/basic_import.dart';
 import '../../../base/utils/local_storage.dart';
 import '../../../base/widgets/app_cached_image.dart';
 import '../../../base/widgets/country_drop_down.dart';
+import '../../../routes/routes.dart';
 import '../../dashboard/controller/dashboard_controller.dart';
 import '../controller/update_profile_controller.dart';
 import '../widget/profile_loading_skeleton.dart';
@@ -35,7 +36,6 @@ class _S {
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 class _R {
   static const double xs = 8;
-  static const double sm = 12;
   static const double md = 16;
   static const double lg = 20;
   static const double xl = 28;
@@ -57,12 +57,8 @@ class _C {
 
   static const Color textPrimary = Color(0xFF0F172A);
   static const Color textSecondary = Color(0xFF64748B);
-  static const Color textTertiary = Color(0xFF94A3B8);
-
   static const Color error = Color(0xFFDC2626);
   static const Color errorLight = Color(0xFFFEF2F2);
-  static const Color success = Color(0xFF059669);
-  static const Color successLight = Color(0xFFECFDF5);
 
   static const Color border = Color(0xFFE2E8F0);
   static const Color borderLight = Color(0xFFF1F5F9);
@@ -75,31 +71,31 @@ class _C {
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 class _Shadow {
   static List<BoxShadow> get subtle => [
-        BoxShadow(
-          color: _C.black.withValues(alpha: 0.03),
-          blurRadius: 8,
-          offset: const Offset(0, 2),
-        ),
-      ];
+    BoxShadow(
+      color: _C.black.withValues(alpha: 0.03),
+      blurRadius: 8,
+      offset: const Offset(0, 2),
+    ),
+  ];
   static List<BoxShadow> get card => [
-        BoxShadow(
-          color: _C.black.withValues(alpha: 0.04),
-          blurRadius: 16,
-          offset: const Offset(0, 4),
-        ),
-        BoxShadow(
-          color: _C.black.withValues(alpha: 0.02),
-          blurRadius: 4,
-          offset: const Offset(0, 1),
-        ),
-      ];
+    BoxShadow(
+      color: _C.black.withValues(alpha: 0.04),
+      blurRadius: 16,
+      offset: const Offset(0, 4),
+    ),
+    BoxShadow(
+      color: _C.black.withValues(alpha: 0.02),
+      blurRadius: 4,
+      offset: const Offset(0, 1),
+    ),
+  ];
   static List<BoxShadow> get elevated => [
-        BoxShadow(
-          color: _C.primary.withValues(alpha: 0.12),
-          blurRadius: 20,
-          offset: const Offset(0, 8),
-        ),
-      ];
+    BoxShadow(
+      color: _C.primary.withValues(alpha: 0.12),
+      blurRadius: 20,
+      offset: const Offset(0, 8),
+    ),
+  ];
 }
 
 class UpdateProfileScreen extends GetView<UpdateProfileController> {

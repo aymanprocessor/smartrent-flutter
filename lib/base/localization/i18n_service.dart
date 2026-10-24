@@ -9,16 +9,16 @@ import '../../../generated/l10n/app_localizations.dart';
 class I18nService extends GetxController {
   static const String _storageKey = 'selectedLanguage';
   final GetStorage _storage = GetStorage();
-  
+
   // Observable current language
   final Rx<Locale> _currentLocale = const Locale('en').obs;
   Locale get currentLocale => _currentLocale.value;
-  
+
   // Loading state
   final RxBool _isLoading = false.obs;
   bool get isLoading => _isLoading.value;
   RxBool get isLoadingValue => _isLoading;
-  
+
   // Runtime translations from server (cached) - not used in ARB-only mode
   final Map<String, Map<String, String>> _runtimeTranslations = {};
 
@@ -28,10 +28,10 @@ class I18nService extends GetxController {
 
   // Reactive accessor for UI bindings
   RxList<LanguageModel> get languagesRx => _languages;
-  
+
   // Cache for AppLocalizations instance
   AppLocalizations? _cachedAppLocalizations;
-  
+
   @override
   void onInit() {
     super.onInit();
@@ -45,14 +45,14 @@ class I18nService extends GetxController {
       LanguageModel(code: 'ar', name: 'العربية', direction: 'rtl'),
     ];
   }
-  
+
   /// Initialize kept for API compatibility. Remote fetches disabled — no-op.
   Future<void> init({required String url}) async {
     _isLoading.value = false;
     // Intentionally no-op: this app uses generated ARB translations only.
     return;
   }
-  
+
   /// Get translation for a key using AppLocalizations getter map (ARB-only)
   String key(String translationKey, {BuildContext? context}) {
     // Use the generated ARB translations via AppLocalizations only.
@@ -67,11 +67,15 @@ class I18nService extends GetxController {
       // Create AppLocalizations for current locale if not cached
       if (_cachedAppLocalizations == null ||
           _cachedAppLocalizations!.localeName != currentLangCode) {
-        _cachedAppLocalizations = lookupAppLocalizations(Locale(currentLangCode));
+        _cachedAppLocalizations = lookupAppLocalizations(
+          Locale(currentLangCode),
+        );
       }
 
       // Use the getter map to retrieve translation
-      final translation = _translationGetters[translationKey]?.call(_cachedAppLocalizations!);
+      final translation = _translationGetters[translationKey]?.call(
+        _cachedAppLocalizations!,
+      );
       if (translation != null && translation.isNotEmpty) {
         return translation;
       }
@@ -81,7 +85,9 @@ class I18nService extends GetxController {
         try {
           final ctxLocal = AppLocalizations.of(context);
           if (ctxLocal != null) {
-            final ctxTranslation = _translationGetters[translationKey]?.call(ctxLocal);
+            final ctxTranslation = _translationGetters[translationKey]?.call(
+              ctxLocal,
+            );
             if (ctxTranslation != null && ctxTranslation.isNotEmpty) {
               return ctxTranslation;
             }
@@ -98,15 +104,17 @@ class I18nService extends GetxController {
     try {
       final enLocal = lookupAppLocalizations(const Locale('en'));
       final enTranslation = _translationGetters[translationKey]?.call(enLocal);
-      if (enTranslation != null && enTranslation.isNotEmpty) return enTranslation;
+      if (enTranslation != null && enTranslation.isNotEmpty)
+        return enTranslation;
     } catch (_) {}
 
     // Fallback to key itself when translation not available
     return translationKey;
   }
-  
+
   /// Getter map for all translations - maps key names to AppLocalizations getters
-  static final Map<String, String Function(AppLocalizations)> _translationGetters = {
+  static final Map<String, String Function(AppLocalizations)>
+  _translationGetters = {
     'appLPleaseFillOutTheField': (l) => l.appLPleaseFillOutTheField,
     'appLFrom': (l) => l.appLFrom,
     'appLFromGallery': (l) => l.appLFromGallery,
@@ -190,7 +198,8 @@ class I18nService extends GetxController {
     'appLSubmit': (l) => l.appLSubmit,
     'appLLogInTitleText': (l) => l.appLLogInTitleText,
     'appLResetPasswordTitleText': (l) => l.appLResetPasswordTitleText,
-    'appLResetPasswordDescriptionText': (l) => l.appLResetPasswordDescriptionText,
+    'appLResetPasswordDescriptionText': (l) =>
+        l.appLResetPasswordDescriptionText,
     'appLLogInDescriptionText': (l) => l.appLLogInDescriptionText,
     'appLYouCanResend': (l) => l.appLYouCanResend,
     'appLSkip': (l) => l.appLSkip,
@@ -380,10 +389,40 @@ class I18nService extends GetxController {
     'appLKycRequired': (l) => l.appLKycRequired,
     'appLKycVerification': (l) => l.appLKycVerification,
     'appLCompleteKycToEnableBooking': (l) => l.appLCompleteKycToEnableBooking,
-    'appLPleaseCompleteKycVerification': (l) => l.appLPleaseCompleteKycVerification,
+    'appLPleaseCompleteKycVerification': (l) =>
+        l.appLPleaseCompleteKycVerification,
     'appLKycPending': (l) => l.appLKycPending,
     'appLKycPendingReview': (l) => l.appLKycPendingReview,
     'appLKycPendingMessage': (l) => l.appLKycPendingMessage,
+    'appLKycPendingBookingMessage': (l) => l.appLKycPendingBookingMessage,
+    'appLOk': (l) => l.appLOk,
+    'appLVerifyIdentity': (l) => l.appLVerifyIdentity,
+    'appLSubmitIdentityDocuments': (l) => l.appLSubmitIdentityDocuments,
+    'appLSubmitKycDocuments': (l) => l.appLSubmitKycDocuments,
+    'appLPleaseUploadRequiredDocuments': (l) =>
+        l.appLPleaseUploadRequiredDocuments,
+    'appLYourIdentityApproved': (l) => l.appLYourIdentityApproved,
+    'appLKycPendingCannotSubmit': (l) => l.appLKycPendingCannotSubmit,
+    'appLKycRejected': (l) => l.appLKycRejected,
+    'appLReason': (l) => l.appLReason,
+    'appLCompleteProfileBeforeKyc': (l) => l.appLCompleteProfileBeforeKyc,
+    'appLKycFieldsUnavailable': (l) => l.appLKycFieldsUnavailable,
+    'appLAccepted': (l) => l.appLAccepted,
+    'appLMaximumSize': (l) => l.appLMaximumSize,
+    'appLTakePhoto': (l) => l.appLTakePhoto,
+    'appLChooseFile': (l) => l.appLChooseFile,
+    'appLChangePhoto': (l) => l.appLChangePhoto,
+    'appLChangeFile': (l) => l.appLChangeFile,
+    'appLIsRequired': (l) => l.appLIsRequired,
+    'appLMaximumCharacters': (l) => l.appLMaximumCharacters,
+    'appLEnterValue': (l) => l.appLEnterValue,
+    'appLSelectValue': (l) => l.appLSelectValue,
+    'appLFileTypeNotSupported': (l) => l.appLFileTypeNotSupported,
+    'appLFileMustBeSmallerThan': (l) => l.appLFileMustBeSmallerThan,
+    'appLCouldNotPickFile': (l) => l.appLCouldNotPickFile,
+    'appLCouldNotPickPhoto': (l) => l.appLCouldNotPickPhoto,
+    'appLCompleteProfileFirst': (l) => l.appLCompleteProfileFirst,
+    'appLKycUnavailable': (l) => l.appLKycUnavailable,
     // Profile Completion related strings
     'appLCompleteYourProfile': (l) => l.appLCompleteYourProfile,
     'appLPleaseCompleteYourProfile': (l) => l.appLPleaseCompleteYourProfile,
@@ -445,28 +484,28 @@ class I18nService extends GetxController {
     'appLOutOfDeliveryRange': (l) => l.appLOutOfDeliveryRange,
     'appLKmAllowanceLabel': (l) => l.appLKmAllowanceLabel,
   };
-  
+
   /// Change current language
   Future<void> changeLanguage(String languageCode) async {
     final newLocale = Locale(languageCode);
     _currentLocale.value = newLocale;
-    
+
     // Save to local storage
     await _storage.write(_storageKey, languageCode);
-    
+
     // Update GetX locale if using GetMaterialApp
     Get.updateLocale(newLocale);
-    
+
     _currentLocale.refresh();
   }
-  
+
   /// Get current text direction
   TextDirection get languageDirection {
-    return _currentLocale.value.languageCode == 'ar' 
-        ? TextDirection.rtl 
+    return _currentLocale.value.languageCode == 'ar'
+        ? TextDirection.rtl
         : TextDirection.ltr;
   }
-  
+
   /// Load saved language from storage
   void _loadSavedLanguage() {
     final savedLang = _storage.read<String>(_storageKey);
@@ -474,12 +513,15 @@ class I18nService extends GetxController {
       _currentLocale.value = Locale(savedLang);
     }
   }
-  
+
   /// Update runtime translations from server
-  void updateRuntimeTranslations(String languageCode, Map<String, String> translations) {
+  void updateRuntimeTranslations(
+    String languageCode,
+    Map<String, String> translations,
+  ) {
     _runtimeTranslations[languageCode] = translations;
   }
-  
+
   /// Update available languages list
   void updateLanguages(List<LanguageModel> languagesList) {
     _languages.value = languagesList;
@@ -491,13 +533,13 @@ class LanguageModel {
   final String code;
   final String name;
   final String direction;
-  
+
   LanguageModel({
     required this.code,
     required this.name,
     this.direction = 'ltr',
   });
-  
+
   factory LanguageModel.fromJson(Map<String, dynamic> json) {
     return LanguageModel(
       code: json['code'] ?? json['language_code'] ?? '',
@@ -505,13 +547,9 @@ class LanguageModel {
       direction: json['direction'] ?? 'ltr',
     );
   }
-  
+
   Map<String, dynamic> toJson() {
-    return {
-      'code': code,
-      'name': name,
-      'direction': direction,
-    };
+    return {'code': code, 'name': name, 'direction': direction};
   }
 }
 

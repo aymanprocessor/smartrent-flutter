@@ -148,7 +148,8 @@ class Strings {
   static const String logOu = "appLLogOu";
   static const String cancel = "appLCancel";
   static const String locationPermissionTitle = "appLLocationPermissionTitle";
-  static const String locationPermissionMessage = "appLLocationPermissionMessage";
+  static const String locationPermissionMessage =
+      "appLLocationPermissionMessage";
   static const String allow = "appLAllow";
   static const String longTitle = "appLLongTitle";
   static const String longText = "appLLongText";
@@ -220,7 +221,7 @@ class Strings {
   static const String showResults = "appLShowResults";
   static const String rentalDays = "appLRentalDays";
   static const String Day = "appLDay";
-  
+
   // Booking pricing related strings
   static const String pricePerDay = "appLPricePerDay";
   static const String pricePerKm = "appLPricePerKm";
@@ -233,7 +234,8 @@ class Strings {
   // Insurance related strings
   static const String appLSelectInsurance = "appLSelectInsurance";
   static const String appLDailyInsurance = "appLDailyInsurance";
-  static const String appLExcessLiabilityInsurance = "appLExcessLiabilityInsurance";
+  static const String appLExcessLiabilityInsurance =
+      "appLExcessLiabilityInsurance";
   static const String appLInsuranceType = "appLInsuranceType";
   static const String appLInsuranceAmount = "appLInsuranceAmount";
   static const String appLInsuranceWarning = "appLInsuranceWarning";
@@ -250,7 +252,7 @@ class Strings {
   static const String ConfirmLocation = "appLConfirmLocation";
   static const String LocationPermissionDenied = "appLLocationPermissionDenied";
   static const String OpenSettings = "appLOpenSettings";
-  
+
   // Quantity input related strings
   static const String enterDays = "appLEnterDays";
   static const String enterDistance = "appLEnterDistance";
@@ -259,15 +261,48 @@ class Strings {
   // KYC Verification related strings
   static const String kycRequired = "appLKycRequired";
   static const String kycVerification = "appLKycVerification";
-  static const String completeKycToEnableBooking = "appLCompleteKycToEnableBooking";
-  static const String pleaseCompleteKycVerification = "appLPleaseCompleteKycVerification";
+  static const String completeKycToEnableBooking =
+      "appLCompleteKycToEnableBooking";
+  static const String pleaseCompleteKycVerification =
+      "appLPleaseCompleteKycVerification";
   static const String kycPending = "appLKycPending";
   static const String kycPendingReview = "appLKycPendingReview";
   static const String kycPendingMessage = "appLKycPendingMessage";
+  static const String kycPendingBookingMessage = "appLKycPendingBookingMessage";
+  static const String ok = "appLOk";
+  static const String verifyIdentity = "appLVerifyIdentity";
+  static const String submitIdentityDocuments = "appLSubmitIdentityDocuments";
+  static const String submitKycDocuments = "appLSubmitKycDocuments";
+  static const String pleaseUploadRequiredDocuments =
+      "appLPleaseUploadRequiredDocuments";
+  static const String yourIdentityApproved = "appLYourIdentityApproved";
+  static const String kycPendingCannotSubmit = "appLKycPendingCannotSubmit";
+  static const String kycRejected = "appLKycRejected";
+  static const String reason = "appLReason";
+  static const String completeProfileBeforeKyc = "appLCompleteProfileBeforeKyc";
+  static const String kycFieldsUnavailable = "appLKycFieldsUnavailable";
+  static const String retry = "appLRetry";
+  static const String accepted = "appLAccepted";
+  static const String maximumSize = "appLMaximumSize";
+  static const String takePhoto = "appLTakePhoto";
+  static const String chooseFile = "appLChooseFile";
+  static const String changePhoto = "appLChangePhoto";
+  static const String changeFile = "appLChangeFile";
+  static const String isRequired = "appLIsRequired";
+  static const String maximumCharacters = "appLMaximumCharacters";
+  static const String enterValue = "appLEnterValue";
+  static const String selectValue = "appLSelectValue";
+  static const String fileTypeNotSupported = "appLFileTypeNotSupported";
+  static const String fileMustBeSmallerThan = "appLFileMustBeSmallerThan";
+  static const String couldNotPickFile = "appLCouldNotPickFile";
+  static const String couldNotPickPhoto = "appLCouldNotPickPhoto";
+  static const String completeProfileFirst = "appLCompleteProfileFirst";
+  static const String kycUnavailable = "appLKycUnavailable";
 
   // Profile Completion strings
   static const String completeYourProfile = "appLCompleteYourProfile";
-  static const String pleaseCompleteYourProfile = "appLPleaseCompleteYourProfile";
+  static const String pleaseCompleteYourProfile =
+      "appLPleaseCompleteYourProfile";
   static const String enterYourFirstName = "appLEnterYourFirstName";
   static const String enterYourLastName = "appLEnterYourLastName";
   static const String enterYourEmailAddress = "appLEnterYourEmailAddress";
@@ -298,7 +333,7 @@ class Strings {
   static const String bookingInformation = "appLBookingInformation";
   static const String carDetails = "appLCarDetails";
   static const String tripDetails = "appLTripDetails";
-  
+
   // KM Allowance related strings
   static const String kmAllowanceLabel = "appLKmAllowanceLabel";
   static const String kmAllowanceMessage = "appLKmAllowanceMessage";

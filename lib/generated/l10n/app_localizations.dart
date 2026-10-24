@@ -1728,6 +1728,174 @@ abstract class AppLocalizations {
   /// **'Your KYC is pending review. We will notify you once it is verified.'**
   String get appLKycPendingMessage;
 
+  /// No description provided for @appLKycPendingBookingMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You can book a car once your identity verification is approved.'**
+  String get appLKycPendingBookingMessage;
+
+  /// No description provided for @appLOk.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get appLOk;
+
+  /// No description provided for @appLVerifyIdentity.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify identity'**
+  String get appLVerifyIdentity;
+
+  /// No description provided for @appLSubmitIdentityDocuments.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit identity documents for verification'**
+  String get appLSubmitIdentityDocuments;
+
+  /// No description provided for @appLSubmitKycDocuments.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit KYC Documents'**
+  String get appLSubmitKycDocuments;
+
+  /// No description provided for @appLPleaseUploadRequiredDocuments.
+  ///
+  /// In en, this message translates to:
+  /// **'Please upload the required documents for verification'**
+  String get appLPleaseUploadRequiredDocuments;
+
+  /// No description provided for @appLYourIdentityApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Your identity is approved.'**
+  String get appLYourIdentityApproved;
+
+  /// No description provided for @appLKycPendingCannotSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Your documents are pending review. You cannot submit again while review is in progress.'**
+  String get appLKycPendingCannotSubmit;
+
+  /// No description provided for @appLKycRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Your verification was rejected.'**
+  String get appLKycRejected;
+
+  /// No description provided for @appLReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason'**
+  String get appLReason;
+
+  /// No description provided for @appLCompleteProfileBeforeKyc.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete your profile before submitting identity documents.'**
+  String get appLCompleteProfileBeforeKyc;
+
+  /// No description provided for @appLKycFieldsUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'KYC fields are not available.'**
+  String get appLKycFieldsUnavailable;
+
+  /// No description provided for @appLAccepted.
+  ///
+  /// In en, this message translates to:
+  /// **'Accepted'**
+  String get appLAccepted;
+
+  /// No description provided for @appLMaximumSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Maximum size'**
+  String get appLMaximumSize;
+
+  /// No description provided for @appLTakePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Take Photo'**
+  String get appLTakePhoto;
+
+  /// No description provided for @appLChooseFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose File'**
+  String get appLChooseFile;
+
+  /// No description provided for @appLChangePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Change Photo'**
+  String get appLChangePhoto;
+
+  /// No description provided for @appLChangeFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Change File'**
+  String get appLChangeFile;
+
+  /// No description provided for @appLIsRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'is required'**
+  String get appLIsRequired;
+
+  /// No description provided for @appLMaximumCharacters.
+  ///
+  /// In en, this message translates to:
+  /// **'Maximum characters'**
+  String get appLMaximumCharacters;
+
+  /// No description provided for @appLEnterValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter'**
+  String get appLEnterValue;
+
+  /// No description provided for @appLSelectValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Select'**
+  String get appLSelectValue;
+
+  /// No description provided for @appLFileTypeNotSupported.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a supported file type'**
+  String get appLFileTypeNotSupported;
+
+  /// No description provided for @appLFileMustBeSmallerThan.
+  ///
+  /// In en, this message translates to:
+  /// **'must be smaller than'**
+  String get appLFileMustBeSmallerThan;
+
+  /// No description provided for @appLCouldNotPickFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to choose file'**
+  String get appLCouldNotPickFile;
+
+  /// No description provided for @appLCouldNotPickPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to capture photo'**
+  String get appLCouldNotPickPhoto;
+
+  /// No description provided for @appLCompleteProfileFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete your profile before submitting.'**
+  String get appLCompleteProfileFirst;
+
+  /// No description provided for @appLKycUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'KYC configuration is unavailable. Please try again later.'**
+  String get appLKycUnavailable;
+
   /// No description provided for @appLCompleteYourProfile.
   ///
   /// In en, this message translates to:

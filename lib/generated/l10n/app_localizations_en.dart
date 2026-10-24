@@ -843,6 +843,97 @@ class AppLocalizationsEn extends AppLocalizations {
       'Your KYC is pending review. We will notify you once it is verified.';
 
   @override
+  String get appLKycPendingBookingMessage =>
+      'You can book a car once your identity verification is approved.';
+
+  @override
+  String get appLOk => 'OK';
+
+  @override
+  String get appLVerifyIdentity => 'Verify identity';
+
+  @override
+  String get appLSubmitIdentityDocuments =>
+      'Submit identity documents for verification';
+
+  @override
+  String get appLSubmitKycDocuments => 'Submit KYC Documents';
+
+  @override
+  String get appLPleaseUploadRequiredDocuments =>
+      'Please upload the required documents for verification';
+
+  @override
+  String get appLYourIdentityApproved => 'Your identity is approved.';
+
+  @override
+  String get appLKycPendingCannotSubmit =>
+      'Your documents are pending review. You cannot submit again while review is in progress.';
+
+  @override
+  String get appLKycRejected => 'Your verification was rejected.';
+
+  @override
+  String get appLReason => 'Reason';
+
+  @override
+  String get appLCompleteProfileBeforeKyc =>
+      'Complete your profile before submitting identity documents.';
+
+  @override
+  String get appLKycFieldsUnavailable => 'KYC fields are not available.';
+
+  @override
+  String get appLAccepted => 'Accepted';
+
+  @override
+  String get appLMaximumSize => 'Maximum size';
+
+  @override
+  String get appLTakePhoto => 'Take Photo';
+
+  @override
+  String get appLChooseFile => 'Choose File';
+
+  @override
+  String get appLChangePhoto => 'Change Photo';
+
+  @override
+  String get appLChangeFile => 'Change File';
+
+  @override
+  String get appLIsRequired => 'is required';
+
+  @override
+  String get appLMaximumCharacters => 'Maximum characters';
+
+  @override
+  String get appLEnterValue => 'Enter';
+
+  @override
+  String get appLSelectValue => 'Select';
+
+  @override
+  String get appLFileTypeNotSupported => 'Choose a supported file type';
+
+  @override
+  String get appLFileMustBeSmallerThan => 'must be smaller than';
+
+  @override
+  String get appLCouldNotPickFile => 'Failed to choose file';
+
+  @override
+  String get appLCouldNotPickPhoto => 'Failed to capture photo';
+
+  @override
+  String get appLCompleteProfileFirst =>
+      'Complete your profile before submitting.';
+
+  @override
+  String get appLKycUnavailable =>
+      'KYC configuration is unavailable. Please try again later.';
+
+  @override
   String get appLCompleteYourProfile => 'Complete Your Profile';
 
   @override

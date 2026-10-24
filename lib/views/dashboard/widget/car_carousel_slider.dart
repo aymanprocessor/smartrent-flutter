@@ -13,14 +13,8 @@ class CarCarouselSlider extends GetView<DashboardController> {
                 return InkWell(
                   splashColor: Colors.transparent,
                   highlightColor: Colors.transparent,
-                  onTap: () {
-                    if (!LocalStorage.isLoggedIn) {
-                      Get.toNamed(Routes.otpLoginScreen);
-                      return;
-                    }
-                    controller.selectedCarId.value = car.id.toString();
-                    Get.toNamed(Routes.bookingScreen);
-                  },
+                  onTap: () =>
+                      controller.bookCarAfterKycCheck(car.id.toString()),
                   child: AnimatedContainer(
                     padding: EdgeInsets.symmetric(
                       horizontal: Dimensions.defaultHorizontalSize,
