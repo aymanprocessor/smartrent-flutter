@@ -1028,18 +1028,22 @@ class _PremiumCarCard extends StatelessWidget {
   }
 
   Widget _buildStatusBadgeRow() {
-    return Row(
+    final currencySymbols = {
+      'SAR': 'ر.س',
+      'USD': r'$',
+      'AED': 'د.إ',
+      'EGP': 'ج.م',
+      'KWD': 'د.ك',
+    };
+    final symbol = currencySymbols[car.currency] ?? car.currency;
+    final isAr = Get.locale?.languageCode == 'ar' ||
+        DynamicLanguage.selectedLanguage.value == 'ar';
+
+    return Wrap(
+      spacing: _S.sm,
+      runSpacing: _S.sm,
+      crossAxisAlignment: WrapCrossAlignment.center,
       children: [
-        if (Get.find<AllVendorsDashboardController>().isDeliveryAvailable(
-          car,
-        )) ...[
-          _Badge(
-            label: DynamicLanguage.key(Strings.deliveryCar),
-            color: _C.blueBadge,
-            icon: Icons.local_shipping_rounded,
-          ),
-          const SizedBox(width: _S.sm),
-        ],
         _Badge(
           label: car.isAvailable
               ? DynamicLanguage.key(Strings.available)
@@ -1049,6 +1053,50 @@ class _PremiumCarCard extends StatelessWidget {
               ? Icons.check_circle_rounded
               : Icons.schedule_rounded,
         ),
+        if (Get.find<AllVendorsDashboardController>().isDeliveryAvailable(
+          car,
+        ))
+          _Badge(
+            label: DynamicLanguage.key(Strings.deliveryCar),
+            color: _C.blueBadge,
+            icon: Icons.local_shipping_rounded,
+          ),
+        if (car.seats > 0)
+          _Badge(
+            label: '${car.seats} ${DynamicLanguage.key(Strings.seats)}',
+            color: const Color(0xFF6366F1),
+            icon: Icons.airline_seat_recline_normal_rounded,
+          ),
+        if (car.hasDailyInsurance)
+          _Badge(
+            label: isAr
+                ? 'تأمين يومي: ${car.dailyInsuranceAmount!.toStringAsFixed(0)} $symbol'
+                : 'Daily Ins: ${car.dailyInsuranceAmount!.toStringAsFixed(0)} $symbol',
+            color: const Color(0xFF0284C7),
+            icon: Icons.health_and_safety_rounded,
+          )
+        else
+          _Badge(
+            label: DynamicLanguage.key(Strings.noDailyInsurance),
+            color: const Color(0xFF9CA3AF),
+            icon: Icons.shield_outlined,
+          ),
+        if (car.excessLiabilityAmount != null && car.excessLiabilityAmount! > 0)
+          _Badge(
+            label: isAr
+                ? 'قسط التحمل: ${car.excessLiabilityAmount!.toStringAsFixed(0)} $symbol'
+                : 'Deductible: ${car.excessLiabilityAmount!.toStringAsFixed(0)} $symbol',
+            color: const Color(0xFFD97706),
+            icon: Icons.gavel_rounded,
+          ),
+        if (car.transmission.isNotEmpty)
+          _Badge(
+            label: car.transmission.toLowerCase() == 'manual'
+                ? DynamicLanguage.key(Strings.manual)
+                : DynamicLanguage.key(Strings.automatic),
+            color: const Color(0xFF64748B),
+            icon: Icons.tune_rounded,
+          ),
       ],
     );
   }

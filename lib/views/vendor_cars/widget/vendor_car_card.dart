@@ -211,6 +211,10 @@ class VendorCarCard extends GetView<VendorCarsController> {
             SizedBox(height: Dimensions.verticalSize * 0.8),
           ],
 
+          // Badges (Seats, Insurance, Excess Liability, Transmission)
+          _buildBadgesRow(),
+          SizedBox(height: Dimensions.verticalSize * 0.8),
+
           // Price and book button
           _buildPriceAndBookButton(context),
         ],
@@ -292,6 +296,104 @@ class VendorCarCard extends GetView<VendorCarsController> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildBadgesRow() {
+    final currencySymbols = {
+      'SAR': 'ر.س',
+      'USD': r'$',
+      'AED': 'د.إ',
+      'EGP': 'ج.م',
+      'KWD': 'د.ك',
+    };
+    final symbol = currencySymbols[car.currency] ?? car.currency;
+    final isAr = Get.locale?.languageCode == 'ar' ||
+        DynamicLanguage.selectedLanguage.value == 'ar';
+
+    return Wrap(
+      spacing: 6,
+      runSpacing: 6,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        if (car.seats > 0)
+          _buildBadgeItem(
+            label: '${car.seats} ${DynamicLanguage.key(Strings.seats)}',
+            color: const Color(0xFF6366F1),
+            icon: Icons.airline_seat_recline_normal_rounded,
+          ),
+        if (car.hasDailyInsurance)
+          _buildBadgeItem(
+            label: isAr
+                ? 'تأمين يومي: ${car.dailyInsuranceAmount!.toStringAsFixed(0)} $symbol'
+                : 'Daily Ins: ${car.dailyInsuranceAmount!.toStringAsFixed(0)} $symbol',
+            color: const Color(0xFF0284C7),
+            icon: Icons.health_and_safety_rounded,
+          )
+        else
+          _buildBadgeItem(
+            label: DynamicLanguage.key(Strings.noDailyInsurance),
+            color: const Color(0xFF9CA3AF),
+            icon: Icons.shield_outlined,
+          ),
+        if (car.excessLiabilityAmount != null && car.excessLiabilityAmount! > 0)
+          _buildBadgeItem(
+            label: isAr
+                ? 'قسط التحمل: ${car.excessLiabilityAmount!.toStringAsFixed(0)} $symbol'
+                : 'Deductible: ${car.excessLiabilityAmount!.toStringAsFixed(0)} $symbol',
+            color: const Color(0xFFD97706),
+            icon: Icons.gavel_rounded,
+          ),
+        if (car.transmission.isNotEmpty)
+          _buildBadgeItem(
+            label: car.transmission.toLowerCase() == 'manual'
+                ? DynamicLanguage.key(Strings.manual)
+                : DynamicLanguage.key(Strings.automatic),
+            color: const Color(0xFF64748B),
+            icon: Icons.tune_rounded,
+          ),
+      ],
+    );
+  }
+
+  Widget _buildBadgeItem({
+    required String label,
+    required Color color,
+    required IconData icon,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 8,
+        vertical: 4,
+      ),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.9),
+        borderRadius: BorderRadius.circular(6),
+        boxShadow: [
+          BoxShadow(
+            color: color.withOpacity(0.25),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 12, color: Colors.white),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+              letterSpacing: 0.2,
+              height: 1.2,
+            ),
+          ),
+        ],
+      ),
     );
   }
 

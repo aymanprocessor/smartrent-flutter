@@ -1376,6 +1376,24 @@ abstract class AppLocalizations {
   /// **'Daily insurance is not available for this car'**
   String get appLDailyInsuranceNotAvailable;
 
+  /// No description provided for @appLManual.
+  ///
+  /// In en, this message translates to:
+  /// **'Manual'**
+  String get appLManual;
+
+  /// No description provided for @appLNoDailyInsurance.
+  ///
+  /// In en, this message translates to:
+  /// **'No Daily Insurance'**
+  String get appLNoDailyInsurance;
+
+  /// No description provided for @appLExcessLiabilityShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Deductible'**
+  String get appLExcessLiabilityShort;
+
   /// No description provided for @appLSnappedOutsideAllowed.
   ///
   /// In en, this message translates to:

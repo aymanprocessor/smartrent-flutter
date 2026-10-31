@@ -652,6 +652,15 @@ class AppLocalizationsEn extends AppLocalizations {
       'Daily insurance is not available for this car';
 
   @override
+  String get appLManual => 'Manual';
+
+  @override
+  String get appLNoDailyInsurance => 'No Daily Insurance';
+
+  @override
+  String get appLExcessLiabilityShort => 'Deductible';
+
+  @override
   String get appLSnappedOutsideAllowed =>
       'Selected location was outside the allowed area — snapped to nearest allowed point.';
 

@@ -654,6 +654,15 @@ class AppLocalizationsAr extends AppLocalizations {
       'التأمين اليومي غير متاح لهذه السيارة';
 
   @override
+  String get appLManual => 'يدوي';
+
+  @override
+  String get appLNoDailyInsurance => 'بدون تأمين يومي';
+
+  @override
+  String get appLExcessLiabilityShort => 'قسط التحمل';
+
+  @override
   String get appLSnappedOutsideAllowed =>
       'الموقع الذي اخترته كان خارج النطاق المسموح — تم تقريبه إلى أقرب نقطة مسموح بها.';
 

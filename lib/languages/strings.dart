@@ -433,4 +433,7 @@ class Strings {
   static const String dailyPrice = "appLDailyPrice";
   static const String yes = "appLYes";
   static const String outOfDeliveryRange = "appLOutOfDeliveryRange";
+  static const String manual = "appLManual";
+  static const String noDailyInsurance = "appLNoDailyInsurance";
+  static const String excessLiabilityShort = "appLExcessLiabilityShort";
 }
