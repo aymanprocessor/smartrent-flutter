@@ -55,59 +55,58 @@ class AllVendorsCarListView extends GetView<AllVendorsDashboardController> {
             return _buildEmptyState(context);
           }
           return RefreshIndicator(
-        onRefresh: controller.refreshCars,
-        color: CustomColor.primary,
-        backgroundColor: Colors.white,
-        displacement: 60,
-        child: CustomScrollView(
-            controller: controller.scrollController,
-            physics: const AlwaysScrollableScrollPhysics(),
-            slivers: [
-              // Animated sliver header
-              _buildSliverHeader(context),
+            onRefresh: controller.refreshCars,
+            color: CustomColor.primary,
+            backgroundColor: Colors.white,
+            displacement: 60,
+            child: CustomScrollView(
+              controller: controller.scrollController,
+              physics: const AlwaysScrollableScrollPhysics(),
+              slivers: [
+                // Animated sliver header
+                _buildSliverHeader(context),
 
-              // Filter bar
-              SliverToBoxAdapter(child: _buildFilterBar(context)),
+                // Filter bar
+                SliverToBoxAdapter(child: _buildFilterBar(context)),
 
+                // Location banner
+                if (controller.locationPermissionDenied.value)
+                  SliverToBoxAdapter(child: _buildLocationBanner(context)),
 
-
-              // Location banner
-              if (controller.locationPermissionDenied.value)
-                SliverToBoxAdapter(child: _buildLocationBanner(context)),
-
-              // Car cards
-              SliverPadding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: _S.base,
-                  vertical: _S.sm,
-                ),
-                sliver: SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      if (index == controller.vendorCars.length) {
-                        return _buildLoadMore();
-                      }
-                      final car = controller.vendorCars[index];
-                      return _PremiumCarCard(
-                        car: car,
-                        onTap: () => _onCarTap(car),
-                      );
-                    },
-                    childCount: controller.vendorCars.length +
-                        (controller.hasMore.value ? 1 : 0),
+                // Car cards
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: _S.base,
+                    vertical: _S.sm,
+                  ),
+                  sliver: SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) {
+                        if (index == controller.vendorCars.length) {
+                          return _buildLoadMore();
+                        }
+                        final car = controller.vendorCars[index];
+                        return _PremiumCarCard(
+                          car: car,
+                          onTap: () => _onCarTap(car),
+                        );
+                      },
+                      childCount:
+                          controller.vendorCars.length +
+                          (controller.hasMore.value ? 1 : 0),
+                    ),
                   ),
                 ),
-              ),
 
-              // Bottom safe area — extra room for FAB
-              SliverToBoxAdapter(
-                child: SizedBox(
-                  height: MediaQuery.of(context).padding.bottom + 96,
+                // Bottom safe area — extra room for FAB
+                SliverToBoxAdapter(
+                  child: SizedBox(
+                    height: MediaQuery.of(context).padding.bottom + 96,
+                  ),
                 ),
-              ),
-            ],
-          ),
-      );
+              ],
+            ),
+          );
         }),
         _buildFilterFab(context),
       ],
@@ -134,9 +133,9 @@ class AllVendorsCarListView extends GetView<AllVendorsDashboardController> {
           final statusBar = MediaQuery.of(context).padding.top;
           final expandedH = (isLoggedIn ? 148.0 : 80.0) + statusBar;
           final collapsedH = kToolbarHeight + statusBar;
-          final t = ((constraints.maxHeight - collapsedH) /
-                  (expandedH - collapsedH))
-              .clamp(0.0, 1.0);
+          final t =
+              ((constraints.maxHeight - collapsedH) / (expandedH - collapsedH))
+                  .clamp(0.0, 1.0);
 
           return Container(
             decoration: const BoxDecoration(
@@ -195,7 +194,11 @@ class AllVendorsCarListView extends GetView<AllVendorsDashboardController> {
                               alignment: AlignmentDirectional.bottomStart,
                               child: Padding(
                                 padding: const EdgeInsets.fromLTRB(
-                                    _S.base, 0, _S.base, _S.base),
+                                  _S.base,
+                                  0,
+                                  _S.base,
+                                  _S.base,
+                                ),
                                 child: Obx(() {
                                   final name = dashCtrl.userFullName.value;
                                   final greeting = _getGreeting();
@@ -212,8 +215,9 @@ class AllVendorsCarListView extends GetView<AllVendorsDashboardController> {
                                               style: TextStyle(
                                                 fontSize: 13,
                                                 fontWeight: FontWeight.w400,
-                                                color: Colors.white
-                                                    .withOpacity(0.75),
+                                                color: Colors.white.withOpacity(
+                                                  0.75,
+                                                ),
                                                 letterSpacing: 0.3,
                                               ),
                                             ),
@@ -229,8 +233,7 @@ class AllVendorsCarListView extends GetView<AllVendorsDashboardController> {
                                                   height: 1.2,
                                                 ),
                                                 maxLines: 1,
-                                                overflow:
-                                                    TextOverflow.ellipsis,
+                                                overflow: TextOverflow.ellipsis,
                                               ),
                                             ],
                                           ],
@@ -245,15 +248,20 @@ class AllVendorsCarListView extends GetView<AllVendorsDashboardController> {
                                         }
                                         return Container(
                                           padding: const EdgeInsets.symmetric(
-                                              horizontal: 10, vertical: 4),
+                                            horizontal: 10,
+                                            vertical: 4,
+                                          ),
                                           decoration: BoxDecoration(
-                                            color:
-                                                Colors.white.withOpacity(0.18),
-                                            borderRadius:
-                                                BorderRadius.circular(_R.xl),
+                                            color: Colors.white.withOpacity(
+                                              0.18,
+                                            ),
+                                            borderRadius: BorderRadius.circular(
+                                              _R.xl,
+                                            ),
                                             border: Border.all(
-                                              color:
-                                                  Colors.white.withOpacity(0.25),
+                                              color: Colors.white.withOpacity(
+                                                0.25,
+                                              ),
                                             ),
                                           ),
                                           child: Text(
@@ -329,11 +337,8 @@ class AllVendorsCarListView extends GetView<AllVendorsDashboardController> {
         fit: BoxFit.cover,
         width: 40,
         height: 40,
-        errorBuilder: (_, __, ___) => const Icon(
-          Icons.person_rounded,
-          color: Colors.white70,
-          size: 22,
-        ),
+        errorBuilder: (_, __, ___) =>
+            const Icon(Icons.person_rounded, color: Colors.white70, size: 22),
       );
     }
     return const Icon(Icons.person_rounded, color: Colors.white70, size: 22);
@@ -370,7 +375,9 @@ class AllVendorsCarListView extends GetView<AllVendorsDashboardController> {
       return Container(
         color: _C.surface,
         padding: const EdgeInsets.symmetric(
-            horizontal: _S.base, vertical: _S.sm),
+          horizontal: _S.base,
+          vertical: _S.sm,
+        ),
         child: SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           physics: const BouncingScrollPhysics(),
@@ -382,10 +389,7 @@ class AllVendorsCarListView extends GetView<AllVendorsDashboardController> {
                   onRemove: () => controller.changeQuickFilter('all'),
                 )
               else
-                _ActiveChip(
-                  label: filterLabel,
-                  isDefault: true,
-                ),
+                _ActiveChip(label: filterLabel, isDefault: true),
               const SizedBox(width: _S.xs),
               _ActiveChip(
                 label: sortLabel,
@@ -455,10 +459,7 @@ class AllVendorsCarListView extends GetView<AllVendorsDashboardController> {
                       end: Alignment.bottomRight,
                       colors: hasActive
                           ? [_C.headerStart, _C.headerEnd]
-                          : [
-                              Colors.white,
-                              Colors.white,
-                            ],
+                          : [Colors.white, Colors.white],
                     ),
                     border: hasActive
                         ? null
@@ -490,8 +491,7 @@ class AllVendorsCarListView extends GetView<AllVendorsDashboardController> {
                       decoration: BoxDecoration(
                         color: Colors.white,
                         shape: BoxShape.circle,
-                        border: Border.all(
-                            color: _C.headerStart, width: 2),
+                        border: Border.all(color: _C.headerStart, width: 2),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black.withOpacity(0.1),
@@ -589,8 +589,10 @@ class AllVendorsCarListView extends GetView<AllVendorsDashboardController> {
               },
               style: TextButton.styleFrom(
                 backgroundColor: _C.amberBadge,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: _S.md, vertical: _S.sm),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: _S.md,
+                  vertical: _S.sm,
+                ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(_R.sm),
                 ),
@@ -639,8 +641,10 @@ class AllVendorsCarListView extends GetView<AllVendorsDashboardController> {
         _buildSliverHeader(context),
         SliverToBoxAdapter(child: _buildFilterBar(context)),
         SliverPadding(
-          padding:
-              const EdgeInsets.symmetric(horizontal: _S.base, vertical: _S.sm),
+          padding: const EdgeInsets.symmetric(
+            horizontal: _S.base,
+            vertical: _S.sm,
+          ),
           sliver: SliverList(
             delegate: SliverChildBuilderDelegate(
               (_, __) => const _SkeletonCard(),
@@ -660,77 +664,82 @@ class AllVendorsCarListView extends GetView<AllVendorsDashboardController> {
       backgroundColor: Colors.white,
       displacement: 60,
       child: CustomScrollView(
-      physics: const AlwaysScrollableScrollPhysics(
-        parent: BouncingScrollPhysics(),
-      ),
-      slivers: [
-        _buildSliverHeader(context),
-        SliverToBoxAdapter(child: _buildFilterBar(context)),
-        SliverFillRemaining(
-          hasScrollBody: false,
-          child: Center(
-            child: Padding(
-              padding: const EdgeInsets.all(_S.xxl),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 100,
-                    height: 100,
-                    decoration: const BoxDecoration(
-                      color: _C.chipBg,
-                      shape: BoxShape.circle,
+        physics: const AlwaysScrollableScrollPhysics(
+          parent: BouncingScrollPhysics(),
+        ),
+        slivers: [
+          _buildSliverHeader(context),
+          SliverToBoxAdapter(child: _buildFilterBar(context)),
+          SliverFillRemaining(
+            hasScrollBody: false,
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(_S.xxl),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 100,
+                      height: 100,
+                      decoration: const BoxDecoration(
+                        color: _C.chipBg,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.search_off_rounded,
+                        size: 48,
+                        color: _C.textTertiary,
+                      ),
                     ),
-                    child: const Icon(
-                      Icons.search_off_rounded,
-                      size: 48,
-                      color: _C.textTertiary,
+                    const SizedBox(height: _S.xl),
+                    Text(
+                      DynamicLanguage.key(Strings.noCarsFound),
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: _C.textPrimary,
+                        letterSpacing: -0.3,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: _S.xl),
-                  Text(
-                    DynamicLanguage.key(Strings.noCarsFound),
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                      color: _C.textPrimary,
-                      letterSpacing: -0.3,
+                    const SizedBox(height: _S.sm),
+                    Text(
+                      DynamicLanguage.key(Strings.tryDifferentFilters),
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: _C.textSecondary,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
-                  ),
-                  const SizedBox(height: _S.sm),
-                  Text(
-                    DynamicLanguage.key(Strings.tryDifferentFilters),
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: _C.textSecondary,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
-        ),
-      ],
-    ),
+        ],
+      ),
     );
   }
 
   // ─────────────────────────── Helpers ──────────────────────
   void _onCarTap(VendorCar car) {
-    if (!LocalStorage.isLoggedIn) {
-      Get.toNamed(Routes.otpLoginScreen);
-      return;
-    }
-    controller.selectedCarId.value = car.id.toString();
-    try {
-      final bookingController = Get.find<BookingController>();
-      bookingController.initializeWithCar(car);
-    } catch (_) {}
-    Get.toNamed(Routes.bookingScreen, arguments: {'car': car});
-  }
+    final dashboardController = Get.isRegistered<DashboardController>()
+        ? Get.find<DashboardController>()
+        : Get.put(DashboardController());
 
+    dashboardController.bookCarAfterKycCheck(
+      car.id.toString(),
+      onVerified: () {
+        controller.selectedCarId.value = car.id.toString();
+        dashboardController.carToken.value = controller.carToken.value;
+        try {
+          final bookingController = Get.find<BookingController>();
+          bookingController.initializeWithCar(car);
+        } catch (_) {}
+        Get.toNamed(Routes.bookingScreen, arguments: {'car': car});
+      },
+    );
+  }
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -795,10 +804,7 @@ class _PremiumCarCard extends StatelessWidget {
   final VendorCar car;
   final VoidCallback onTap;
 
-  const _PremiumCarCard({
-    required this.car,
-    required this.onTap,
-  });
+  const _PremiumCarCard({required this.car, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -827,8 +833,12 @@ class _PremiumCarCard extends StatelessWidget {
           children: [
             _buildImageSection(context),
             Padding(
-              padding:
-                  const EdgeInsets.fromLTRB(_S.base, _S.md, _S.base, _S.base),
+              padding: const EdgeInsets.fromLTRB(
+                _S.base,
+                _S.md,
+                _S.base,
+                _S.base,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -887,10 +897,7 @@ class _PremiumCarCard extends StatelessWidget {
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.center,
-                  colors: [
-                    Colors.black.withOpacity(0.25),
-                    Colors.transparent,
-                  ],
+                  colors: [Colors.black.withOpacity(0.25), Colors.transparent],
                 ),
               ),
             ),
@@ -906,10 +913,7 @@ class _PremiumCarCard extends StatelessWidget {
                 gradient: LinearGradient(
                   begin: Alignment.bottomCenter,
                   end: Alignment.topCenter,
-                  colors: [
-                    _C.card.withOpacity(0.6),
-                    Colors.transparent,
-                  ],
+                  colors: [_C.card.withOpacity(0.6), Colors.transparent],
                 ),
               ),
             ),
@@ -1000,8 +1004,10 @@ class _PremiumCarCard extends StatelessWidget {
       runSpacing: 6,
       children: car.features.take(3).map((feature) {
         return Container(
-          padding:
-              const EdgeInsets.symmetric(horizontal: _S.sm, vertical: _S.xs),
+          padding: const EdgeInsets.symmetric(
+            horizontal: _S.sm,
+            vertical: _S.xs,
+          ),
           decoration: BoxDecoration(
             color: const Color(0xFFEFF6FF),
             borderRadius: BorderRadius.circular(6),
@@ -1024,7 +1030,9 @@ class _PremiumCarCard extends StatelessWidget {
   Widget _buildStatusBadgeRow() {
     return Row(
       children: [
-        if (Get.find<AllVendorsDashboardController>().isDeliveryAvailable(car)) ...[
+        if (Get.find<AllVendorsDashboardController>().isDeliveryAvailable(
+          car,
+        )) ...[
           _Badge(
             label: DynamicLanguage.key(Strings.deliveryCar),
             color: _C.blueBadge,
@@ -1220,11 +1228,7 @@ class _Badge extends StatelessWidget {
   final Color color;
   final IconData icon;
 
-  const _Badge({
-    required this.label,
-    required this.color,
-    required this.icon,
-  });
+  const _Badge({required this.label, required this.color, required this.icon});
 
   @override
   Widget build(BuildContext context) {
@@ -1404,8 +1408,10 @@ class _FilterSheetState extends State<_FilterSheet> {
   }
 
   bool get _isModified =>
-      _selectedFilter != 'all' || _selectedSort != 'popularity' ||
-      _selectedBrand != 'all' || _selectedCity != 'all';
+      _selectedFilter != 'all' ||
+      _selectedSort != 'popularity' ||
+      _selectedBrand != 'all' ||
+      _selectedCity != 'all';
 
   @override
   Widget build(BuildContext context) {
@@ -1458,12 +1464,16 @@ class _FilterSheetState extends State<_FilterSheet> {
                     onTap: _resetFilters,
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: _S.md, vertical: _S.xs),
+                        horizontal: _S.md,
+                        vertical: _S.xs,
+                      ),
                       decoration: BoxDecoration(
                         color: const Color(0xFFFEF2F2),
                         borderRadius: BorderRadius.circular(_R.xl),
                         border: Border.all(
-                            color: const Color(0xFFFCA5A5), width: 1),
+                          color: const Color(0xFFFCA5A5),
+                          width: 1,
+                        ),
                       ),
                       child: const Text(
                         'Reset',
@@ -1485,8 +1495,11 @@ class _FilterSheetState extends State<_FilterSheet> {
                       color: _C.chipBg,
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.close_rounded,
-                        size: 18, color: _C.textSecondary),
+                    child: const Icon(
+                      Icons.close_rounded,
+                      size: 18,
+                      color: _C.textSecondary,
+                    ),
                   ),
                 ),
               ],
@@ -1519,7 +1532,8 @@ class _FilterSheetState extends State<_FilterSheet> {
                                 icon: Icons.apps_rounded,
                                 label: DynamicLanguage.key(Strings.allCars),
                                 isSelected: _selectedFilter == 'all',
-                                onTap: () => setState(() => _selectedFilter = 'all'),
+                                onTap: () =>
+                                    setState(() => _selectedFilter = 'all'),
                               ),
                             ),
                             const SizedBox(width: _S.sm),
@@ -1528,8 +1542,9 @@ class _FilterSheetState extends State<_FilterSheet> {
                                 icon: Icons.check_circle_outline_rounded,
                                 label: DynamicLanguage.key(Strings.available),
                                 isSelected: _selectedFilter == 'available',
-                                onTap: () =>
-                                    setState(() => _selectedFilter = 'available'),
+                                onTap: () => setState(
+                                  () => _selectedFilter = 'available',
+                                ),
                               ),
                             ),
                             if (!c.locationPermissionDenied.value) ...[
@@ -1537,10 +1552,14 @@ class _FilterSheetState extends State<_FilterSheet> {
                               Expanded(
                                 child: _OptionCard(
                                   icon: Icons.local_shipping_outlined,
-                                  label: DynamicLanguage.key(Strings.deliveryCar),
-                                  isSelected: _selectedFilter == 'deliveryAvailable',
+                                  label: DynamicLanguage.key(
+                                    Strings.deliveryCar,
+                                  ),
+                                  isSelected:
+                                      _selectedFilter == 'deliveryAvailable',
                                   onTap: () => setState(
-                                      () => _selectedFilter = 'deliveryAvailable'),
+                                    () => _selectedFilter = 'deliveryAvailable',
+                                  ),
                                 ),
                               ),
                             ],
@@ -1558,14 +1577,17 @@ class _FilterSheetState extends State<_FilterSheet> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _sectionLabel(Icons.swap_vert_rounded,
-                            DynamicLanguage.key(Strings.sortBy)),
+                        _sectionLabel(
+                          Icons.swap_vert_rounded,
+                          DynamicLanguage.key(Strings.sortBy),
+                        ),
                         const SizedBox(height: _S.md),
                         _SortOption(
                           icon: Icons.trending_up_rounded,
                           label: DynamicLanguage.key(Strings.popularity),
                           isSelected: _selectedSort == 'popularity',
-                          onTap: () => setState(() => _selectedSort = 'popularity'),
+                          onTap: () =>
+                              setState(() => _selectedSort = 'popularity'),
                         ),
                         const SizedBox(height: _S.sm),
                         _SortOption(
@@ -1611,13 +1633,17 @@ class _FilterSheetState extends State<_FilterSheet> {
                               _SheetChip(
                                 label: 'All',
                                 isSelected: _selectedBrand == 'all',
-                                onTap: () => setState(() => _selectedBrand = 'all'),
+                                onTap: () =>
+                                    setState(() => _selectedBrand = 'all'),
                               ),
-                              ...brands.map((b) => _SheetChip(
-                                    label: b,
-                                    isSelected: _selectedBrand == b,
-                                    onTap: () => setState(() => _selectedBrand = b),
-                                  )),
+                              ...brands.map(
+                                (b) => _SheetChip(
+                                  label: b,
+                                  isSelected: _selectedBrand == b,
+                                  onTap: () =>
+                                      setState(() => _selectedBrand = b),
+                                ),
+                              ),
                             ],
                           ),
                         ],
@@ -1642,13 +1668,17 @@ class _FilterSheetState extends State<_FilterSheet> {
                               _SheetChip(
                                 label: DynamicLanguage.key(Strings.allCities),
                                 isSelected: _selectedCity == 'all',
-                                onTap: () => setState(() => _selectedCity = 'all'),
+                                onTap: () =>
+                                    setState(() => _selectedCity = 'all'),
                               ),
-                              ...cities.map((city) => _SheetChip(
-                                    label: city,
-                                    isSelected: _selectedCity == city,
-                                    onTap: () => setState(() => _selectedCity = city),
-                                  )),
+                              ...cities.map(
+                                (city) => _SheetChip(
+                                  label: city,
+                                  isSelected: _selectedCity == city,
+                                  onTap: () =>
+                                      setState(() => _selectedCity = city),
+                                ),
+                              ),
                             ],
                           ),
                         ],
@@ -1667,7 +1697,11 @@ class _FilterSheetState extends State<_FilterSheet> {
           // ── Apply Button ──
           Padding(
             padding: EdgeInsets.fromLTRB(
-                _S.lg, _S.base, _S.lg, _S.base + bottomInset),
+              _S.lg,
+              _S.base,
+              _S.lg,
+              _S.base + bottomInset,
+            ),
             child: SizedBox(
               width: double.infinity,
               height: 54,
@@ -1833,10 +1867,14 @@ class _SortOption extends StatelessWidget {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
-        padding:
-            const EdgeInsets.symmetric(horizontal: _S.base, vertical: _S.md),
+        padding: const EdgeInsets.symmetric(
+          horizontal: _S.base,
+          vertical: _S.md,
+        ),
         decoration: BoxDecoration(
-          color: isSelected ? CustomColor.primary.withOpacity(0.06) : Colors.white,
+          color: isSelected
+              ? CustomColor.primary.withOpacity(0.06)
+              : Colors.white,
           borderRadius: BorderRadius.circular(_R.md),
           border: Border.all(
             color: isSelected
@@ -1868,8 +1906,7 @@ class _SortOption extends StatelessWidget {
                 label,
                 style: TextStyle(
                   fontSize: 14,
-                  fontWeight:
-                      isSelected ? FontWeight.w700 : FontWeight.w500,
+                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                   color: isSelected ? CustomColor.primary : _C.textPrimary,
                 ),
               ),
@@ -1884,12 +1921,14 @@ class _SortOption extends StatelessWidget {
                   color: isSelected ? CustomColor.primary : _C.border,
                   width: 2,
                 ),
-                color:
-                    isSelected ? CustomColor.primary : Colors.transparent,
+                color: isSelected ? CustomColor.primary : Colors.transparent,
               ),
               child: isSelected
-                  ? const Icon(Icons.check_rounded,
-                      size: 12, color: Colors.white)
+                  ? const Icon(
+                      Icons.check_rounded,
+                      size: 12,
+                      color: Colors.white,
+                    )
                   : null,
             ),
           ],

@@ -1,4 +1,5 @@
 import 'package:carbo/base/utils/basic_import.dart';
+import 'package:flutter/material.dart';
 import 'package:carbo/views/dashboard/model/area_has_type_model.dart';
 import 'package:carbo/views/dashboard/model/car_area_model.dart';
 import 'package:carbo/views/dashboard/model/type_has_model.dart';
@@ -11,12 +12,15 @@ import 'package:carbo/base/widgets/logger.dart';
 import 'package:carbo/base/utils/local_storage.dart';
 import '../../../base/api/endpoint/api_endpoint.dart';
 import '../../../base/api/method/request_process.dart';
+import '../../../base/api/services/profile_kyc_service.dart';
+import '../../../routes/routes.dart';
 import '../model/car_info_model.dart';
 import '../model/dashboard_info_model.dart';
 
 final log = logger(DashboardController);
 
 class DashboardController extends GetxController {
+  final RxBool isCheckingKycBeforeBooking = false.obs;
   final List<String> carType = [];
 
   RxInt currentIndex = 0.obs;
@@ -63,10 +67,7 @@ class DashboardController extends GetxController {
         _dashboardInfoModel = value!;
         // Update LocalStorage with latest KYC status from server
         final kycStatus = _dashboardInfoModel.data.userInfo.kycVerified;
-        LocalStorage.save(
-          kycStatus: kycStatus,
-          isKycVerified: kycStatus == 1,
-        );
+        LocalStorage.save(kycStatus: kycStatus, isKycVerified: kycStatus == 1);
         _getDashboardInfo();
         typeList.clear();
         getAllTypes(); // Fetch all types directly
@@ -83,6 +84,72 @@ class DashboardController extends GetxController {
     userDefaultImageUrl.value = '${baseUrl}/$defaultImg';
     userFullName.value = _dashboardInfoModel.data.userInfo.fullname;
     userEmail.value = _dashboardInfoModel.data.userInfo.email;
+  }
+
+  Future<void> bookCarAfterKycCheck(
+    String carId, {
+    void Function()? onVerified,
+  }) async {
+    if (!LocalStorage.isLoggedIn) {
+      Get.toNamed(Routes.otpLoginScreen);
+      return;
+    }
+    if (isCheckingKycBeforeBooking.value) return;
+
+    isCheckingKycBeforeBooking.value = true;
+    try {
+      final statusData = await ProfileKycService.getKycStatus();
+      if (statusData == null || !statusData.containsKey('kyc_status')) {
+        CustomSnackBar.error(
+          'Could not check your identity verification status. Please try again.',
+        );
+        return;
+      }
+
+      final status =
+          int.tryParse(statusData['kyc_status']?.toString() ?? '') ?? 0;
+      final isVerified = status == 1;
+      await LocalStorage.save(kycStatus: status, isKycVerified: isVerified);
+
+      if (!isVerified) {
+        if (status == 2) {
+          Get.dialog<void>(
+            Builder(
+              builder: (dialogContext) => AlertDialog(
+                title: Text(DynamicLanguage.key(Strings.kycPendingReview)),
+                content: Text(
+                  DynamicLanguage.key(Strings.kycPendingBookingMessage),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(dialogContext).pop(),
+                    child: Text(DynamicLanguage.key(Strings.ok)),
+                  ),
+                ],
+              ),
+            ),
+            barrierDismissible: true,
+          );
+          return;
+        }
+        Get.toNamed(Routes.kycSubmissionScreen);
+        return;
+      }
+
+      selectedCarId.value = carId;
+      if (onVerified != null) {
+        onVerified();
+      } else {
+        Get.toNamed(Routes.bookingScreen);
+      }
+    } catch (e) {
+      log.e('Could not check KYC status before booking: $e');
+      CustomSnackBar.error(
+        'Could not check your identity verification status. Please try again.',
+      );
+    } finally {
+      isCheckingKycBeforeBooking.value = false;
+    }
   }
 
   //// GET ARE - - - - - - - - - - - - - - - - - (DEPRECATED - Keeping for backwards compatibility)

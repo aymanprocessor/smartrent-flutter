@@ -34,32 +34,27 @@ class AllVendorsCarCarousel extends GetView<AllVendorsDashboardController> {
                       splashColor: Colors.transparent,
                       highlightColor: Colors.transparent,
                       onTap: () {
-                        // Store selected car ID for booking
-                        controller.selectedCarId.value = car.id.toString();
-                        try {
-                          final dashController =
-                              Get.find<DashboardController>();
-                          dashController.selectedCarId.value = car.id
-                              .toString();
-                          dashController.carToken.value =
-                              controller.carToken.value;
-                        } catch (e) {
-                          // DashboardController may not be loaded yet
-                        }
-                        
-                        // Initialize booking controller with selected car
-                        try {
-                          final bookingController = Get.find<BookingController>();
-                          bookingController.initializeWithCar(car);
-                        } catch (e) {
-                          // BookingController not yet initialized
-                        }
-                        
-                        if (!LocalStorage.isLoggedIn) {
-                          Get.toNamed(Routes.otpLoginScreen);
-                          return;
-                        }
-                        Get.toNamed(Routes.bookingScreen, arguments: {'car': car});
+                        final dashController =
+                            Get.isRegistered<DashboardController>()
+                            ? Get.find<DashboardController>()
+                            : Get.put(DashboardController());
+                        dashController.bookCarAfterKycCheck(
+                          car.id.toString(),
+                          onVerified: () {
+                            controller.selectedCarId.value = car.id.toString();
+                            dashController.carToken.value =
+                                controller.carToken.value;
+                            try {
+                              Get.find<BookingController>().initializeWithCar(
+                                car,
+                              );
+                            } catch (_) {}
+                            Get.toNamed(
+                              Routes.bookingScreen,
+                              arguments: {'car': car},
+                            );
+                          },
+                        );
                       },
                       child: Container(
                         padding: EdgeInsets.all(
@@ -92,8 +87,9 @@ class AllVendorsCarCarousel extends GetView<AllVendorsDashboardController> {
                                 ),
                                 child: Builder(
                                   builder: (context) {
-                                    final imageUrl = car.modelImage?.trim() ?? '';
-                                    
+                                    final imageUrl =
+                                        car.modelImage?.trim() ?? '';
+
                                     return AppCachedImage(
                                       imageUrl: imageUrl,
                                       width: double.infinity,
@@ -222,20 +218,24 @@ class AllVendorsCarCarousel extends GetView<AllVendorsDashboardController> {
                         } catch (e) {
                           // DashboardController may not be loaded yet
                         }
-                        
+
                         // Initialize booking controller with selected car
                         try {
-                          final bookingController = Get.find<BookingController>();
+                          final bookingController =
+                              Get.find<BookingController>();
                           bookingController.initializeWithCar(car);
                         } catch (e) {
                           // BookingController not yet initialized
                         }
-                        
+
                         if (!LocalStorage.isLoggedIn) {
                           Get.toNamed(Routes.otpLoginScreen);
                           return;
                         }
-                        Get.toNamed(Routes.bookingScreen, arguments: {'car': car});
+                        Get.toNamed(
+                          Routes.bookingScreen,
+                          arguments: {'car': car},
+                        );
                       }
                     },
                   ),

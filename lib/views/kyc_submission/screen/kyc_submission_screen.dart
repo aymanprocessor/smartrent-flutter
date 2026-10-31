@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../base/api/model/kyc_model.dart';
+import '../../../base/localization/dynamic_language_shim.dart';
 import '../../../base/utils/basic_import.dart';
 import '../controller/kyc_submission_controller.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
@@ -27,7 +28,7 @@ class KycSubmissionMobileScreen extends StatelessWidget {
       backgroundColor: CustomColor.whiteColor,
       appBar: AppBar(
         title: Text(
-          'Submit KYC Documents',
+          DynamicLanguage.key(Strings.submitKycDocuments),
           style: TextStyle(
             fontSize: Dimensions.titleLarge,
             color: CustomColor.typography,
@@ -43,10 +44,41 @@ class KycSubmissionMobileScreen extends StatelessWidget {
         }
 
         if (controller.kycFields.isEmpty) {
+          if (controller.kycStatus.value == 1) {
+            return Center(
+              child: Padding(
+                padding: EdgeInsets.all(Dimensions.paddingSize),
+                child: _statusMessage(
+                  Icons.verified,
+                  Colors.green,
+                  DynamicLanguage.key(Strings.yourIdentityApproved),
+                ),
+              ),
+            );
+          }
+          if (controller.kycStatus.value == 2) {
+            return Center(
+              child: Padding(
+                padding: EdgeInsets.all(Dimensions.paddingSize),
+                child: _statusMessage(
+                  Icons.hourglass_top,
+                  Colors.orange,
+                  DynamicLanguage.key(Strings.kycPendingCannotSubmit),
+                ),
+              ),
+            );
+          }
           return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
+                if (controller.kycStatus.value == 3)
+                  _statusMessage(
+                    Icons.error_outline,
+                    Colors.red,
+                    '${DynamicLanguage.key(Strings.kycRejected)}${controller.rejectReason.value.isEmpty ? '' : '\n${DynamicLanguage.key(Strings.reason)}: ${controller.rejectReason.value}'}',
+                  ),
                 Icon(
                   Icons.error_outline,
                   size: 64,
@@ -54,11 +86,18 @@ class KycSubmissionMobileScreen extends StatelessWidget {
                 ),
                 SizedBox(height: Dimensions.heightSize),
                 Text(
-                  'KYC fields not available',
+                  controller.pageError.value.isEmpty
+                      ? DynamicLanguage.key(Strings.kycFieldsUnavailable)
+                      : controller.pageError.value,
                   style: TextStyle(
                     fontSize: Dimensions.titleMedium,
                     color: CustomColor.typographyShade[40],
                   ),
+                ),
+                SizedBox(height: Dimensions.heightSize),
+                OutlinedButton(
+                  onPressed: controller.refreshKycFields,
+                  child: Text(DynamicLanguage.key(Strings.retry)),
                 ),
               ],
             ),
@@ -78,10 +117,44 @@ class KycSubmissionMobileScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            if (controller.kycStatus.value == 1)
+              _statusMessage(
+                Icons.verified,
+                Colors.green,
+                DynamicLanguage.key(Strings.yourIdentityApproved),
+              ),
+            if (controller.kycStatus.value == 2)
+              _statusMessage(
+                Icons.hourglass_top,
+                Colors.orange,
+                DynamicLanguage.key(Strings.kycPendingCannotSubmit),
+              ),
+            if (controller.kycStatus.value == 3) ...[
+              _statusMessage(
+                Icons.error_outline,
+                Colors.red,
+                '${DynamicLanguage.key(Strings.kycRejected)}${controller.rejectReason.value.isEmpty ? '' : '\n${DynamicLanguage.key(Strings.reason)}: ${controller.rejectReason.value}'}',
+              ),
+            ],
+            if (!controller.profileComplete.value &&
+                controller.kycStatus.value != 1 &&
+                controller.kycStatus.value != 2)
+              _statusMessage(
+                Icons.info_outline,
+                Colors.orange,
+                DynamicLanguage.key(Strings.completeProfileBeforeKyc),
+              ),
+            if (controller.pageError.value.isNotEmpty &&
+                controller.kycFields.isNotEmpty)
+              _statusMessage(
+                Icons.error_outline,
+                Colors.red,
+                controller.pageError.value,
+              ),
             SizedBox(height: Dimensions.heightSize * 2),
 
             Text(
-              'Please upload required documents for verification',
+              DynamicLanguage.key(Strings.pleaseUploadRequiredDocuments),
               style: TextStyle(
                 fontSize: Dimensions.titleMedium,
                 color: CustomColor.typographyShade[40],
@@ -107,7 +180,11 @@ class KycSubmissionMobileScreen extends StatelessWidget {
                 width: double.infinity,
                 height: Dimensions.buttonHeight,
                 child: ElevatedButton(
-                  onPressed: controller.isLoading.value
+                  onPressed:
+                      controller.isLoading.value ||
+                          !controller.profileComplete.value ||
+                          controller.kycStatus.value == 1 ||
+                          controller.kycStatus.value == 2
                       ? null
                       : controller.submitKyc,
                   style: ElevatedButton.styleFrom(
@@ -129,7 +206,7 @@ class KycSubmissionMobileScreen extends StatelessWidget {
                           ),
                         )
                       : Text(
-                          'Submit KYC',
+                          DynamicLanguage.key(Strings.submitKycDocuments),
                           style: TextStyle(
                             fontSize: Dimensions.titleMedium,
                             color: Colors.white,
@@ -146,6 +223,30 @@ class KycSubmissionMobileScreen extends StatelessWidget {
       ),
     );
   }
+
+  Widget _statusMessage(IconData icon, Color color, String message) =>
+      Container(
+        width: double.infinity,
+        margin: EdgeInsets.only(bottom: Dimensions.heightSize),
+        padding: EdgeInsets.all(Dimensions.paddingSize),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.08),
+          borderRadius: BorderRadius.circular(Dimensions.radius),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(icon, color: color),
+            SizedBox(width: Dimensions.widthSize),
+            Expanded(
+              child: Text(
+                message,
+                style: TextStyle(color: CustomColor.typography),
+              ),
+            ),
+          ],
+        ),
+      );
 
   Widget _buildDynamicField(
     KycField field,
@@ -174,10 +275,14 @@ class KycSubmissionMobileScreen extends StatelessWidget {
   }
 
   Widget _buildTextField(KycField field, KycSubmissionController controller) {
+    final label = field.localizedLabel(DynamicLanguage.selectedLanguage.value);
+    final placeholder = field.localizedPlaceholder(
+      DynamicLanguage.selectedLanguage.value,
+    );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildLabel(field.label, field.required),
+        _buildLabel(label, field.required),
         SizedBox(height: Dimensions.heightSize * 0.5),
         TextFormField(
           controller: controller.textControllers[field.name],
@@ -185,7 +290,9 @@ class KycSubmissionMobileScreen extends StatelessWidget {
               ? TextInputType.number
               : TextInputType.text,
           decoration: InputDecoration(
-            hintText: field.placeholder ?? 'Enter ${field.label}',
+            hintText:
+                placeholder ??
+                '${DynamicLanguage.key(Strings.enterValue)} $label',
             filled: true,
             fillColor: CustomColor.typographyShade[0]!.withOpacity(0.5),
             border: OutlineInputBorder(
@@ -200,12 +307,14 @@ class KycSubmissionMobileScreen extends StatelessWidget {
           validator: field.required
               ? FormBuilderValidators.compose([
                   FormBuilderValidators.required(
-                    errorText: '${field.label} is required',
+                    errorText:
+                        '$label ${DynamicLanguage.key(Strings.isRequired)}',
                   ),
                   if (field.maxLength != null)
                     FormBuilderValidators.maxLength(
                       field.maxLength!,
-                      errorText: 'Maximum ${field.maxLength} characters',
+                      errorText:
+                          '${DynamicLanguage.key(Strings.maximumCharacters)} ${field.maxLength}',
                     ),
                 ])
               : null,
@@ -218,16 +327,22 @@ class KycSubmissionMobileScreen extends StatelessWidget {
     KycField field,
     KycSubmissionController controller,
   ) {
+    final label = field.localizedLabel(DynamicLanguage.selectedLanguage.value);
+    final placeholder = field.localizedPlaceholder(
+      DynamicLanguage.selectedLanguage.value,
+    );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildLabel(field.label, field.required),
+        _buildLabel(label, field.required),
         SizedBox(height: Dimensions.heightSize * 0.5),
         TextFormField(
           controller: controller.textControllers[field.name],
           maxLines: 4,
           decoration: InputDecoration(
-            hintText: field.placeholder ?? 'Enter ${field.label}',
+            hintText:
+                placeholder ??
+                '${DynamicLanguage.key(Strings.enterValue)} $label',
             filled: true,
             fillColor: CustomColor.typographyShade[0]!.withOpacity(0.5),
             border: OutlineInputBorder(
@@ -238,7 +353,8 @@ class KycSubmissionMobileScreen extends StatelessWidget {
           ),
           validator: field.required
               ? FormBuilderValidators.required(
-                  errorText: '${field.label} is required',
+                  errorText:
+                      '$label ${DynamicLanguage.key(Strings.isRequired)}',
                 )
               : null,
         ),
@@ -247,16 +363,22 @@ class KycSubmissionMobileScreen extends StatelessWidget {
   }
 
   Widget _buildDateField(KycField field, KycSubmissionController controller) {
+    final label = field.localizedLabel(DynamicLanguage.selectedLanguage.value);
+    final placeholder = field.localizedPlaceholder(
+      DynamicLanguage.selectedLanguage.value,
+    );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildLabel(field.label, field.required),
+        _buildLabel(label, field.required),
         SizedBox(height: Dimensions.heightSize * 0.5),
         TextFormField(
           controller: controller.textControllers[field.name],
           readOnly: true,
           decoration: InputDecoration(
-            hintText: field.placeholder ?? 'Select ${field.label}',
+            hintText:
+                placeholder ??
+                '${DynamicLanguage.key(Strings.selectValue)} $label',
             filled: true,
             fillColor: CustomColor.typographyShade[0]!.withOpacity(0.5),
             border: OutlineInputBorder(
@@ -283,7 +405,8 @@ class KycSubmissionMobileScreen extends StatelessWidget {
           },
           validator: field.required
               ? FormBuilderValidators.required(
-                  errorText: '${field.label} is required',
+                  errorText:
+                      '$label ${DynamicLanguage.key(Strings.isRequired)}',
                 )
               : null,
         ),
@@ -292,16 +415,22 @@ class KycSubmissionMobileScreen extends StatelessWidget {
   }
 
   Widget _buildSelectField(KycField field, KycSubmissionController controller) {
+    final label = field.localizedLabel(DynamicLanguage.selectedLanguage.value);
+    final placeholder = field.localizedPlaceholder(
+      DynamicLanguage.selectedLanguage.value,
+    );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildLabel(field.label, field.required),
+        _buildLabel(label, field.required),
         SizedBox(height: Dimensions.heightSize * 0.5),
         Obx(
           () => DropdownButtonFormField<String>(
             value: controller.selectedValues[field.name],
             decoration: InputDecoration(
-              hintText: field.placeholder ?? 'Select ${field.label}',
+              hintText:
+                  placeholder ??
+                  '${DynamicLanguage.key(Strings.selectValue)} $label',
               filled: true,
               fillColor: CustomColor.typographyShade[0]!.withOpacity(0.5),
               border: OutlineInputBorder(
@@ -326,7 +455,8 @@ class KycSubmissionMobileScreen extends StatelessWidget {
             },
             validator: field.required
                 ? FormBuilderValidators.required(
-                    errorText: '${field.label} is required',
+                    errorText:
+                        '$label ${DynamicLanguage.key(Strings.isRequired)}',
                   )
                 : null,
           ),
@@ -336,10 +466,39 @@ class KycSubmissionMobileScreen extends StatelessWidget {
   }
 
   Widget _buildFileField(KycField field, KycSubmissionController controller) {
+    final label = field.localizedLabel(DynamicLanguage.selectedLanguage.value);
+    final maxSize = field.maxFileSizeKb;
+    final cameraSuitable =
+        field.mimes.isEmpty ||
+        field.mimes.any(
+          (mime) => const {
+            'jpg',
+            'jpeg',
+            'png',
+            'image/jpeg',
+            'image/png',
+          }.contains(mime.toLowerCase()),
+        );
+    final guidance = [
+      if (field.mimes.isNotEmpty)
+        '${DynamicLanguage.key(Strings.accepted)}: ${field.mimes.join(', ')}',
+      if (maxSize != null)
+        '${DynamicLanguage.key(Strings.maximumSize)}: ${maxSize >= 1024 ? '${(maxSize / 1024).round()} MB' : '$maxSize KB'}',
+    ].join(' · ');
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildLabel(field.label, field.required),
+        _buildLabel(label, field.required),
+        if (guidance.isNotEmpty) ...[
+          SizedBox(height: Dimensions.heightSize * 0.3),
+          Text(
+            guidance,
+            style: TextStyle(
+              fontSize: Dimensions.titleSmall,
+              color: CustomColor.typographyShade[40],
+            ),
+          ),
+        ],
         SizedBox(height: Dimensions.heightSize * 0.5),
         Obx(() {
           final hasFile = controller.fileNames.containsKey(field.name);
@@ -383,7 +542,11 @@ class KycSubmissionMobileScreen extends StatelessWidget {
                       child: OutlinedButton.icon(
                         onPressed: () => controller.pickFile(field.name),
                         icon: Icon(Icons.upload_file),
-                        label: Text(hasFile ? 'Change File' : 'Choose File'),
+                        label: Text(
+                          DynamicLanguage.key(
+                            hasFile ? Strings.changeFile : Strings.chooseFile,
+                          ),
+                        ),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: CustomColor.primary,
                           padding: EdgeInsets.symmetric(
@@ -392,20 +555,26 @@ class KycSubmissionMobileScreen extends StatelessWidget {
                         ),
                       ),
                     ),
-                    SizedBox(width: Dimensions.widthSize),
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: () => controller.pickImage(field.name),
-                        icon: Icon(Icons.camera_alt),
-                        label: Text(hasFile ? 'Change Photo' : 'Take Photo'),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: CustomColor.primary,
-                          padding: EdgeInsets.symmetric(
-                            vertical: Dimensions.paddingSize * 0.6,
+                    if (cameraSuitable) ...[
+                      SizedBox(width: Dimensions.widthSize),
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: () => controller.pickImage(field.name),
+                          icon: Icon(Icons.camera_alt),
+                          label: Text(
+                            DynamicLanguage.key(
+                              hasFile ? Strings.changePhoto : Strings.takePhoto,
+                            ),
+                          ),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: CustomColor.primary,
+                            padding: EdgeInsets.symmetric(
+                              vertical: Dimensions.paddingSize * 0.6,
+                            ),
                           ),
                         ),
                       ),
-                    ),
+                    ],
                   ],
                 ),
               ],

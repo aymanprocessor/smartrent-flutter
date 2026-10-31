@@ -846,6 +846,95 @@ class AppLocalizationsAr extends AppLocalizations {
       'يجاري مراجعة بيانات التحقق من الهوية الخاصة بك. سيتم إخطارك عند التحقق منها.';
 
   @override
+  String get appLKycPendingBookingMessage =>
+      'يمكنك حجز سيارة بعد الموافقة على التحقق من هويتك.';
+
+  @override
+  String get appLOk => 'حسنًا';
+
+  @override
+  String get appLVerifyIdentity => 'التحقق من الهوية';
+
+  @override
+  String get appLSubmitIdentityDocuments => 'إرسال مستندات الهوية للتحقق';
+
+  @override
+  String get appLSubmitKycDocuments => 'إرسال مستندات التحقق من الهوية';
+
+  @override
+  String get appLPleaseUploadRequiredDocuments =>
+      'يرجى رفع المستندات المطلوبة للتحقق';
+
+  @override
+  String get appLYourIdentityApproved => 'تمت الموافقة على التحقق من هويتك.';
+
+  @override
+  String get appLKycPendingCannotSubmit =>
+      'مستنداتك قيد المراجعة. لا يمكنك إعادة الإرسال أثناء المراجعة.';
+
+  @override
+  String get appLKycRejected => 'تم رفض التحقق من هويتك.';
+
+  @override
+  String get appLReason => 'السبب';
+
+  @override
+  String get appLCompleteProfileBeforeKyc =>
+      'أكمل ملفك الشخصي قبل إرسال مستندات الهوية.';
+
+  @override
+  String get appLKycFieldsUnavailable => 'حقول التحقق من الهوية غير متاحة.';
+
+  @override
+  String get appLAccepted => 'الملفات المقبولة';
+
+  @override
+  String get appLMaximumSize => 'الحد الأقصى للحجم';
+
+  @override
+  String get appLTakePhoto => 'التقط صورة';
+
+  @override
+  String get appLChooseFile => 'اختر ملفًا';
+
+  @override
+  String get appLChangePhoto => 'تغيير الصورة';
+
+  @override
+  String get appLChangeFile => 'تغيير الملف';
+
+  @override
+  String get appLIsRequired => 'مطلوب';
+
+  @override
+  String get appLMaximumCharacters => 'الحد الأقصى للأحرف';
+
+  @override
+  String get appLEnterValue => 'أدخل';
+
+  @override
+  String get appLSelectValue => 'اختر';
+
+  @override
+  String get appLFileTypeNotSupported => 'اختر نوع ملف مدعومًا';
+
+  @override
+  String get appLFileMustBeSmallerThan => 'يجب أن يكون حجم الملف أقل من';
+
+  @override
+  String get appLCouldNotPickFile => 'تعذر اختيار الملف';
+
+  @override
+  String get appLCouldNotPickPhoto => 'تعذر التقاط الصورة';
+
+  @override
+  String get appLCompleteProfileFirst => 'أكمل ملفك الشخصي قبل الإرسال.';
+
+  @override
+  String get appLKycUnavailable =>
+      'إعدادات التحقق من الهوية غير متاحة. يرجى المحاولة لاحقًا.';
+
+  @override
   String get appLCompleteYourProfile => 'أكمل ملفك الشخصي';
 
   @override
