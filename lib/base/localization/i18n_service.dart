@@ -327,6 +327,8 @@ class I18nService extends GetxController {
     'appLInsuranceType': (l) => l.appLInsuranceType,
     'appLInsuranceAmount': (l) => l.appLInsuranceAmount,
     'appLInsuranceWarning': (l) => l.appLInsuranceWarning,
+    'appLDailyInsuranceNotAvailable': (l) => l.appLDailyInsuranceNotAvailable,
+    'appLNotAvailable': (l) => l.appLNotAvailable,
     'appLSnappedOutsideAllowed': (l) => l.appLSnappedOutsideAllowed,
     'appLSnappedShort': (l) => l.appLSnappedShort,
     'appLCurrentLocation': (l) => l.appLCurrentLocation,

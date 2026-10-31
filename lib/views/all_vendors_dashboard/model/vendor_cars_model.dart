@@ -147,6 +147,10 @@ class VendorCar {
   double? distanceKm;
   double? kmAllowance;
   double? kmOverageCharge;
+  bool isDailyInsuranceEnabled;
+  double? dailyInsuranceAmount;
+  int? dailyInsuranceMinDays;
+  double? excessLiabilityAmount;
 
   VendorCar({
     required this.id,
@@ -186,6 +190,10 @@ class VendorCar {
     this.distanceKm,
     this.kmAllowance,
     this.kmOverageCharge,
+    this.isDailyInsuranceEnabled = true,
+    this.dailyInsuranceAmount,
+    this.dailyInsuranceMinDays,
+    this.excessLiabilityAmount,
   });
 
   factory VendorCar.fromJson(Map<String, dynamic> json) => VendorCar(
@@ -238,6 +246,17 @@ class VendorCar {
     distanceKm: _parseDouble(json["distance_km"]),
     kmAllowance: _parseDouble(json["km_allowance"]),
     kmOverageCharge: _parseDouble(json["km_overage_charge"]),
+    isDailyInsuranceEnabled: json["is_daily_insurance_enabled"] == null
+        ? true
+        : (json["is_daily_insurance_enabled"] == true ||
+            json["is_daily_insurance_enabled"] == 1 ||
+            json["is_daily_insurance_enabled"] == "1" ||
+            json["is_daily_insurance_enabled"] == "true"),
+    dailyInsuranceAmount: _parseDouble(json["daily_insurance_amount"]),
+    dailyInsuranceMinDays: json["daily_insurance_min_days"] != null
+        ? int.tryParse(json["daily_insurance_min_days"].toString())
+        : null,
+    excessLiabilityAmount: _parseDouble(json["excess_liability_amount"]),
   );
 
   Map<String, dynamic> toJson() => {
@@ -277,11 +296,29 @@ class VendorCar {
     "is_delivery_available": isDeliveryAvailable,
     if (kmAllowance != null) "km_allowance": kmAllowance,
     if (kmOverageCharge != null) "km_overage_charge": kmOverageCharge,
+    "is_daily_insurance_enabled": isDailyInsuranceEnabled,
+    if (dailyInsuranceAmount != null) "daily_insurance_amount": dailyInsuranceAmount,
+    if (dailyInsuranceMinDays != null) "daily_insurance_min_days": dailyInsuranceMinDays,
+    if (excessLiabilityAmount != null) "excess_liability_amount": excessLiabilityAmount,
   };
 
   String get displayName => '$make $model';
 
   bool get isAvailable => availabilityStatus == 'available';
+
+  bool get hasDailyInsurance {
+    if (!isDailyInsuranceEnabled) return false;
+    if (dailyInsuranceAmount != null && dailyInsuranceAmount! <= 0) return false;
+    return true;
+  }
+
+  bool isDailyInsuranceEligibleForDays(int days) {
+    if (!hasDailyInsurance) return false;
+    if (dailyInsuranceMinDays != null && dailyInsuranceMinDays! > 0) {
+      return days >= dailyInsuranceMinDays!;
+    }
+    return true;
+  }
 
   String get formattedPrice {
     // Map currency codes to their symbols (SAR for Saudi Riyal)

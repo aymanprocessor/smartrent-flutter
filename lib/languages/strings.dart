@@ -240,6 +240,8 @@ class Strings {
   static const String appLInsuranceAmount = "appLInsuranceAmount";
   static const String appLInsuranceWarning = "appLInsuranceWarning";
   static const String appLInsuranceIncluded = "appLInsuranceIncluded";
+  static const String appLDailyInsuranceNotAvailable = "appLDailyInsuranceNotAvailable";
+  static const String appLNotAvailable = "appLNotAvailable";
 
   // Location picker specific strings
   static const String SnappedOutsideAllowed = "appLSnappedOutsideAllowed";

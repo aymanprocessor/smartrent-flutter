@@ -18,6 +18,9 @@ class PriceEstimateModel {
   final double? insuranceSubtotal;
   final double? insuranceExcessLiabilityAmount;
   final Map<String, String>? insuranceMessage; // {en: "...", ar: "..."}
+  final bool? isDailyInsuranceEnabled;
+  final bool? isDailyInsuranceEligible;
+  final int? dailyInsuranceMinDays;
 
   PriceEstimateModel({
     required this.carId,
@@ -36,6 +39,9 @@ class PriceEstimateModel {
     this.insuranceSubtotal,
     this.insuranceExcessLiabilityAmount,
     this.insuranceMessage,
+    this.isDailyInsuranceEnabled,
+    this.isDailyInsuranceEligible,
+    this.dailyInsuranceMinDays,
   });
 
   factory PriceEstimateModel.fromJson(Map<String, dynamic> json) {
@@ -94,6 +100,15 @@ class PriceEstimateModel {
       insuranceSubtotal: _dn(data['insurance_subtotal']),
       insuranceExcessLiabilityAmount: _dn(data['insurance_excess_liability_amount']),
       insuranceMessage: _parseInsuranceMessage(data['insurance_message']),
+      isDailyInsuranceEnabled: data['is_daily_insurance_enabled'] != null
+          ? (data['is_daily_insurance_enabled'] == true || data['is_daily_insurance_enabled'] == 1 || data['is_daily_insurance_enabled'] == '1')
+          : null,
+      isDailyInsuranceEligible: data['is_daily_insurance_eligible'] != null
+          ? (data['is_daily_insurance_eligible'] == true || data['is_daily_insurance_eligible'] == 1 || data['is_daily_insurance_eligible'] == '1')
+          : null,
+      dailyInsuranceMinDays: data['daily_insurance_min_days'] != null
+          ? int.tryParse(data['daily_insurance_min_days'].toString())
+          : null,
     );
     
     debugPrint('[PriceEstimateModel] ✅ Successfully parsed:');

@@ -543,6 +543,8 @@ class BookingAllFields extends GetView<BookingController> {
                   value: 'daily',
                   isSelected: controller.selectedInsuranceType.value == 'daily',
                   icon: Icons.today_rounded,
+                  isEnabled: controller.isDailyInsuranceAllowed.value,
+                  disabledReason: controller.dailyInsuranceDisabledReason.value,
                 )),
                 const SizedBox(height: 12),
                 // Excess Liability Insurance Option
@@ -551,6 +553,7 @@ class BookingAllFields extends GetView<BookingController> {
                   value: 'excess_liability',
                   isSelected: controller.selectedInsuranceType.value == 'excess_liability',
                   icon: Icons.warning_rounded,
+                  isEnabled: true,
                 )),
                 const SizedBox(height: 12),
                 // Warning message for excess_liability
@@ -574,67 +577,124 @@ class BookingAllFields extends GetView<BookingController> {
     required String value,
     required bool isSelected,
     required IconData icon,
+    bool isEnabled = true,
+    String? disabledReason,
   }) {
+    final effectiveIsSelected = isEnabled && isSelected;
+
     return GestureDetector(
-      onTap: () => controller.selectedInsuranceType.value = value,
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? const Color(0xFFE3F0FB)
-              : const Color(0xFFF8FAFD),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isSelected
-                ? const Color(0xFF0B5FA5)
-                : const Color(0xFFDDE3EA),
-            width: 2,
+      onTap: isEnabled ? () => controller.selectInsuranceType(value) : null,
+      behavior: HitTestBehavior.opaque,
+      child: AnimatedOpacity(
+        duration: const Duration(milliseconds: 200),
+        opacity: isEnabled ? 1.0 : 0.55,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          decoration: BoxDecoration(
+            color: !isEnabled
+                ? const Color(0xFFF1F3F5)
+                : effectiveIsSelected
+                    ? const Color(0xFFE3F0FB)
+                    : const Color(0xFFF8FAFD),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: !isEnabled
+                  ? const Color(0xFFE2E8F0)
+                  : effectiveIsSelected
+                      ? const Color(0xFF0B5FA5)
+                      : const Color(0xFFDDE3EA),
+              width: 2,
+            ),
           ),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 24,
-              height: 24,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: isSelected
-                      ? const Color(0xFF0B5FA5)
-                      : const Color(0xFF9EAAB8),
-                  width: 2,
-                ),
-              ),
-              child: isSelected
-                  ? Container(
-                      margin: const EdgeInsets.all(4),
-                      decoration: const BoxDecoration(
-                        color: Color(0xFF0B5FA5),
-                        shape: BoxShape.circle,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 24,
+                    height: 24,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: !isEnabled ? const Color(0xFFE2E8F0) : null,
+                      border: Border.all(
+                        color: !isEnabled
+                            ? const Color(0xFFCBD5E1)
+                            : effectiveIsSelected
+                                ? const Color(0xFF0B5FA5)
+                                : const Color(0xFF9EAAB8),
+                        width: 2,
                       ),
-                    )
-                  : null,
-            ),
-            const SizedBox(width: 12),
-            Icon(
-              icon,
-              color: isSelected ? const Color(0xFF0B5FA5) : const Color(0xFF9EAAB8),
-              size: 20,
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                label,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                  color: isSelected
-                      ? const Color(0xFF0B5FA5)
-                      : const Color(0xFF6B7A8D),
-                ),
+                    ),
+                    child: effectiveIsSelected
+                        ? Container(
+                            margin: const EdgeInsets.all(4),
+                            decoration: const BoxDecoration(
+                              color: Color(0xFF0B5FA5),
+                              shape: BoxShape.circle,
+                            ),
+                          )
+                        : null,
+                  ),
+                  const SizedBox(width: 12),
+                  Icon(
+                    icon,
+                    color: !isEnabled
+                        ? const Color(0xFF94A3B8)
+                        : effectiveIsSelected
+                            ? const Color(0xFF0B5FA5)
+                            : const Color(0xFF9EAAB8),
+                    size: 20,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      label,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: effectiveIsSelected ? FontWeight.w600 : FontWeight.w500,
+                        color: !isEnabled
+                            ? const Color(0xFF94A3B8)
+                            : effectiveIsSelected
+                                ? const Color(0xFF0B5FA5)
+                                : const Color(0xFF6B7A8D),
+                      ),
+                    ),
+                  ),
+                  if (!isEnabled)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE2E8F0),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        DynamicLanguage.key(Strings.appLNotAvailable),
+                        style: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF64748B),
+                        ),
+                      ),
+                    ),
+                ],
               ),
-            ),
-          ],
+              if (!isEnabled && disabledReason != null && disabledReason.isNotEmpty) ...[
+                const SizedBox(height: 6),
+                Padding(
+                  padding: const EdgeInsetsDirectional.only(start: 36),
+                  child: Text(
+                    disabledReason,
+                    style: const TextStyle(
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xFF64748B),
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
         ),
       ),
     );
@@ -649,63 +709,71 @@ class BookingAllFields extends GetView<BookingController> {
         border: Border.all(color: const Color(0xFFFF9800), width: 1.5),
         borderRadius: BorderRadius.circular(10),
       ),
-      child: Column(
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              const Icon(
-                Icons.warning_amber_rounded,
-                color: Color(0xFFE65100),
-                size: 18,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                DynamicLanguage.key(Strings.appLInsuranceWarning),
-                style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF7B4000),
-                ),
-              ),
-            ],
+          const Padding(
+            padding: EdgeInsets.only(top: 2),
+            child: Icon(
+              Icons.warning_amber_rounded,
+              color: Color(0xFFE65100),
+              size: 20,
+            ),
           ),
-          const SizedBox(height: 8),
-          // Display message based on app language
-          Obx(() {
-            String message = '';
-            if (controller.insuranceMessage.value != null) {
-              // Get current app language from DynamicLanguage
-              final currentLang = DynamicLanguage.selectedLanguage.value;
-              message = controller.insuranceMessage.value![currentLang] ??
-                  controller.insuranceMessage.value!['en'] ??
-                  '';
-            }
-            return Text(
-              message.isNotEmpty ? message : DynamicLanguage.key(Strings.appLInsuranceWarning),
-              style: const TextStyle(
-                fontSize: 12,
-                color: Color(0xFF7B4000),
-                height: 1.4,
-              ),
-            );
-          }),
-          const SizedBox(height: 8),
-          // Show insurance amount
-          Obx(() {
-            if (controller.insuranceExcessLiabilityAmount.value <= 0) {
-              return const SizedBox.shrink();
-            }
-            final currency = _cur(controller.selectedPricing.value?.currency);
-            return Text(
-              '${DynamicLanguage.key(Strings.appLInsuranceAmount)}: ${_smartPrice(controller.insuranceExcessLiabilityAmount.value)} $currency',
-              style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFFE65100),
-              ),
-            );
-          }),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  DynamicLanguage.selectedLanguage.value == 'ar' ? 'تنبيه' : 'Warning',
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF7B4000),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                // Display message based on app language
+                Obx(() {
+                  String message = '';
+                  if (controller.insuranceMessage.value != null) {
+                    final currentLang = DynamicLanguage.selectedLanguage.value;
+                    message = controller.insuranceMessage.value![currentLang] ??
+                        controller.insuranceMessage.value!['en'] ??
+                        '';
+                  }
+                  if (message.isEmpty) {
+                    message = DynamicLanguage.key(Strings.appLInsuranceWarning);
+                  }
+                  return Text(
+                    message,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Color(0xFF7B4000),
+                      height: 1.45,
+                    ),
+                  );
+                }),
+                const SizedBox(height: 8),
+                // Show insurance amount
+                Obx(() {
+                  if (controller.insuranceExcessLiabilityAmount.value <= 0) {
+                    return const SizedBox.shrink();
+                  }
+                  final currency = _cur(controller.selectedPricing.value?.currency);
+                  return Text(
+                    '${DynamicLanguage.key(Strings.appLInsuranceAmount)}: ${_smartPrice(controller.insuranceExcessLiabilityAmount.value)} $currency',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFFE65100),
+                    ),
+                  );
+                }),
+              ],
+            ),
+          ),
         ],
       ),
     );

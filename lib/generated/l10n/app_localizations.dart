@@ -1178,6 +1178,12 @@ abstract class AppLocalizations {
   /// **'Insurance Included'**
   String get appLInsuranceIncluded;
 
+  /// No description provided for @appLNotAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Not available'**
+  String get appLNotAvailable;
+
   /// No description provided for @appLAutomatic.
   ///
   /// In en, this message translates to:
@@ -1363,6 +1369,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Warning: You selected Excess Liability Insurance'**
   String get appLInsuranceWarning;
+
+  /// No description provided for @appLDailyInsuranceNotAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily insurance is not available for this car'**
+  String get appLDailyInsuranceNotAvailable;
 
   /// No description provided for @appLSnappedOutsideAllowed.
   ///
