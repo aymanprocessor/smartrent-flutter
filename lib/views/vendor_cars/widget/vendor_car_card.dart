@@ -329,12 +329,6 @@ class VendorCarCard extends GetView<VendorCarsController> {
                 : 'Daily Ins: ${car.dailyInsuranceAmount!.toStringAsFixed(0)} $symbol',
             color: const Color(0xFF0284C7),
             icon: Icons.health_and_safety_rounded,
-          )
-        else
-          _buildBadgeItem(
-            label: DynamicLanguage.key(Strings.noDailyInsurance),
-            color: const Color(0xFF9CA3AF),
-            icon: Icons.shield_outlined,
           ),
         if (car.excessLiabilityAmount != null && car.excessLiabilityAmount! > 0)
           _buildBadgeItem(
@@ -343,14 +337,6 @@ class VendorCarCard extends GetView<VendorCarsController> {
                 : 'Deductible: ${car.excessLiabilityAmount!.toStringAsFixed(0)} $symbol',
             color: const Color(0xFFD97706),
             icon: Icons.gavel_rounded,
-          ),
-        if (car.transmission.isNotEmpty)
-          _buildBadgeItem(
-            label: car.transmission.toLowerCase() == 'manual'
-                ? DynamicLanguage.key(Strings.manual)
-                : DynamicLanguage.key(Strings.automatic),
-            color: const Color(0xFF64748B),
-            icon: Icons.tune_rounded,
           ),
       ],
     );
