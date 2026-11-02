@@ -1028,26 +1028,45 @@ class _PremiumCarCard extends StatelessWidget {
   }
 
   Widget _buildStatusBadgeRow() {
-    return Row(
+    final isAr = Get.locale?.languageCode == 'ar' ||
+        DynamicLanguage.selectedLanguage.value == 'ar';
+
+    final num? allowedKm = (car.kmAllowance != null && car.kmAllowance! > 0)
+        ? car.kmAllowance
+        : (car.mileageLimitPerDay != null && car.mileageLimitPerDay! > 0
+            ? car.mileageLimitPerDay
+            : null);
+    final String kmText = allowedKm != null && allowedKm > 0
+        ? (allowedKm % 1 == 0
+            ? allowedKm.toInt().toString()
+            : allowedKm.toStringAsFixed(0))
+        : '';
+
+    return Wrap(
+      spacing: _S.sm,
+      runSpacing: _S.sm,
+      crossAxisAlignment: WrapCrossAlignment.center,
       children: [
         if (Get.find<AllVendorsDashboardController>().isDeliveryAvailable(
           car,
-        )) ...[
+        ))
           _Badge(
             label: DynamicLanguage.key(Strings.deliveryCar),
             color: _C.blueBadge,
             icon: Icons.local_shipping_rounded,
           ),
-          const SizedBox(width: _S.sm),
-        ],
+        if (car.seats > 0)
+          _Badge(
+            label: '${car.seats} ${DynamicLanguage.key(Strings.seats)}',
+            color: const Color(0xFF6366F1),
+            icon: Icons.airline_seat_recline_normal_rounded,
+          ),
         _Badge(
-          label: car.isAvailable
-              ? DynamicLanguage.key(Strings.available)
-              : DynamicLanguage.key(Strings.limited),
-          color: car.isAvailable ? _C.greenBadge : _C.amberBadge,
-          icon: car.isAvailable
-              ? Icons.check_circle_rounded
-              : Icons.schedule_rounded,
+          label: kmText.isNotEmpty
+              ? (isAr ? 'الكيلومتر المسموح: $kmText كم' : 'Allowed KM: $kmText km')
+              : (isAr ? 'الكيلومتر المسموح: مفتوح' : 'Allowed KM: Unlimited'),
+          color: const Color(0xFF0284C7),
+          icon: Icons.speed_rounded,
         ),
       ],
     );

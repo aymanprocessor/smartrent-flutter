@@ -551,6 +551,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appLInsuranceIncluded => 'Insurance Included';
 
   @override
+  String get appLNotAvailable => 'Not available';
+
+  @override
   String get appLAutomatic => 'Automatic';
 
   @override
@@ -643,6 +646,19 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get appLInsuranceWarning =>
       'Warning: You selected Excess Liability Insurance';
+
+  @override
+  String get appLDailyInsuranceNotAvailable =>
+      'Daily insurance is not available for this car';
+
+  @override
+  String get appLManual => 'Manual';
+
+  @override
+  String get appLNoDailyInsurance => 'No Daily Insurance';
+
+  @override
+  String get appLExcessLiabilityShort => 'Deductible';
 
   @override
   String get appLSnappedOutsideAllowed =>

@@ -7,6 +7,8 @@
 ## User Preferences
 
 <!-- How the user likes things done. Code style, tools, patterns, communication. -->
+- **Flutter Hot Reload / Restart Rule**: Always trigger a Hot Reload via Dart MCP (`hot_reload`) or active terminal/PID after creating, editing, or deleting any `.dart` file before completing the turn. Trigger Hot Restart (`hot_restart` or `kill -USR2`) when modifying `pubspec.yaml` dependencies or `main.dart` initializers.
+- **Language**: User communicates in Arabic (responds clearly in Arabic/English as appropriate).
 
 ## Key Learnings
 

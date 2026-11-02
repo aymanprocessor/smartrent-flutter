@@ -391,7 +391,7 @@ class _PricingCard extends StatelessWidget {
                 bookCtrl.taxAmount.value > 0) ...[
               _PreviewDivider(),
               _PriceRow(
-                label: 'VAT (15%)',
+                label: DynamicLanguage.key(Strings.tax),
                 value: '${p(bookCtrl.taxAmount.value)} $c',
               ),
             ],

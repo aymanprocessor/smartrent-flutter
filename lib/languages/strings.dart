@@ -240,6 +240,8 @@ class Strings {
   static const String appLInsuranceAmount = "appLInsuranceAmount";
   static const String appLInsuranceWarning = "appLInsuranceWarning";
   static const String appLInsuranceIncluded = "appLInsuranceIncluded";
+  static const String appLDailyInsuranceNotAvailable = "appLDailyInsuranceNotAvailable";
+  static const String appLNotAvailable = "appLNotAvailable";
 
   // Location picker specific strings
   static const String SnappedOutsideAllowed = "appLSnappedOutsideAllowed";
@@ -431,4 +433,7 @@ class Strings {
   static const String dailyPrice = "appLDailyPrice";
   static const String yes = "appLYes";
   static const String outOfDeliveryRange = "appLOutOfDeliveryRange";
+  static const String manual = "appLManual";
+  static const String noDailyInsurance = "appLNoDailyInsurance";
+  static const String excessLiabilityShort = "appLExcessLiabilityShort";
 }

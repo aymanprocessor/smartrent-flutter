@@ -211,6 +211,10 @@ class VendorCarCard extends GetView<VendorCarsController> {
             SizedBox(height: Dimensions.verticalSize * 0.8),
           ],
 
+          // Badges (Seats, Insurance, Excess Liability, Transmission)
+          _buildBadgesRow(),
+          SizedBox(height: Dimensions.verticalSize * 0.8),
+
           // Price and book button
           _buildPriceAndBookButton(context),
         ],
@@ -292,6 +296,84 @@ class VendorCarCard extends GetView<VendorCarsController> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildBadgesRow() {
+    final isAr = Get.locale?.languageCode == 'ar' ||
+        DynamicLanguage.selectedLanguage.value == 'ar';
+
+    final num? allowedKm = (car.kmAllowance != null && car.kmAllowance! > 0)
+        ? car.kmAllowance
+        : (car.mileageLimitPerDay != null && car.mileageLimitPerDay! > 0
+            ? car.mileageLimitPerDay
+            : null);
+    final String kmText = allowedKm != null && allowedKm > 0
+        ? (allowedKm % 1 == 0
+            ? allowedKm.toInt().toString()
+            : allowedKm.toStringAsFixed(0))
+        : '';
+
+    return Wrap(
+      spacing: 6,
+      runSpacing: 6,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        if (car.seats > 0)
+          _buildBadgeItem(
+            label: '${car.seats} ${DynamicLanguage.key(Strings.seats)}',
+            color: const Color(0xFF6366F1),
+            icon: Icons.airline_seat_recline_normal_rounded,
+          ),
+        _buildBadgeItem(
+          label: kmText.isNotEmpty
+              ? (isAr ? 'الكيلومتر المسموح: $kmText كم' : 'Allowed KM: $kmText km')
+              : (isAr ? 'الكيلومتر المسموح: مفتوح' : 'Allowed KM: Unlimited'),
+          color: const Color(0xFF0284C7),
+          icon: Icons.speed_rounded,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBadgeItem({
+    required String label,
+    required Color color,
+    required IconData icon,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 8,
+        vertical: 4,
+      ),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.9),
+        borderRadius: BorderRadius.circular(6),
+        boxShadow: [
+          BoxShadow(
+            color: color.withOpacity(0.25),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 12, color: Colors.white),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+              letterSpacing: 0.2,
+              height: 1.2,
+            ),
+          ),
+        ],
+      ),
     );
   }
 

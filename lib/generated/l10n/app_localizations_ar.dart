@@ -553,6 +553,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get appLInsuranceIncluded => 'التأمين مدرج';
 
   @override
+  String get appLNotAvailable => 'غير متاح';
+
+  @override
   String get appLAutomatic => 'أوتوماتيك';
 
   @override
@@ -645,6 +648,19 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get appLInsuranceWarning =>
       'تنبيه: لقد قمت باختيار تأمين قسط التحمل. يرجى العلم بأن قيمة قسط التحمل الخاص بهذه الفئة من السيارات هي 3,500.00 ريال فقط، وتطبق في حالات الحوادث وفقاً للشروط والأحكام.';
+
+  @override
+  String get appLDailyInsuranceNotAvailable =>
+      'التأمين اليومي غير متاح لهذه السيارة';
+
+  @override
+  String get appLManual => 'يدوي';
+
+  @override
+  String get appLNoDailyInsurance => 'بدون تأمين يومي';
+
+  @override
+  String get appLExcessLiabilityShort => 'قسط التحمل';
 
   @override
   String get appLSnappedOutsideAllowed =>

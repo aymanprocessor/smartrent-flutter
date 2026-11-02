@@ -45,11 +45,11 @@ void main() {
       // Small delay to ensure storage is persisted
       await Future.delayed(const Duration(milliseconds: 50));
 
-      controller = BookingController();
+      controller = Get.put(BookingController());
     });
 
     tearDown(() {
-      controller.dispose();
+      Get.delete<BookingController>();
       Get.reset();
     });
 
@@ -119,6 +119,7 @@ void main() {
         controller.pickupDate.value = 
             '${futureDate.year}-${futureDate.month.toString().padLeft(2, '0')}-${futureDate.day.toString().padLeft(2, '0')}';
         controller.pickupTime.value = '14:00';
+        controller.selectedInsuranceType.value = 'daily';
         
         // Wait for reactive updates
         await Future.delayed(const Duration(milliseconds: 10));
@@ -140,6 +141,7 @@ void main() {
         controller.pickupDate.value = 
             '${futureDate.year}-${futureDate.month.toString().padLeft(2, '0')}-${futureDate.day.toString().padLeft(2, '0')}';
         controller.pickupTime.value = '14:00';
+        controller.selectedInsuranceType.value = 'daily';
         controller.isDeliver.value = true;
 
         expect(controller.isFormValid.value, isFalse);
@@ -151,6 +153,7 @@ void main() {
         controller.pickupDate.value = 
             '${futureDate.year}-${futureDate.month.toString().padLeft(2, '0')}-${futureDate.day.toString().padLeft(2, '0')}';
         controller.pickupTime.value = '14:00';
+        controller.selectedInsuranceType.value = 'daily';
         controller.isDeliver.value = true;
         controller.pickupLocation.value = PickupLocation(
           latitude: 24.7136,
@@ -171,6 +174,7 @@ void main() {
         controller.pickupDate.value = 
             '${futureDate.year}-${futureDate.month.toString().padLeft(2, '0')}-${futureDate.day.toString().padLeft(2, '0')}';
         controller.pickupTime.value = '14:00';
+        controller.selectedInsuranceType.value = 'daily';
         controller.isDeliver.value = true;
         controller.pickupLocation.value = PickupLocation(
           latitude: 24.7136,
@@ -189,6 +193,7 @@ void main() {
         controller.pickupDate.value = 
             '${futureDate.year}-${futureDate.month.toString().padLeft(2, '0')}-${futureDate.day.toString().padLeft(2, '0')}';
         controller.pickupTime.value = '14:00';
+        controller.selectedInsuranceType.value = 'daily';
 
         // Private method test via form validation
         controller.quantityController.text = '1';
@@ -228,6 +233,7 @@ void main() {
             '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
         controller.pickupTime.value = 
             '${futureTime.hour.toString().padLeft(2, '0')}:${futureTime.minute.toString().padLeft(2, '0')}';
+        controller.selectedInsuranceType.value = 'daily';
         controller.quantityController.text = '1';
         
         // Wait for reactive updates
@@ -478,6 +484,131 @@ void main() {
         
         expect(controller.emailController.text, equals('test@example.com'));
         expect(controller.mobileController.text, equals('0501234567'));
+      });
+    });
+
+    group('Daily Insurance Eligibility', () {
+      test('daily insurance is allowed when car has daily insurance and no min days', () {
+        final mockCar = _createMockCar();
+        mockCar.isDailyInsuranceEnabled = true;
+        mockCar.dailyInsuranceAmount = 50.0;
+        mockCar.dailyInsuranceMinDays = null;
+
+        controller.initializeWithCar(mockCar);
+        controller.quantityController.text = '2';
+
+        expect(controller.isDailyInsuranceAllowed.value, isTrue);
+        expect(controller.dailyInsuranceDisabledReason.value, isNull);
+
+        controller.selectInsuranceType('daily');
+        expect(controller.selectedInsuranceType.value, equals('daily'));
+      });
+
+      test('daily insurance is disallowed when disabled on car', () {
+        final mockCar = _createMockCar();
+        mockCar.isDailyInsuranceEnabled = false;
+
+        controller.initializeWithCar(mockCar);
+        controller.quantityController.text = '5';
+
+        expect(controller.isDailyInsuranceAllowed.value, isFalse);
+        expect(controller.dailyInsuranceDisabledReason.value, isNotNull);
+
+        // Attempting to select daily should be rejected
+        controller.selectInsuranceType('daily');
+        expect(controller.selectedInsuranceType.value, isNot('daily'));
+      });
+
+      test('daily insurance is disallowed when days < dailyInsuranceMinDays', () {
+        final mockCar = _createMockCar();
+        mockCar.isDailyInsuranceEnabled = true;
+        mockCar.dailyInsuranceAmount = 50.0;
+        mockCar.dailyInsuranceMinDays = 7;
+
+        controller.initializeWithCar(mockCar);
+        controller.quantityController.text = '3';
+
+        expect(controller.isDailyInsuranceAllowed.value, isFalse);
+        expect(controller.dailyInsuranceDisabledReason.value, contains('7'));
+
+        // Changing quantity to meet min days enables daily insurance
+        controller.quantityController.text = '7';
+        expect(controller.isDailyInsuranceAllowed.value, isTrue);
+        expect(controller.dailyInsuranceDisabledReason.value, isNull);
+
+        controller.selectInsuranceType('daily');
+        expect(controller.selectedInsuranceType.value, equals('daily'));
+
+        // Dropping quantity below min days disallows and auto-switches to excess_liability
+        controller.quantityController.text = '2';
+        expect(controller.isDailyInsuranceAllowed.value, isFalse);
+        expect(controller.selectedInsuranceType.value, equals('excess_liability'));
+      });
+
+      test('mandatory insurance: auto-selects excess_liability when days = 3 and min days = 5', () {
+        final mockCar = _createMockCar();
+        mockCar.isDailyInsuranceEnabled = true;
+        mockCar.dailyInsuranceAmount = 50.0;
+        mockCar.dailyInsuranceMinDays = 5;
+
+        controller.initializeWithCar(mockCar);
+        controller.quantityController.text = '3';
+
+        // Daily insurance must not be allowed
+        expect(controller.isDailyInsuranceAllowed.value, isFalse);
+        // Excess liability must be selected automatically because there is no other option
+        expect(controller.selectedInsuranceType.value, equals('excess_liability'));
+
+        // Attempting to manually select daily insurance must be rejected
+        final result = controller.selectInsuranceType('daily');
+        expect(result, isFalse);
+        expect(controller.selectedInsuranceType.value, equals('excess_liability'));
+      });
+
+      test('mandatory insurance: user can freely choose insurance when rental days >= 5', () {
+        final mockCar = _createMockCar();
+        mockCar.isDailyInsuranceEnabled = true;
+        mockCar.dailyInsuranceAmount = 50.0;
+        mockCar.dailyInsuranceMinDays = 5;
+
+        controller.initializeWithCar(mockCar);
+        controller.quantityController.text = '5';
+
+        // Daily insurance is eligible
+        expect(controller.isDailyInsuranceAllowed.value, isTrue);
+
+        // User can select daily insurance
+        expect(controller.selectInsuranceType('daily'), isTrue);
+        expect(controller.selectedInsuranceType.value, equals('daily'));
+
+        // User has the right to switch to excess liability
+        expect(controller.selectInsuranceType('excess_liability'), isTrue);
+        expect(controller.selectedInsuranceType.value, equals('excess_liability'));
+
+        // User can switch back to daily
+        expect(controller.selectInsuranceType('daily'), isTrue);
+        expect(controller.selectedInsuranceType.value, equals('daily'));
+      });
+
+      test('mandatory insurance: dropping days from 5 to 3 automatically switches selection to excess_liability', () {
+        final mockCar = _createMockCar();
+        mockCar.isDailyInsuranceEnabled = true;
+        mockCar.dailyInsuranceAmount = 50.0;
+        mockCar.dailyInsuranceMinDays = 5;
+
+        controller.initializeWithCar(mockCar);
+        controller.quantityController.text = '6';
+
+        // User selected daily insurance
+        controller.selectInsuranceType('daily');
+        expect(controller.selectedInsuranceType.value, equals('daily'));
+
+        // User reduces days to 3
+        controller.quantityController.text = '3';
+
+        // Must disallow daily insurance and auto-select excess_liability
+        expect(controller.isDailyInsuranceAllowed.value, isFalse);
+        expect(controller.selectedInsuranceType.value, equals('excess_liability'));
       });
     });
   });

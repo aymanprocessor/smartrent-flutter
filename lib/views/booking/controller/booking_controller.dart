@@ -21,6 +21,7 @@ class BookingController extends GetxController {
   final noteController = TextEditingController();
   final mobileController = TextEditingController();
   final quantityController = TextEditingController(); // Days or Distance
+  final RxInt rentalDays = 1.obs; // Observable rental days for reactive UI
   
   // Pickup date and time observables
   RxString pickupDate = ''.obs;
@@ -55,6 +56,9 @@ class BookingController extends GetxController {
   RxDouble insuranceSubtotal = 0.0.obs;
   RxDouble insuranceExcessLiabilityAmount = 0.0.obs;
   Rxn<Map<String, String>> insuranceMessage = Rxn<Map<String, String>>();
+  RxBool isDailyInsuranceAllowed = true.obs;
+  RxnInt dailyInsuranceMinDays = RxnInt();
+  RxnString dailyInsuranceDisabledReason = RxnString();
 
   Timer? _debounceTimer;
 
@@ -85,6 +89,11 @@ class BookingController extends GetxController {
     // Set up listeners for form validation
     emailController.addListener(_updateFormValidity);
     quantityController.addListener(() {
+      final parsed = int.tryParse(quantityController.text);
+      if (parsed != null && parsed > 0 && parsed != rentalDays.value) {
+        rentalDays.value = parsed;
+      }
+      updateDailyInsuranceEligibility();
       _updateFormValidity();
       _scheduleDebounce();
     });
@@ -120,6 +129,7 @@ class BookingController extends GetxController {
     // Debug: Track delivery source changes
     ever(deliverySource, (source) {
       debugPrint('[BookingController] deliverySource updated: $source');
+      _updateFormValidity();
     });
     
     // Listen to insurance type selection changes — trigger price estimate
@@ -152,7 +162,83 @@ class BookingController extends GetxController {
     // Normalize API type values: 'daily' → 'per_day', 'km' → 'per_km'
     pricingType.value = _normalizePricingType(car.pricing.type);
     pricingUnit.value = car.pricing.unit;
+    dailyInsuranceMinDays.value = car.dailyInsuranceMinDays;
+    updateDailyInsuranceEligibility();
+    _ensureValidInsuranceSelection();
     _updateFormValidity();
+  }
+
+  /// Set rental days reactively and keep quantityController synchronized
+  void setRentalDays(int days) {
+    if (days < 1 || days > 90) return;
+    rentalDays.value = days;
+    final s = days.toString();
+    if (quantityController.text != s) {
+      quantityController.text = s;
+    }
+    updateDailyInsuranceEligibility();
+    _updateFormValidity();
+  }
+
+  /// Select insurance type safely (checks daily insurance eligibility)
+  bool selectInsuranceType(String type) {
+    if (type == 'daily' && !isDailyInsuranceAllowed.value) {
+      debugPrint('[BookingController] Cannot select daily insurance: not allowed');
+      return false;
+    }
+    selectedInsuranceType.value = type;
+    return true;
+  }
+
+  /// Evaluate if daily insurance is allowed based on car settings and rental days
+  void updateDailyInsuranceEligibility() {
+    final car = selectedCar.value;
+    if (car == null) {
+      isDailyInsuranceAllowed.value = false;
+      dailyInsuranceDisabledReason.value = null;
+      _ensureValidInsuranceSelection();
+      return;
+    }
+
+    // 1. Check if daily insurance is disabled on car
+    if (!car.hasDailyInsurance) {
+      isDailyInsuranceAllowed.value = false;
+      dailyInsuranceDisabledReason.value = DynamicLanguage.key(Strings.appLDailyInsuranceNotAvailable);
+      _ensureValidInsuranceSelection();
+      return;
+    }
+
+    // 2. Check min days requirement
+    final minDays = dailyInsuranceMinDays.value ?? car.dailyInsuranceMinDays;
+    final int days = int.tryParse(quantityController.text) ?? 0;
+
+    if (minDays != null && minDays > 0 && days > 0 && days < minDays) {
+      isDailyInsuranceAllowed.value = false;
+      dailyInsuranceDisabledReason.value = DynamicLanguage.selectedLanguage.value == 'ar'
+          ? 'متاح للحجوزات من $minDays أيام فأكثر'
+          : 'Available for bookings of $minDays days or more';
+      _ensureValidInsuranceSelection();
+      return;
+    }
+
+    // 3. Daily insurance is allowed
+    isDailyInsuranceAllowed.value = true;
+    dailyInsuranceDisabledReason.value = null;
+    _ensureValidInsuranceSelection();
+  }
+
+  void _ensureValidInsuranceSelection() {
+    if (!isDailyInsuranceAllowed.value) {
+      // Insurance is mandatory: if daily insurance is not allowed,
+      // excess liability is the only option and must be auto-selected
+      selectedInsuranceType.value = 'excess_liability';
+    } else {
+      // If daily insurance is allowed and nothing has been selected yet,
+      // default to 'daily' (insurance is mandatory), while letting the user choose freely
+      if (selectedInsuranceType.value == null || selectedInsuranceType.value!.isEmpty) {
+        selectedInsuranceType.value = 'daily';
+      }
+    }
   }
 
   /// Maps API pricing type values to internal constants.
@@ -304,6 +390,28 @@ class BookingController extends GetxController {
         if (estimate.insuranceMessage != null) {
           insuranceMessage.value = estimate.insuranceMessage;
         }
+        if (estimate.dailyInsuranceMinDays != null) {
+          dailyInsuranceMinDays.value = estimate.dailyInsuranceMinDays;
+        }
+        if (estimate.isDailyInsuranceEligible != null) {
+          isDailyInsuranceAllowed.value = estimate.isDailyInsuranceEligible!;
+          if (!isDailyInsuranceAllowed.value) {
+            final minDays = dailyInsuranceMinDays.value ?? selectedCar.value?.dailyInsuranceMinDays;
+            if (minDays != null && minDays > 0) {
+              dailyInsuranceDisabledReason.value = DynamicLanguage.selectedLanguage.value == 'ar'
+                  ? 'متاح للحجوزات من $minDays أيام فأكثر'
+                  : 'Available for bookings of $minDays days or more';
+            } else {
+              dailyInsuranceDisabledReason.value = DynamicLanguage.key(Strings.appLDailyInsuranceNotAvailable);
+            }
+            _ensureValidInsuranceSelection();
+          } else {
+            dailyInsuranceDisabledReason.value = null;
+            _ensureValidInsuranceSelection();
+          }
+        } else {
+          updateDailyInsuranceEligibility();
+        }
         
         _updateFormValidity();
       },
@@ -355,6 +463,7 @@ class BookingController extends GetxController {
 
   @override
   void onClose() {
+    _debounceTimer?.cancel();
     try {
       emailController.removeListener(_updateFormValidity);
       quantityController.removeListener(_updateFormValidity);
