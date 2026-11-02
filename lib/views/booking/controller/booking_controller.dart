@@ -21,6 +21,7 @@ class BookingController extends GetxController {
   final noteController = TextEditingController();
   final mobileController = TextEditingController();
   final quantityController = TextEditingController(); // Days or Distance
+  final RxInt rentalDays = 1.obs; // Observable rental days for reactive UI
   
   // Pickup date and time observables
   RxString pickupDate = ''.obs;
@@ -88,6 +89,10 @@ class BookingController extends GetxController {
     // Set up listeners for form validation
     emailController.addListener(_updateFormValidity);
     quantityController.addListener(() {
+      final parsed = int.tryParse(quantityController.text);
+      if (parsed != null && parsed > 0 && parsed != rentalDays.value) {
+        rentalDays.value = parsed;
+      }
       updateDailyInsuranceEligibility();
       _updateFormValidity();
       _scheduleDebounce();
@@ -159,16 +164,30 @@ class BookingController extends GetxController {
     pricingUnit.value = car.pricing.unit;
     dailyInsuranceMinDays.value = car.dailyInsuranceMinDays;
     updateDailyInsuranceEligibility();
+    _ensureValidInsuranceSelection();
+    _updateFormValidity();
+  }
+
+  /// Set rental days reactively and keep quantityController synchronized
+  void setRentalDays(int days) {
+    if (days < 1 || days > 90) return;
+    rentalDays.value = days;
+    final s = days.toString();
+    if (quantityController.text != s) {
+      quantityController.text = s;
+    }
+    updateDailyInsuranceEligibility();
     _updateFormValidity();
   }
 
   /// Select insurance type safely (checks daily insurance eligibility)
-  void selectInsuranceType(String type) {
+  bool selectInsuranceType(String type) {
     if (type == 'daily' && !isDailyInsuranceAllowed.value) {
       debugPrint('[BookingController] Cannot select daily insurance: not allowed');
-      return;
+      return false;
     }
     selectedInsuranceType.value = type;
+    return true;
   }
 
   /// Evaluate if daily insurance is allowed based on car settings and rental days
@@ -205,11 +224,20 @@ class BookingController extends GetxController {
     // 3. Daily insurance is allowed
     isDailyInsuranceAllowed.value = true;
     dailyInsuranceDisabledReason.value = null;
+    _ensureValidInsuranceSelection();
   }
 
   void _ensureValidInsuranceSelection() {
-    if (!isDailyInsuranceAllowed.value && selectedInsuranceType.value == 'daily') {
+    if (!isDailyInsuranceAllowed.value) {
+      // Insurance is mandatory: if daily insurance is not allowed,
+      // excess liability is the only option and must be auto-selected
       selectedInsuranceType.value = 'excess_liability';
+    } else {
+      // If daily insurance is allowed and nothing has been selected yet,
+      // default to 'daily' (insurance is mandatory), while letting the user choose freely
+      if (selectedInsuranceType.value == null || selectedInsuranceType.value!.isEmpty) {
+        selectedInsuranceType.value = 'daily';
+      }
     }
   }
 
@@ -379,6 +407,7 @@ class BookingController extends GetxController {
             _ensureValidInsuranceSelection();
           } else {
             dailyInsuranceDisabledReason.value = null;
+            _ensureValidInsuranceSelection();
           }
         } else {
           updateDailyInsuranceEligibility();

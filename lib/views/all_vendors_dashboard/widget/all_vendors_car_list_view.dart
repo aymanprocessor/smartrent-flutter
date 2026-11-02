@@ -1028,31 +1028,25 @@ class _PremiumCarCard extends StatelessWidget {
   }
 
   Widget _buildStatusBadgeRow() {
-    final currencySymbols = {
-      'SAR': 'ر.س',
-      'USD': r'$',
-      'AED': 'د.إ',
-      'EGP': 'ج.م',
-      'KWD': 'د.ك',
-    };
-    final symbol = currencySymbols[car.currency] ?? car.currency;
     final isAr = Get.locale?.languageCode == 'ar' ||
         DynamicLanguage.selectedLanguage.value == 'ar';
+
+    final num? allowedKm = (car.kmAllowance != null && car.kmAllowance! > 0)
+        ? car.kmAllowance
+        : (car.mileageLimitPerDay != null && car.mileageLimitPerDay! > 0
+            ? car.mileageLimitPerDay
+            : null);
+    final String kmText = allowedKm != null && allowedKm > 0
+        ? (allowedKm % 1 == 0
+            ? allowedKm.toInt().toString()
+            : allowedKm.toStringAsFixed(0))
+        : '';
 
     return Wrap(
       spacing: _S.sm,
       runSpacing: _S.sm,
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
-        _Badge(
-          label: car.isAvailable
-              ? DynamicLanguage.key(Strings.available)
-              : DynamicLanguage.key(Strings.limited),
-          color: car.isAvailable ? _C.greenBadge : _C.amberBadge,
-          icon: car.isAvailable
-              ? Icons.check_circle_rounded
-              : Icons.schedule_rounded,
-        ),
         if (Get.find<AllVendorsDashboardController>().isDeliveryAvailable(
           car,
         ))
@@ -1067,22 +1061,13 @@ class _PremiumCarCard extends StatelessWidget {
             color: const Color(0xFF6366F1),
             icon: Icons.airline_seat_recline_normal_rounded,
           ),
-        if (car.hasDailyInsurance)
-          _Badge(
-            label: isAr
-                ? 'تأمين يومي: ${car.dailyInsuranceAmount!.toStringAsFixed(0)} $symbol'
-                : 'Daily Ins: ${car.dailyInsuranceAmount!.toStringAsFixed(0)} $symbol',
-            color: const Color(0xFF0284C7),
-            icon: Icons.health_and_safety_rounded,
-          ),
-        if (car.excessLiabilityAmount != null && car.excessLiabilityAmount! > 0)
-          _Badge(
-            label: isAr
-                ? 'قسط التحمل: ${car.excessLiabilityAmount!.toStringAsFixed(0)} $symbol'
-                : 'Deductible: ${car.excessLiabilityAmount!.toStringAsFixed(0)} $symbol',
-            color: const Color(0xFFD97706),
-            icon: Icons.gavel_rounded,
-          ),
+        _Badge(
+          label: kmText.isNotEmpty
+              ? (isAr ? 'الكيلومتر المسموح: $kmText كم' : 'Allowed KM: $kmText km')
+              : (isAr ? 'الكيلومتر المسموح: مفتوح' : 'Allowed KM: Unlimited'),
+          color: const Color(0xFF0284C7),
+          icon: Icons.speed_rounded,
+        ),
       ],
     );
   }

@@ -544,6 +544,72 @@ void main() {
         expect(controller.isDailyInsuranceAllowed.value, isFalse);
         expect(controller.selectedInsuranceType.value, equals('excess_liability'));
       });
+
+      test('mandatory insurance: auto-selects excess_liability when days = 3 and min days = 5', () {
+        final mockCar = _createMockCar();
+        mockCar.isDailyInsuranceEnabled = true;
+        mockCar.dailyInsuranceAmount = 50.0;
+        mockCar.dailyInsuranceMinDays = 5;
+
+        controller.initializeWithCar(mockCar);
+        controller.quantityController.text = '3';
+
+        // Daily insurance must not be allowed
+        expect(controller.isDailyInsuranceAllowed.value, isFalse);
+        // Excess liability must be selected automatically because there is no other option
+        expect(controller.selectedInsuranceType.value, equals('excess_liability'));
+
+        // Attempting to manually select daily insurance must be rejected
+        final result = controller.selectInsuranceType('daily');
+        expect(result, isFalse);
+        expect(controller.selectedInsuranceType.value, equals('excess_liability'));
+      });
+
+      test('mandatory insurance: user can freely choose insurance when rental days >= 5', () {
+        final mockCar = _createMockCar();
+        mockCar.isDailyInsuranceEnabled = true;
+        mockCar.dailyInsuranceAmount = 50.0;
+        mockCar.dailyInsuranceMinDays = 5;
+
+        controller.initializeWithCar(mockCar);
+        controller.quantityController.text = '5';
+
+        // Daily insurance is eligible
+        expect(controller.isDailyInsuranceAllowed.value, isTrue);
+
+        // User can select daily insurance
+        expect(controller.selectInsuranceType('daily'), isTrue);
+        expect(controller.selectedInsuranceType.value, equals('daily'));
+
+        // User has the right to switch to excess liability
+        expect(controller.selectInsuranceType('excess_liability'), isTrue);
+        expect(controller.selectedInsuranceType.value, equals('excess_liability'));
+
+        // User can switch back to daily
+        expect(controller.selectInsuranceType('daily'), isTrue);
+        expect(controller.selectedInsuranceType.value, equals('daily'));
+      });
+
+      test('mandatory insurance: dropping days from 5 to 3 automatically switches selection to excess_liability', () {
+        final mockCar = _createMockCar();
+        mockCar.isDailyInsuranceEnabled = true;
+        mockCar.dailyInsuranceAmount = 50.0;
+        mockCar.dailyInsuranceMinDays = 5;
+
+        controller.initializeWithCar(mockCar);
+        controller.quantityController.text = '6';
+
+        // User selected daily insurance
+        controller.selectInsuranceType('daily');
+        expect(controller.selectedInsuranceType.value, equals('daily'));
+
+        // User reduces days to 3
+        controller.quantityController.text = '3';
+
+        // Must disallow daily insurance and auto-select excess_liability
+        expect(controller.isDailyInsuranceAllowed.value, isFalse);
+        expect(controller.selectedInsuranceType.value, equals('excess_liability'));
+      });
     });
   });
 }

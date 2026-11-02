@@ -153,7 +153,7 @@ class BookingMobileScreen extends GetView<BookingController> {
                           Expanded(child: _carDetails(car)),
                         ],
                       ),
-                    ),
+                    ).animate().fadeIn(duration: 300.ms).slideY(begin: 0.05, end: 0, curve: Curves.easeOutCubic),
                   ] else ...[
                     const SizedBox(height: _BS.sm),
                     // Subtitle when no car selected
@@ -195,32 +195,99 @@ class BookingMobileScreen extends GetView<BookingController> {
     );
   }
 
-  Widget _carImage(VendorCar car) {
-    final imgUrl = car.modelImage ??
-        (car.images.isNotEmpty ? car.images.first.url : null);
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(14),
-      child: imgUrl != null && imgUrl.isNotEmpty
-          ? Image.network(
-              imgUrl,
-              width: 80,
-              height: 64,
-              fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => _carPlaceholder(),
-            )
-          : _carPlaceholder(),
-    );
+  String? _resolveCarImageUrl(VendorCar car) {
+    String? url = car.modelImage?.trim();
+
+    // Check if modelImage is valid and not empty or 'null'
+    if (url == null || url.isEmpty || url.toLowerCase() == 'null' || url.contains('/null')) {
+      url = null;
+    }
+
+    // Fallback to car.images (prefer primary)
+    if (url == null && car.images.isNotEmpty) {
+      final validImages = car.images.where((img) => img.url.trim().isNotEmpty && img.url.trim().toLowerCase() != 'null').toList();
+      if (validImages.isNotEmpty) {
+        final primary = validImages.firstWhere(
+          (img) => img.isPrimary,
+          orElse: () => validImages.first,
+        );
+        url = primary.url.trim();
+      }
+    }
+
+    // Fallback: match from AllVendorsDashboardController if available
+    if (url == null) {
+      try {
+        if (Get.isRegistered<AllVendorsDashboardController>()) {
+          final vendorCtrl = Get.find<AllVendorsDashboardController>();
+          final match = vendorCtrl.allVendorCars.firstWhereOrNull((c) => c.id == car.id);
+          if (match != null) {
+            final mUrl = match.modelImage?.trim();
+            if (mUrl != null && mUrl.isNotEmpty && mUrl.toLowerCase() != 'null') {
+              url = mUrl;
+            } else if (match.images.isNotEmpty) {
+              final mImg = match.images.firstWhereOrNull((i) => i.isPrimary && i.url.trim().isNotEmpty) ?? match.images.first;
+              if (mImg.url.trim().isNotEmpty) {
+                url = mImg.url.trim();
+              }
+            }
+          }
+        }
+      } catch (_) {}
+    }
+
+    if (url == null || url.isEmpty) return null;
+
+    // Clean backslashes if any
+    url = url.replaceAll(r'\', '/');
+
+    // If relative path, prepend mainDomain
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      if (url.startsWith('/')) {
+        url = '${ApiConfig.mainDomain}$url';
+      } else {
+        url = '${ApiConfig.mainDomain}/$url';
+      }
+    }
+
+    return url;
   }
 
-  Widget _carPlaceholder() => Container(
+  Widget _carImage(VendorCar car) {
+    final imgUrl = _resolveCarImageUrl(car);
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(14),
+      child: Container(
         width: 80,
         height: 64,
         decoration: BoxDecoration(
           color: Colors.white.withOpacity(0.15),
           borderRadius: BorderRadius.circular(14),
         ),
-        child: const Icon(Icons.directions_car_rounded,
-            color: Colors.white70, size: 32),
+        child: imgUrl != null && imgUrl.isNotEmpty
+            ? AppCachedImage(
+                imageUrl: imgUrl,
+                width: 80,
+                height: 64,
+                fit: BoxFit.cover,
+                useShimmer: true,
+                fadeIn: true,
+                errorWidget: _carPlaceholder(),
+              )
+            : _carPlaceholder(),
+      ),
+    );
+  }
+
+  Widget _carPlaceholder() => Container(
+        width: 80,
+        height: 64,
+        color: Colors.white.withOpacity(0.15),
+        child: const Center(
+          child: Icon(Icons.directions_car_rounded,
+              color: Colors.white70, size: 32),
+        ),
       );
 
   Widget _carDetails(VendorCar car) {
@@ -291,40 +358,91 @@ class BookingMobileScreen extends GetView<BookingController> {
         child: SizedBox(
           width: double.infinity,
           height: 54,
-          child: ElevatedButton(
-            onPressed: disabled
-                ? null
-                : () {
-                    Get.toNamed(Routes.previewScreen,
-                        arguments: controller.getBookingData());
-                  },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: _BC.primary,
-              disabledBackgroundColor: const Color(0xFFBDBDBD),
-              foregroundColor: Colors.white,
-              disabledForegroundColor: Colors.white70,
-              elevation: disabled ? 0 : 4,
-              shadowColor: _BC.primary.withOpacity(0.4),
-              shape: RoundedRectangleBorder(
+          child: _BouncyPress(
+            isEnabled: true,
+            onTap: () {
+              if (disabled) {
+                HapticFeedback.lightImpact();
+                final missing = controller.getMissingFields();
+                final isArabic = DynamicLanguage.selectedLanguage.value == 'ar';
+                final missingText = missing.isNotEmpty
+                    ? (isArabic
+                        ? 'يرجى إكمال البيانات التالية: ${missing.join("، ")}'
+                        : 'Please complete the following: ${missing.join(", ")}')
+                    : (isArabic
+                        ? 'يرجى استكمال جميع البيانات المطلوبة للمتابعة'
+                        : 'Please fill in all required fields to proceed');
+                Get.snackbar(
+                  isArabic ? 'بيانات مطلوبة' : 'Required Information',
+                  missingText,
+                  snackPosition: SnackPosition.BOTTOM,
+                  backgroundColor: const Color(0xFF1E293B),
+                  colorText: Colors.white,
+                  margin: const EdgeInsets.all(16),
+                  borderRadius: 12,
+                  duration: const Duration(seconds: 3),
+                  icon: const Icon(Icons.info_outline_rounded, color: Color(0xFF38BDF8)),
+                );
+                return;
+              }
+              HapticFeedback.lightImpact();
+              Get.toNamed(Routes.previewScreen,
+                  arguments: controller.getBookingData());
+            },
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 250),
+              curve: Curves.easeInOutCubic,
+              decoration: BoxDecoration(
+                gradient: disabled
+                    ? null
+                    : const LinearGradient(
+                        colors: [Color(0xFF0B5FA5), Color(0xFF1A8CFF)],
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
+                      ),
+                color: disabled ? const Color(0xFFCBD5E1) : null,
                 borderRadius: BorderRadius.circular(_BR.button),
+                boxShadow: disabled
+                    ? []
+                    : [
+                        BoxShadow(
+                          color: _BC.primary.withOpacity(0.35),
+                          blurRadius: 14,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
               ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  DynamicLanguage.key(Strings.continuee),
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 0.5,
-                  ),
+              child: Center(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      DynamicLanguage.key(Strings.continuee),
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: disabled ? const Color(0xFF64748B) : Colors.white,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    AnimatedSlide(
+                      duration: const Duration(milliseconds: 220),
+                      curve: Curves.easeOutBack,
+                      offset: disabled ? const Offset(-0.2, 0) : Offset.zero,
+                      child: AnimatedOpacity(
+                        duration: const Duration(milliseconds: 220),
+                        opacity: disabled ? 0.4 : 1.0,
+                        child: Icon(
+                          Icons.arrow_forward_rounded,
+                          size: 20,
+                          color: disabled ? const Color(0xFF64748B) : Colors.white,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                if (!disabled) ...[
-                  const SizedBox(width: 8),
-                  const Icon(Icons.arrow_forward_rounded, size: 20),
-                ],
-              ],
+              ),
             ),
           ),
         ),
