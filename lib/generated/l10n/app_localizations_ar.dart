@@ -951,6 +951,40 @@ class AppLocalizationsAr extends AppLocalizations {
       'إعدادات التحقق من الهوية غير متاحة. يرجى المحاولة لاحقًا.';
 
   @override
+  String get appLRequiredDocuments => 'المستندات المطلوبة';
+
+  @override
+  String get appLRequiredDocumentsDescription =>
+      'يرجى رفع صورة الهوية الوطنية ورخصة القيادة لإتمام حجز السيارة';
+
+  @override
+  String get appLUploadNationalId => 'رفع صورة الهوية الوطنية';
+
+  @override
+  String get appLUploadDrivingLicense => 'رفع صورة رخصة القيادة';
+
+  @override
+  String get appLNationalIdRequired => 'صورة الهوية الوطنية مطلوبة';
+
+  @override
+  String get appLDrivingLicenseRequired => 'صورة رخصة القيادة مطلوبة';
+
+  @override
+  String get appLSaveAndProceed => 'حفظ ومتابعة الحجز';
+
+  @override
+  String get appLDocumentsUploadedSuccessfully => 'تم رفع المستندات بنجاح';
+
+  @override
+  String get appLCamera => 'الكاميرا';
+
+  @override
+  String get appLGallery => 'المعرض';
+
+  @override
+  String get appLRequired => 'مطلوب';
+
+  @override
   String get appLCompleteYourProfile => 'أكمل ملفك الشخصي';
 
   @override

@@ -1,4 +1,5 @@
 import 'package:carbo/base/utils/basic_import.dart';
+// ignore: unused_import
 import 'package:flutter/material.dart';
 import 'package:carbo/views/dashboard/model/area_has_type_model.dart';
 import 'package:carbo/views/dashboard/model/car_area_model.dart';
@@ -88,6 +89,7 @@ class DashboardController extends GetxController {
 
   Future<void> bookCarAfterKycCheck(
     String carId, {
+    dynamic car,
     void Function()? onVerified,
   }) async {
     if (!LocalStorage.isLoggedIn) {
@@ -99,40 +101,31 @@ class DashboardController extends GetxController {
     isCheckingKycBeforeBooking.value = true;
     try {
       final statusData = await ProfileKycService.getKycStatus();
-      if (statusData == null || !statusData.containsKey('kyc_status')) {
+      if (statusData == null) {
         CustomSnackBar.error(
-          'Could not check your identity verification status. Please try again.',
+          DynamicLanguage.key(Strings.kycUnavailable),
         );
         return;
       }
 
-      final status =
-          int.tryParse(statusData['kyc_status']?.toString() ?? '') ?? 0;
-      final isVerified = status == 1;
-      await LocalStorage.save(kycStatus: status, isKycVerified: isVerified);
+      final hasNationalId = statusData['has_national_id'] == true ||
+          (statusData['national_id_image'] != null &&
+              statusData['national_id_image'].toString().trim().isNotEmpty);
+      final hasDrivingLicense = statusData['has_driving_license'] == true ||
+          (statusData['driving_license_image'] != null &&
+              statusData['driving_license_image'].toString().trim().isNotEmpty);
+      final hasRequiredDocuments = statusData['has_required_documents'] == true ||
+          (hasNationalId && hasDrivingLicense);
 
-      if (!isVerified) {
-        if (status == 2) {
-          Get.dialog<void>(
-            Builder(
-              builder: (dialogContext) => AlertDialog(
-                title: Text(DynamicLanguage.key(Strings.kycPendingReview)),
-                content: Text(
-                  DynamicLanguage.key(Strings.kycPendingBookingMessage),
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.of(dialogContext).pop(),
-                    child: Text(DynamicLanguage.key(Strings.ok)),
-                  ),
-                ],
-              ),
-            ),
-            barrierDismissible: true,
-          );
-          return;
-        }
-        Get.toNamed(Routes.kycSubmissionScreen);
+      if (!hasRequiredDocuments) {
+        Get.toNamed(
+          Routes.kycSubmissionScreen,
+          arguments: {
+            'carId': carId,
+            'car': car,
+            'onSuccess': onVerified,
+          },
+        );
         return;
       }
 
@@ -140,7 +133,10 @@ class DashboardController extends GetxController {
       if (onVerified != null) {
         onVerified();
       } else {
-        Get.toNamed(Routes.bookingScreen);
+        Get.toNamed(
+          Routes.bookingScreen,
+          arguments: car != null ? {'car': car} : null,
+        );
       }
     } catch (e) {
       log.e('Could not check KYC status before booking: $e');

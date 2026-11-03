@@ -40,6 +40,7 @@ class AllVendorsCarCarousel extends GetView<AllVendorsDashboardController> {
                             : Get.put(DashboardController());
                         dashController.bookCarAfterKycCheck(
                           car.id.toString(),
+                          car: car,
                           onVerified: () {
                             controller.selectedCarId.value = car.id.toString();
                             dashController.carToken.value =
@@ -228,13 +229,19 @@ class AllVendorsCarCarousel extends GetView<AllVendorsDashboardController> {
                           // BookingController not yet initialized
                         }
 
-                        if (!LocalStorage.isLoggedIn) {
-                          Get.toNamed(Routes.otpLoginScreen);
-                          return;
-                        }
-                        Get.toNamed(
-                          Routes.bookingScreen,
-                          arguments: {'car': car},
+                        final dashController =
+                            Get.isRegistered<DashboardController>()
+                            ? Get.find<DashboardController>()
+                            : Get.put(DashboardController());
+                        dashController.bookCarAfterKycCheck(
+                          car.id.toString(),
+                          car: car,
+                          onVerified: () {
+                            Get.toNamed(
+                              Routes.bookingScreen,
+                              arguments: {'car': car},
+                            );
+                          },
                         );
                       }
                     },

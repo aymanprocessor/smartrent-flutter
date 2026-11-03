@@ -488,6 +488,17 @@ class I18nService extends GetxController {
     'appLAllow': (l) => l.appLAllow,
     'appLOutOfDeliveryRange': (l) => l.appLOutOfDeliveryRange,
     'appLKmAllowanceLabel': (l) => l.appLKmAllowanceLabel,
+    'appLRequiredDocuments': (l) => l.appLRequiredDocuments,
+    'appLRequiredDocumentsDescription': (l) => l.appLRequiredDocumentsDescription,
+    'appLUploadNationalId': (l) => l.appLUploadNationalId,
+    'appLUploadDrivingLicense': (l) => l.appLUploadDrivingLicense,
+    'appLNationalIdRequired': (l) => l.appLNationalIdRequired,
+    'appLDrivingLicenseRequired': (l) => l.appLDrivingLicenseRequired,
+    'appLSaveAndProceed': (l) => l.appLSaveAndProceed,
+    'appLDocumentsUploadedSuccessfully': (l) => l.appLDocumentsUploadedSuccessfully,
+    'appLCamera': (l) => l.appLCamera,
+    'appLGallery': (l) => l.appLGallery,
+    'appLRequired': (l) => l.appLRequired,
   };
 
   /// Change current language

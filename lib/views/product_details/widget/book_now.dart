@@ -4,11 +4,15 @@ class BookNow extends GetView<ProductDetailsController> {
   const BookNow({Key? key}) : super(key: key);
 
   void _onTap() {
-    if (!LocalStorage.isLoggedIn) {
-      Get.toNamed(Routes.otpLoginScreen);
-      return;
-    }
-    Get.toNamed(Routes.bookingScreen);
+    final dashController = Get.isRegistered<DashboardController>()
+        ? Get.find<DashboardController>()
+        : Get.put(DashboardController());
+    dashController.bookCarAfterKycCheck(
+      '',
+      onVerified: () => Get.toNamed(Routes.bookingScreen),
+    );
+
+
   }
 
   @override

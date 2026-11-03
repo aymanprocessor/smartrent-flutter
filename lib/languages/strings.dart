@@ -300,6 +300,17 @@ class Strings {
   static const String couldNotPickPhoto = "appLCouldNotPickPhoto";
   static const String completeProfileFirst = "appLCompleteProfileFirst";
   static const String kycUnavailable = "appLKycUnavailable";
+  static const String requiredDocuments = "appLRequiredDocuments";
+  static const String requiredDocumentsDescription = "appLRequiredDocumentsDescription";
+  static const String uploadNationalId = "appLUploadNationalId";
+  static const String uploadDrivingLicense = "appLUploadDrivingLicense";
+  static const String nationalIdRequired = "appLNationalIdRequired";
+  static const String drivingLicenseRequired = "appLDrivingLicenseRequired";
+  static const String saveAndProceed = "appLSaveAndProceed";
+  static const String documentsUploadedSuccessfully = "appLDocumentsUploadedSuccessfully";
+  static const String camera = "appLCamera";
+  static const String gallery = "appLGallery";
+  static const String required = "appLRequired";
 
   // Profile Completion strings
   static const String completeYourProfile = "appLCompleteYourProfile";

@@ -950,6 +950,41 @@ class AppLocalizationsEn extends AppLocalizations {
       'KYC configuration is unavailable. Please try again later.';
 
   @override
+  String get appLRequiredDocuments => 'Required Documents';
+
+  @override
+  String get appLRequiredDocumentsDescription =>
+      'Please upload your National ID and Driving License to complete your booking';
+
+  @override
+  String get appLUploadNationalId => 'Upload National ID';
+
+  @override
+  String get appLUploadDrivingLicense => 'Upload Driving License';
+
+  @override
+  String get appLNationalIdRequired => 'National ID is required';
+
+  @override
+  String get appLDrivingLicenseRequired => 'Driving License is required';
+
+  @override
+  String get appLSaveAndProceed => 'Save & Proceed to Booking';
+
+  @override
+  String get appLDocumentsUploadedSuccessfully =>
+      'Documents uploaded successfully';
+
+  @override
+  String get appLCamera => 'Camera';
+
+  @override
+  String get appLGallery => 'Gallery';
+
+  @override
+  String get appLRequired => 'Required';
+
+  @override
   String get appLCompleteYourProfile => 'Complete Your Profile';
 
   @override

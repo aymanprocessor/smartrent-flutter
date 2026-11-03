@@ -1,7 +1,7 @@
 class ApiConfig {
-  static const String mainDomain = "https://smartrent.sa";
+  // static const String mainDomain = "https://smartrent.sa";
   // static const String mainDomain = "https://stage.smartrent.sa";
-  // static const String mainDomain = "http://192.168.1.211:8001";
+  static const String mainDomain = "http://192.168.1.221:8001";
   
   static const String baseUrl = "$mainDomain/api/v1";
   static const String languageUrl = "$baseUrl/settings/languages";
@@ -57,6 +57,7 @@ enum ApiEndpoint {
   // Profile
   profileInfo('/user/profile/info'),
   updateProfile('/user/profile/info/update'),
+  updateDocuments('/user/profile/documents/update'),
   updatePassword('/user/profile/password/update'),
   deleteAccount('/user/profile/delete-account'),
 

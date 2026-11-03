@@ -11,6 +11,67 @@ final log = logger(ProfileKycService);
 class ProfileKycService {
   static String lastError = '';
 
+  static Future<bool> uploadDocuments({
+    String? nationalIdPath,
+    String? drivingLicensePath,
+    bool removeNationalId = false,
+    bool removeDrivingLicense = false,
+  }) async {
+    try {
+      final token = LocalStorage.token;
+      if (token.isEmpty) {
+        lastError = 'Your session has expired. Sign in again.';
+        return false;
+      }
+
+      final url = ApiEndpoint.updateDocuments.url();
+      log.i('POST (multipart) $url (removeNationalId: $removeNationalId, removeDrivingLicense: $removeDrivingLicense)');
+
+      final request = http.MultipartRequest('POST', Uri.parse(url));
+      request.headers.addAll({
+        'Accept': 'application/json',
+        'Authorization': 'Bearer $token',
+      });
+
+      if (removeNationalId) {
+        request.fields['remove_national_id'] = '1';
+      }
+
+      if (removeDrivingLicense) {
+        request.fields['remove_driving_license'] = '1';
+      }
+
+      if (nationalIdPath != null && nationalIdPath.isNotEmpty) {
+        request.files.add(
+          await http.MultipartFile.fromPath('national_id_image', nationalIdPath),
+        );
+      }
+
+      if (drivingLicensePath != null && drivingLicensePath.isNotEmpty) {
+        request.files.add(
+          await http.MultipartFile.fromPath('driving_license_image', drivingLicensePath),
+        );
+      }
+
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+
+      log.i('uploadDocuments status: ${response.statusCode}');
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        lastError = '';
+        return true;
+      } else {
+        lastError = _errorMessage(response.body, response.statusCode);
+        return false;
+      }
+    } catch (e) {
+      log.e('uploadDocuments error: $e');
+      lastError = 'Failed to upload documents. Please try again.';
+      return false;
+    }
+  }
+
   static Future<Map<String, dynamic>?> getKycStatus() async {
     try {
       final token = LocalStorage.token;

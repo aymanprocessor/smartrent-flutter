@@ -1926,6 +1926,72 @@ abstract class AppLocalizations {
   /// **'KYC configuration is unavailable. Please try again later.'**
   String get appLKycUnavailable;
 
+  /// No description provided for @appLRequiredDocuments.
+  ///
+  /// In en, this message translates to:
+  /// **'Required Documents'**
+  String get appLRequiredDocuments;
+
+  /// No description provided for @appLRequiredDocumentsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Please upload your National ID and Driving License to complete your booking'**
+  String get appLRequiredDocumentsDescription;
+
+  /// No description provided for @appLUploadNationalId.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload National ID'**
+  String get appLUploadNationalId;
+
+  /// No description provided for @appLUploadDrivingLicense.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload Driving License'**
+  String get appLUploadDrivingLicense;
+
+  /// No description provided for @appLNationalIdRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'National ID is required'**
+  String get appLNationalIdRequired;
+
+  /// No description provided for @appLDrivingLicenseRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Driving License is required'**
+  String get appLDrivingLicenseRequired;
+
+  /// No description provided for @appLSaveAndProceed.
+  ///
+  /// In en, this message translates to:
+  /// **'Save & Proceed to Booking'**
+  String get appLSaveAndProceed;
+
+  /// No description provided for @appLDocumentsUploadedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Documents uploaded successfully'**
+  String get appLDocumentsUploadedSuccessfully;
+
+  /// No description provided for @appLCamera.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera'**
+  String get appLCamera;
+
+  /// No description provided for @appLGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Gallery'**
+  String get appLGallery;
+
+  /// No description provided for @appLRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Required'**
+  String get appLRequired;
+
   /// No description provided for @appLCompleteYourProfile.
   ///
   /// In en, this message translates to:

@@ -122,6 +122,13 @@ class DataUserInfo {
   int twoFactorVerified;
   int twoFactorStatus;
   dynamic twoFactorSecret;
+  String? nationalIdImage;
+  String? drivingLicenseImage;
+  String? nationalIdImageUrl;
+  String? drivingLicenseImageUrl;
+  bool hasNationalId;
+  bool hasDrivingLicense;
+  bool hasRequiredDocuments;
 
   DataUserInfo({
     required this.id,
@@ -139,6 +146,13 @@ class DataUserInfo {
     required this.twoFactorVerified,
     required this.twoFactorStatus,
     required this.twoFactorSecret,
+    this.nationalIdImage,
+    this.drivingLicenseImage,
+    this.nationalIdImageUrl,
+    this.drivingLicenseImageUrl,
+    this.hasNationalId = false,
+    this.hasDrivingLicense = false,
+    this.hasRequiredDocuments = false,
   });
 
   factory DataUserInfo.fromJson(Map<String, dynamic> json) => DataUserInfo(
@@ -157,6 +171,21 @@ class DataUserInfo {
     twoFactorVerified: json["two_factor_verified"],
     twoFactorStatus: json["two_factor_status"],
     twoFactorSecret: json["two_factor_secret"],
+    nationalIdImage: json["national_id_image"],
+    drivingLicenseImage: json["driving_license_image"],
+    nationalIdImageUrl: json["national_id_image_url"] ?? json["nationalIdImageUrl"],
+    drivingLicenseImageUrl: json["driving_license_image_url"] ?? json["drivingLicenseImageUrl"],
+    hasNationalId: json["has_national_id"] == true ||
+        (json["national_id_image"] != null &&
+            json["national_id_image"].toString().isNotEmpty),
+    hasDrivingLicense: json["has_driving_license"] == true ||
+        (json["driving_license_image"] != null &&
+            json["driving_license_image"].toString().isNotEmpty),
+    hasRequiredDocuments: json["has_required_documents"] == true ||
+        ((json["national_id_image"] != null &&
+                json["national_id_image"].toString().isNotEmpty) &&
+            (json["driving_license_image"] != null &&
+                json["driving_license_image"].toString().isNotEmpty)),
   );
 
   Map<String, dynamic> toJson() => {
@@ -175,6 +204,13 @@ class DataUserInfo {
     "two_factor_verified": twoFactorVerified,
     "two_factor_status": twoFactorStatus,
     "two_factor_secret": twoFactorSecret,
+    "national_id_image": nationalIdImage,
+    "driving_license_image": drivingLicenseImage,
+    "national_id_image_url": nationalIdImageUrl,
+    "driving_license_image_url": drivingLicenseImageUrl,
+    "has_national_id": hasNationalId,
+    "has_driving_license": hasDrivingLicense,
+    "has_required_documents": hasRequiredDocuments,
   };
 }
 
