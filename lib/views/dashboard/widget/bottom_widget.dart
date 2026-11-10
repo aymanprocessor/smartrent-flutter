@@ -22,7 +22,7 @@ class BottomWidget extends GetView<DashboardController> {
         child: PrimaryButton(
           title: Strings.bookNow,
           disable: controller.isCheckingKycBeforeBooking.value,
-          onPressed: () => controller.bookCarAfterKycCheck(car.id.toString()),
+          onPressed: () => controller.bookCarAfterKycCheck(car.id.toString(), car: car),
         ),
       );
     });

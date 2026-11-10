@@ -23,6 +23,34 @@ class WalletController extends GetxController with GetSingleTickerProviderStateM
   final RxBool isRefreshing = false.obs;
   int currentPage = 1;
 
+  // UI preferences
+  final RxBool isBalanceHidden = false.obs;
+  final RxString selectedFilter = "all".obs; // all, topup, debit, refund
+
+  List<WalletTransaction> get filteredTransactions {
+    if (selectedFilter.value == "all") {
+      return transactions;
+    } else if (selectedFilter.value == "topup") {
+      return transactions.where((t) => t.type == WalletTransactionType.topup).toList();
+    } else if (selectedFilter.value == "debit") {
+      return transactions.where((t) => t.type == WalletTransactionType.debit).toList();
+    } else if (selectedFilter.value == "refund") {
+      return transactions.where((t) =>
+        t.type == WalletTransactionType.refundWallet ||
+        t.type == WalletTransactionType.refundCard
+      ).toList();
+    }
+    return transactions;
+  }
+
+  void toggleBalanceVisibility() {
+    isBalanceHidden.value = !isBalanceHidden.value;
+  }
+
+  void setFilter(String filter) {
+    selectedFilter.value = filter;
+  }
+
   // Animation controllers
   late AnimationController shimmerController;
   

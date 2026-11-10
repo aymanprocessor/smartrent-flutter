@@ -37,20 +37,21 @@ class HistoryTabletScreen extends GetView<HistoryController> {
   }
 
   Widget _bodyWidgetTablet() {
-    return Obx(
-      () => controller.filteredList.isNotEmpty
-          ? _HistoryListViewTablet(controller: controller)
-          : RefreshIndicator(
-              onRefresh: controller.refresh,
-              color: CustomColor.primary,
-              child: SingleChildScrollView(
+    return RefreshIndicator(
+      onRefresh: controller.refresh,
+      color: CustomColor.primary,
+      backgroundColor: Colors.white,
+      child: Obx(
+        () => controller.filteredList.isNotEmpty
+            ? _HistoryListViewTablet(controller: controller)
+            : SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 child: SizedBox(
                   height: Get.height * 0.6,
                   child: EmptyDataWidget(massage: Strings.noHistory),
                 ),
               ),
-            ),
+      ),
     );
   }
 }
@@ -89,57 +90,54 @@ class _HistoryListViewTabletState extends State<_HistoryListViewTablet> {
 
   @override
   Widget build(BuildContext context) {
-    return RefreshIndicator(
-      onRefresh: widget.controller.refresh,
-      color: CustomColor.primary,
-      child: Obx(
-        () {
-          final list = widget.controller.filteredList;
-          return ListView.builder(
-            controller: _scrollController,
-            padding: EdgeInsets.fromLTRB(
-              Dimensions.defaultHorizontalSize,
-              12,
-              Dimensions.defaultHorizontalSize,
-              Dimensions.verticalSize,
-            ),
-            itemCount: list.length + (widget.controller.isLoadingMore ? 1 : 0),
-            itemBuilder: (context, index) {
-              if (index == list.length) {
-                return Padding(
-                  padding: EdgeInsets.all(Dimensions.heightSize * 2),
-                  child: Center(
-                    child: SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2.5,
-                        color: CustomColor.primary,
-                      ),
+    return Obx(
+      () {
+        final list = widget.controller.filteredList;
+        return ListView.builder(
+          controller: _scrollController,
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: EdgeInsets.fromLTRB(
+            Dimensions.defaultHorizontalSize,
+            12,
+            Dimensions.defaultHorizontalSize,
+            Dimensions.verticalSize,
+          ),
+          itemCount: list.length + (widget.controller.isLoadingMore ? 1 : 0),
+          itemBuilder: (context, index) {
+            if (index == list.length) {
+              return Padding(
+                padding: EdgeInsets.all(Dimensions.heightSize * 2),
+                child: Center(
+                  child: SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2.5,
+                      color: CustomColor.primary,
                     ),
                   ),
-                );
-              }
-              if (index >= list.length) return const SizedBox.shrink();
-
-              return TweenAnimationBuilder<double>(
-                key: ValueKey(list[index].id),
-                tween: Tween(begin: 0.0, end: 1.0),
-                duration: Duration(milliseconds: 350 + (index % 5) * 60),
-                curve: Curves.easeOutCubic,
-                builder: (_, value, child) => Opacity(
-                  opacity: value,
-                  child: Transform.translate(
-                    offset: Offset(0, 20 * (1 - value)),
-                    child: child,
-                  ),
                 ),
-                child: HistoryCard(list[index]),
               );
-            },
-          );
-        },
-      ),
+            }
+            if (index >= list.length) return const SizedBox.shrink();
+
+            return TweenAnimationBuilder<double>(
+              key: ValueKey(list[index].id),
+              tween: Tween(begin: 0.0, end: 1.0),
+              duration: Duration(milliseconds: 350 + (index % 5) * 60),
+              curve: Curves.easeOutCubic,
+              builder: (_, value, child) => Opacity(
+                opacity: value,
+                child: Transform.translate(
+                  offset: Offset(0, 20 * (1 - value)),
+                  child: child,
+                ),
+              ),
+              child: HistoryCard(list[index]),
+            );
+          },
+        );
+      },
     );
   }
 }

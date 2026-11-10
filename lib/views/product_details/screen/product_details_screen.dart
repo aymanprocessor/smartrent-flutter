@@ -4,6 +4,7 @@ import '../../../base/utils/basic_import.dart';
 import '../../../base/utils/local_storage.dart';
 import '../../../routes/routes.dart';
 import '../controller/product_details_controller.dart';
+import '../../dashboard/controller/dashboard_controller.dart';
 part 'product_details_tablet_screen.dart';
 part 'product_details_mobile_screen.dart';
 part '../widget/imageView.dart';

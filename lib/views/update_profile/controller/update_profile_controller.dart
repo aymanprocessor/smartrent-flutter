@@ -7,6 +7,7 @@ import '../../../base/api/method/request_process.dart';
 import '../../../base/api/model/common_success_model.dart';
 import '../../../base/utils/local_storage.dart';
 import '../../auth/register/controller/register_controller.dart';
+import '../../dashboard/controller/dashboard_controller.dart';
 import '../model/profile_info_model.dart';
 
 class UpdateProfileController extends GetxController {
@@ -31,16 +32,10 @@ class UpdateProfileController extends GetxController {
   RxString mobileCode = ''.obs;
   RxBool isAvailableUserImage = false.obs;
   RxString userImage = ''.obs;
-  RxString nationalIdImageUrl = ''.obs;
-  RxString drivingLicenseImageUrl = ''.obs;
   
   // Image paths for upload
   RxString imagePath = ''.obs;
   RxBool isImagePathSet = false.obs;
-  RxString nationalIdPath = ''.obs;
-  RxBool isNationalIdPathSet = false.obs;
-  RxString drivingLicensePath = ''.obs;
-  RxBool isDrivingLicensePathSet = false.obs;
 
   @override
   void onInit() {
@@ -103,6 +98,10 @@ class UpdateProfileController extends GetxController {
     countrySelectMethod.value = userInfo.country;
     userCity.value = userInfo.city;
     mobileCode.value = userInfo.mobileCode ?? '';
+    userEmail.value = userInfo.email;
+    displayName.value = '${userInfo.firstname} ${userInfo.lastname}'.trim();
+    isFormValid.value =
+        userInfo.firstname.isNotEmpty && userInfo.lastname.isNotEmpty;
     
     LocalStorage.save(email: userInfo.email);
     if (userInfo.image != null && userInfo.image != '') {
@@ -114,14 +113,7 @@ class UpdateProfileController extends GetxController {
       userImage.value = "${imagePaths.baseUrl}/${imagePaths.defaultImage}";
     }
 
-    // Set document image URLs
-    if (userInfo.nationalIdImage != null && userInfo.nationalIdImage!.isNotEmpty) {
-      nationalIdImageUrl.value = "${imagePaths.baseUrl}/${imagePaths.pathLocation}/${userInfo.nationalIdImage}";
-    }
-    if (userInfo.drivingLicenseImage != null && userInfo.drivingLicenseImage!.isNotEmpty) {
-      drivingLicenseImageUrl.value = "${imagePaths.baseUrl}/${imagePaths.pathLocation}/${userInfo.drivingLicenseImage}";
-    }
-
+    countryList.clear();
     _profileInfoModel.data.countries?.forEach((element) {
       countryList.add(
         Country(
@@ -167,14 +159,6 @@ class UpdateProfileController extends GetxController {
       fieldList.add('image');
       pathList.add(imagePath.value);
     }
-    if (isNationalIdPathSet.value) {
-      fieldList.add('national_id_image');
-      pathList.add(nationalIdPath.value);
-    }
-    if (isDrivingLicensePathSet.value) {
-      fieldList.add('driving_license_image');
-      pathList.add(drivingLicensePath.value);
-    }
 
     return RequestProcess().request<CommonSuccessModel>(
       fromJson: CommonSuccessModel.fromJson,
@@ -189,6 +173,9 @@ class UpdateProfileController extends GetxController {
         if (value == null) return;
         _commonSuccessModel = value;
         LocalStorage.save(number: mobileController.text);
+        if (Get.isRegistered<DashboardController>()) {
+          Get.find<DashboardController>().getDashboardInfo();
+        }
         getProfileInfo();
       },
     );
@@ -222,62 +209,6 @@ class UpdateProfileController extends GetxController {
   void removeProfileImage() {
     imagePath.value = '';
     isImagePathSet.value = false;
-  }
-
-  // National ID Image Picker
-  Future<void> pickNationalIdImage(ImageSource source) async {
-    final XFile? image = await _picker.pickImage(
-      source: source,
-      imageQuality: 60,
-      maxWidth: 1024,
-      maxHeight: 1024,
-    );
-    
-    if (image != null) {
-      final file = File(image.path);
-      final fileSize = await file.length();
-      
-      if (fileSize > 5 * 1024 * 1024) {
-        CustomSnackBar.error('File size must be less than 5MB');
-        return;
-      }
-      
-      nationalIdPath.value = image.path;
-      isNationalIdPathSet.value = true;
-    }
-  }
-
-  void removeNationalId() {
-    nationalIdPath.value = '';
-    isNationalIdPathSet.value = false;
-  }
-
-  // Driving License Image Picker
-  Future<void> pickDrivingLicenseImage(ImageSource source) async {
-    final XFile? image = await _picker.pickImage(
-      source: source,
-      imageQuality: 60,
-      maxWidth: 1024,
-      maxHeight: 1024,
-    );
-    
-    if (image != null) {
-      final file = File(image.path);
-      final fileSize = await file.length();
-      
-      if (fileSize > 5 * 1024 * 1024) {
-        CustomSnackBar.error('File size must be less than 5MB');
-        return;
-      }
-      
-      drivingLicensePath.value = image.path;
-      isDrivingLicensePathSet.value = true;
-    }
-  }
-
-  void removeDrivingLicense() {
-    drivingLicensePath.value = '';
-    isDrivingLicensePathSet.value = false;
   }
 
   @override

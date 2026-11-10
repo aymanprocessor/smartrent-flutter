@@ -11,6 +11,15 @@ class OthersWidgets extends StatelessWidget {
         Sizes.height.v20,
         if (isLoggedIn)
           _itemCard(
+            Icons.badge_outlined,
+            Strings.requiredDocuments,
+            () {
+              Get.back();
+              Get.toNamed(Routes.kycSubmissionScreen);
+            },
+          ),
+        if (isLoggedIn)
+          _itemCard(
             Icons.notifications_none,
             Strings.notification,
             () => Get.toNamed(Routes.notificationScreen),

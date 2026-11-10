@@ -14,7 +14,7 @@ class CarCarouselSlider extends GetView<DashboardController> {
                   splashColor: Colors.transparent,
                   highlightColor: Colors.transparent,
                   onTap: () =>
-                      controller.bookCarAfterKycCheck(car.id.toString()),
+                      controller.bookCarAfterKycCheck(car.id.toString(), car: car),
                   child: AnimatedContainer(
                     padding: EdgeInsets.symmetric(
                       horizontal: Dimensions.defaultHorizontalSize,

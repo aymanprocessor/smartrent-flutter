@@ -59,7 +59,9 @@ class LanguageService {
 
       if (response.statusCode == 200) {
         final jsonData = json.decode(utf8.decode(response.bodyBytes));
-        final language = jsonData['language'] as String?;
+        // The API wraps the payload: { message, data: { language }, type }
+        final data = jsonData is Map ? jsonData['data'] : null;
+        final language = data is Map ? data['language'] as String? : null;
         log.i('User language: $language');
         return language;
       } else {

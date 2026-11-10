@@ -8,6 +8,7 @@ import 'package:carbo/views/all_vendors_dashboard/model/vendor_cars_model.dart';
 import 'package:carbo/views/vendor_cars/model/vendor_cars_filter_model.dart';
 import 'package:carbo/views/booking/controller/booking_controller.dart';
 import 'package:carbo/routes/routes.dart';
+import 'package:carbo/views/dashboard/controller/dashboard_controller.dart';
 import 'package:http/http.dart' as http;
 import '../../../base/api/endpoint/api_endpoint.dart';
 
@@ -469,7 +470,14 @@ class VendorCarsController extends GetxController {
       log.w('BookingController not initialized yet');
     }
 
-    Get.toNamed(Routes.bookingScreen, arguments: {'car': car});
+    final dashController = Get.isRegistered<DashboardController>()
+        ? Get.find<DashboardController>()
+        : Get.put(DashboardController());
+    dashController.bookCarAfterKycCheck(
+      car.id.toString(),
+      car: car,
+      onVerified: () => Get.toNamed(Routes.bookingScreen, arguments: {'car': car}),
+    );
   }
 
   void _redirectToLogin(VendorCar car) {

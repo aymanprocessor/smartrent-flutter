@@ -729,6 +729,7 @@ class AllVendorsCarListView extends GetView<AllVendorsDashboardController> {
 
     dashboardController.bookCarAfterKycCheck(
       car.id.toString(),
+      car: car,
       onVerified: () {
         controller.selectedCarId.value = car.id.toString();
         dashboardController.carToken.value = controller.carToken.value;

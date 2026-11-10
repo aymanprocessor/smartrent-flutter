@@ -49,16 +49,16 @@ class DynamicLanguageController extends GetxController {
     return _i18n.key(translationKey);
   }
   
-  /// Fetch user's language preference from backend
+  /// Keep the backend's saved language in step with the language this app is
+  /// showing. The app is the source of truth: the backend value starts as a
+  /// column default the user never chose, and it decides the language of
+  /// notifications and wallet descriptions sent to this user.
   Future<void> fetchUserLanguage() async {
     try {
+      final appLanguage = _i18n.currentLocale.languageCode;
       final userLanguage = await LanguageService.getUserLanguage();
-      if (userLanguage != null && userLanguage.isNotEmpty) {
-        // Update language if different from current
-        if (_i18n.currentLocale.languageCode != userLanguage) {
-          await _i18n.changeLanguage(userLanguage);
-          selectedLanguage.value = userLanguage;
-        }
+      if (userLanguage != null && userLanguage != appLanguage) {
+        await syncLanguageToBackend(appLanguage);
       }
     } catch (e) {
       debugPrint('Error fetching user language: $e');
