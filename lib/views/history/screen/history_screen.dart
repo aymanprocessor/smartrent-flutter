@@ -1,7 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carbo/base/api/services/basic_services.dart';
 import 'package:carbo/base/localization/dynamic_language_shim.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../base/enums/booking_status.dart';
@@ -142,28 +141,6 @@ class _HistoryHeader extends StatelessWidget {
                   ),
                 ),
               ],
-            ),
-          ),
-
-          // ── Icon accent ──────────────────────────────────────
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  CustomColor.primary,
-                  CustomColor.primary.withOpacity(0.75),
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Icon(
-              Icons.history_rounded,
-              size: 20,
-              color: Colors.white,
             ),
           ),
         ],

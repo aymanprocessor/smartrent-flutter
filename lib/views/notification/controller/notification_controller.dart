@@ -1,4 +1,4 @@
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/cupertino.dart' hide Notification;
 import 'package:get/get.dart';
 import '../../../base/api/endpoint/api_endpoint.dart';
 import '../../../base/api/method/request_process.dart';
@@ -21,14 +21,87 @@ class NotificationController extends GetxController {
   RxString trxId = ''.obs;
   final _isLoading = false.obs;
   final _hasError = false.obs;
+  final Rx<NotificationModel?> _rxNotificationModel = Rx<NotificationModel?>(null);
 
   bool get isLoading => _isLoading.value;
   bool get hasError => _hasError.value;
 
+  NotificationModel? get notificationModel => _rxNotificationModel.value ?? _notificationModel;
   NotificationModel? _notificationModel;
+  bool get hasNotifications => notificationModel?.data.notification.isNotEmpty ?? false;
 
-  NotificationModel? get notificationModel => _notificationModel;
-  bool get hasNotifications => _notificationModel?.data.notification.isNotEmpty ?? false;
+  // Filter state: 'all', 'bookings', 'finance'
+  final RxString selectedFilter = 'all'.obs;
+
+  void setFilter(String filter) {
+    selectedFilter.value = filter;
+  }
+
+  List<Notification> get filteredNotifications {
+    final list = notificationModel?.data.notification ?? [];
+    if (selectedFilter.value == 'bookings') {
+      return list.where((n) {
+        final t = n.type.toLowerCase();
+        final title = n.message.title.toLowerCase();
+        final msg = n.message.message.toLowerCase();
+        return t.contains('book') ||
+            t.contains('request') ||
+            t.contains('ride') ||
+            title.contains('حجز') ||
+            title.contains('سيار') ||
+            msg.contains('حجز');
+      }).toList();
+    } else if (selectedFilter.value == 'finance') {
+      return list.where((n) {
+        final t = n.type.toLowerCase();
+        final title = n.message.title.toLowerCase();
+        final msg = n.message.message.toLowerCase();
+        return t.contains('pay') ||
+            t.contains('money') ||
+            t.contains('refund') ||
+            t.contains('balance') ||
+            title.contains('استرداد') ||
+            title.contains('مبلغ') ||
+            title.contains('دفع') ||
+            title.contains('محفظ') ||
+            msg.contains('استرداد') ||
+            msg.contains('مبلغ') ||
+            msg.contains('محفظ');
+      }).toList();
+    }
+    return list;
+  }
+
+  int get allCount => notificationModel?.data.notification.length ?? 0;
+
+  int get bookingsCount => (notificationModel?.data.notification ?? []).where((n) {
+        final t = n.type.toLowerCase();
+        final title = n.message.title.toLowerCase();
+        final msg = n.message.message.toLowerCase();
+        return t.contains('book') ||
+            t.contains('request') ||
+            t.contains('ride') ||
+            title.contains('حجز') ||
+            title.contains('سيار') ||
+            msg.contains('حجز');
+      }).length;
+
+  int get financeCount => (notificationModel?.data.notification ?? []).where((n) {
+        final t = n.type.toLowerCase();
+        final title = n.message.title.toLowerCase();
+        final msg = n.message.message.toLowerCase();
+        return t.contains('pay') ||
+            t.contains('money') ||
+            t.contains('refund') ||
+            t.contains('balance') ||
+            title.contains('استرداد') ||
+            title.contains('مبلغ') ||
+            title.contains('دفع') ||
+            title.contains('محفظ') ||
+            msg.contains('استرداد') ||
+            msg.contains('مبلغ') ||
+            msg.contains('محفظ');
+      }).length;
 
   Future<NotificationModel?> getNotificationInfo() async {
     _hasError.value = false;
@@ -39,6 +112,7 @@ class NotificationController extends GetxController {
       onSuccess: (value) {
         if (value != null) {
           _notificationModel = value;
+          _rxNotificationModel.value = value;
           // Only set trxId if notifications list is not empty
           if (_notificationModel!.data.notification.isNotEmpty) {
             trxId.value = _notificationModel!.data.notification.first.message.trxId ?? '';
@@ -48,6 +122,7 @@ class NotificationController extends GetxController {
       onError: (error) {
         _hasError.value = true;
         _notificationModel = null;
+        _rxNotificationModel.value = null;
       },
     );
   }
